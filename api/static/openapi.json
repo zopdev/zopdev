@@ -1,0 +1,937 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Zop API",
+    "description": "API for managing applications, environments, cloud accounts, and related resources in the user's cloud platform.",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/cloud-accounts": {
+      "get": {
+        "summary": "Get Cloud Accounts",
+        "description": "Retrieves a list of all cloud accounts.",
+        "operationId": "getCloudAccounts",
+        "tags": [
+          "Cloud Accounts"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of cloud accounts.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "exampleName"
+                      },
+                      "provider": {
+                        "type": "string",
+                        "example": "gcp"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Cloud Account",
+        "description": "Adds a new cloud account.",
+        "operationId": "addCloudAccount",
+        "tags": [
+          "Cloud Accounts"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "provider",
+                  "credentials"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "exampleName"
+                  },
+                  "provider": {
+                    "type": "string",
+                    "example": "gcp"
+                  },
+                  "credentials": {
+                    "type": "object",
+                    "properties": {
+                      "client_email": {
+                        "type": "string",
+                        "example": "testzop@caramel-park-443607-n2.iam.gserviceaccount.com"
+                      },
+                      "private_key": {
+                        "type": "string",
+                        "example": "-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
+                      },
+                      "project_id": {
+                        "type": "string",
+                        "example": "caramel-park-443607-n2"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Cloud account added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "exampleName"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cloud-accounts/{id}/deployment-space/options": {
+      "get": {
+        "summary": "Get Deployment Space Options for Cloud Account",
+        "description": "Retrieves a list of deployment space options for the cloud account with ID.",
+        "operationId": "getDeploymentSpaceOptions",
+        "tags": [
+          "Cloud Accounts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Cloud Account ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of deployment space options for the specified cloud account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "gke"
+                          },
+                          "path": {
+                            "type": "string",
+                            "example": "/cloud-accounts/1/deployment-space/clusters"
+                          },
+                          "type": {
+                            "type": "string",
+                            "example": "type"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cloud-accounts/{id}/deployment-space/clusters": {
+      "get": {
+        "summary": "Get Clusters for Deployment Space in Cloud Account",
+        "description": "Retrieves a list of clusters for the deployment space in the cloud account with ID .",
+        "operationId": "getDeploymentSpaceClusters",
+        "tags": [
+          "Cloud Accounts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Cloud Account ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of clusters associated with the deployment space for the specified cloud account.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "options": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "example": "satvik-test-17"
+                              },
+                              "identifier": {
+                                "type": "string",
+                                "example": "cca3d2207c7b4f1fa47214c4685626c9b6a76b2b51d04598aa1426d10efbdd9b"
+                              },
+                              "locations": {
+                                "type": "array",
+                                "items": {
+                                  "type": "string",
+                                  "example": "us-central1-c"
+                                }
+                              },
+                              "type": {
+                                "type": "string",
+                                "example": "deploymentSpace"
+                              },
+                              "region": {
+                                "type": "string",
+                                "example": "us-central1"
+                              },
+                              "nodePools": {
+                                "type": "array",
+                                "items": {
+                                  "type": "object",
+                                  "properties": {
+                                    "machineType": {
+                                      "type": "string",
+                                      "example": "e2-standard-2"
+                                    },
+                                    "nodeVersion": {
+                                      "type": "string",
+                                      "example": "1.28.15-gke.1388000"
+                                    },
+                                    "nodeName": {
+                                      "type": "string",
+                                      "example": "node-pool"
+                                    },
+                                    "currentNode": {
+                                      "type": "integer",
+                                      "example": 2
+                                    },
+                                    "availabilityZones": {
+                                      "type": "array",
+                                      "items": {
+                                        "type": "string"
+                                      },
+                                      "nullable": true
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "next": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "example": "Namespace"
+                            },
+                            "path": {
+                              "type": "string",
+                              "example": "/cloud-accounts/1/deployment-space/namespaces"
+                            },
+                            "params": {
+                              "type": "object",
+                              "properties": {
+                                "name": {
+                                  "type": "string",
+                                  "example": "name"
+                                },
+                                "region": {
+                                  "type": "string",
+                                  "example": "region"
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "example": "GKE Cluster"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/cloud-accounts/{id}/deployment-space/namespaces": {
+      "get": {
+        "summary": "Get Namespaces for Deployment Space in Cloud Account by Name and Region",
+        "description": "Retrieves a list of namespaces for the deployment space in the specified cloud account, filtered by name and region.",
+        "operationId": "getDeploymentSpaceNamespacesByNameAndRegion",
+        "tags": [
+          "Cloud Accounts"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The ID of the cloud account"
+          },
+          {
+            "in": "query",
+            "name": "name",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The name of the cluster (e.g., \"test-gcp-04dec\")"
+          },
+          {
+            "in": "query",
+            "name": "region",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "The region of the cluster (e.g., \"us-central1\")"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of namespaces associated with the deployment space in the specified cloud account and region.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "options": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string",
+                                "example": "cert-manager"
+                              },
+                              "type": {
+                                "type": "string",
+                                "example": "deploymentSpace.namespace"
+                              }
+                            }
+                          }
+                        },
+                        "metadata": {
+                          "type": "object",
+                          "properties": {
+                            "name": {
+                              "type": "string",
+                              "example": "namespace"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications": {
+      "get": {
+        "summary": "List all applications",
+        "description": "Retrieve a list of applications with their environments and deployment spaces.",
+        "tags": [
+          "Application"
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Application"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Application",
+        "description": "Adds a new application with its environments.",
+        "operationId": "addApplication",
+        "tags": [
+          "Application"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name",
+                  "environments"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "app12"
+                  },
+                  "environments": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": {
+                          "type": "string",
+                          "example": "stage"
+                        },
+                        "level": {
+                          "type": "number",
+                          "example": 1
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Application added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "app12"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/{id}": {
+      "get": {
+        "summary": "List all applications",
+        "description": "Retrieve a list of applications with their environments and deployment spaces.",
+        "tags": [
+          "Application"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Cloud Account ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "$ref": "#/components/schemas/Application"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/applications/{id}/environments": {
+      "get": {
+        "summary": "List Environments for Application",
+        "description": "Retrieves a list of environments for the application with ID.",
+        "operationId": "listEnvironmentsByApp",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "schema": {
+              "type": "integer"
+            },
+            "required": true,
+            "description": "Application ID"
+          }
+        ],
+        "tags": [
+          "Environment"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of environments associated with the application.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "stage"
+                      },
+                      "level": {
+                        "type": "number",
+                        "example": 1
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/environments": {
+      "get": {
+        "summary": "Get Environments",
+        "description": "Retrieves a list of all environments.",
+        "operationId": "getEnvironments",
+        "tags": [
+          "Environment"
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of environments.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "number",
+                        "example": 1
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "stage"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "summary": "Add Environment",
+        "description": "Adds a new environment.",
+        "operationId": "addEnvironment",
+        "tags": [
+          "Environment"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "name"
+                ],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "stage"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Environment added successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "stage"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/environments/{id}/deploymentspace": {
+      "post": {
+        "summary": "Create Deployment Space for an Environment",
+        "description": "Creates a new deployment space for the environment specified by the `id` with the provided details.",
+        "operationId": "createDeploymentSpaceForEnvironment",
+        "tags": [
+          "Environment"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "The ID of the environment for which the deployment space is being created."
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "cloudAccount": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string",
+                        "example": "exampleName"
+                      },
+                      "id": {
+                        "type": "integer",
+                        "example": 1
+                      },
+                      "provider": {
+                        "type": "string",
+                        "example": "gcp"
+                      },
+                      "providerId": {
+                        "type": "string",
+                        "example": "caramel-park-443607-n2"
+                      },
+                      "providerDetails": {
+                        "type": "string",
+                        "nullable": true,
+                        "example": null
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-12-15T15:42:43Z"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2024-12-15T15:42:43Z"
+                      }
+                    }
+                  },
+                  "type": {
+                    "type": "object",
+                    "properties": {
+                      "Name": {
+                        "type": "string",
+                        "example": "gke"
+                      },
+                      "PATH": {
+                        "type": "string",
+                        "example": "/cloud-accounts/1/deployment-space/clusters"
+                      },
+                      "Type": {
+                        "type": "string",
+                        "example": "type"
+                      }
+                    }
+                  },
+                  "deploymentSpace": {
+                    "type": "object",
+                    "properties": {
+                      "namespace": {
+                        "type": "object",
+                        "properties": {
+                          "name": {
+                            "type": "string",
+                            "example": "monitoring"
+                          },
+                          "type": {
+                            "type": "string",
+                            "example": "deploymentSpace.namespace"
+                          }
+                        }
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "test-gcp-04dec"
+                      },
+                      "locations": {
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "example": "us-central1-c"
+                        }
+                      },
+                      "region": {
+                        "type": "string",
+                        "example": "us-central1"
+                      },
+                      "node_pools": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "machine_type": {
+                              "type": "string",
+                              "example": "e2-standard-2"
+                            },
+                            "availability_zones": {
+                              "type": "array",
+                              "items": {
+                                "type": "string"
+                              },
+                              "nullable": true
+                            },
+                            "nodeVersion": {
+                              "type": "string",
+                              "example": "1.29.10-gke.1054000"
+                            },
+                            "currentNode": {
+                              "type": "integer",
+                              "example": 2
+                            },
+                            "nodeName": {
+                              "type": "string",
+                              "example": "node-pool"
+                            }
+                          }
+                        }
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "deploymentSpace"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Deployment space created successfully.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer",
+                          "example": 1
+                        },
+                        "name": {
+                          "type": "string",
+                          "example": "test-gcp-04dec"
+                        },
+                        "type": {
+                          "type": "string",
+                          "example": "deploymentSpace"
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2024-12-15T15:42:43Z"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2024-12-15T15:42:43Z"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Application": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "app12"
+          },
+          "environments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Environment"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-12-15T16:05:06Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-12-15T16:05:06Z"
+          }
+        }
+      },
+      "Environment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 1
+          },
+          "name": {
+            "type": "string",
+            "example": "stage"
+          },
+          "level": {
+            "type": "integer",
+            "example": 1
+          },
+          "applicationID": {
+            "type": "integer",
+            "example": 1
+          },
+          "deploymentSpace": {
+            "$ref": "#/components/schemas/DeploymentSpace"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-12-15T16:05:06Z"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "example": "2024-12-15T16:05:06Z"
+          }
+        }
+      },
+      "DeploymentSpace": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "exampleName"
+          },
+          "next": {
+            "$ref": "#/components/schemas/DeploymentSpace"
+          }
+        }
+      }
+    }
+  }
+}
