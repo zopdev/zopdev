@@ -6,7 +6,7 @@ This repository contains the API server for Zopdev. The server is designed to ha
 
 Ensure you have the following installed on your system before proceeding:
 
-- [Go](https://golang.org/) (latest if possible or v1.20)
+- [Go](https://golang.org/) (v1.24 or later)
 - [Docker](https://www.docker.com/) (optional, for containerized development)
 - A SQLite database for local development
 - [Git](https://git-scm.com/)
