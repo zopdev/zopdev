@@ -1,0 +1,37 @@
+{
+  "name": "zop-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prettier:fix": "prettier --config  ./.prettierrc --write \"**/*.{ts,tsx,yml,yaml,js,sh,json}\"",
+    "prettier:check": "prettier --config ./.prettierrc --check \"**/*.{ts,tsx,yml,yaml,js,sh,json}\"",
+    "dev": "next dev --turbopack",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.0",
+    "@heroicons/react": "^2.2.0",
+    "axios": "^1.7.9",
+    "dayjs": "^1.11.13",
+    "next": "15.0.3",
+    "react": "19.0.0-rc-66855b96-20241106",
+    "react-dom": "19.0.0-rc-66855b96-20241106"
+  },
+  "devDependencies": {
+    "@babel/eslint-parser": "^7.25.9",
+    "@tailwindcss/forms": "^0.5.9",
+    "eslint": "^8",
+    "eslint-config-next": "15.0.3",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.31.0",
+    "eslint-plugin-n": "^16.6.2",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-promise": "^6.6.0",
+    "postcss": "^8",
+    "prettier": "^3.4.2",
+    "tailwindcss": "^3.4.1"
+  }
+}

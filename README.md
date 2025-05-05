@@ -13,7 +13,7 @@
 
 ## 💡 **Key Features**
 
-1. **Cloud Agnosic**  
+1. **Cloud Agnostic**  
 2. **Automated Audits**   
 
 ## 👍 **Contribute**
