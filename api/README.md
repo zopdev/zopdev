@@ -46,7 +46,7 @@ Ensure you have the following installed on your system before proceeding:
 3. Use Docker for development (optional):
     Build and run the Docker container:
     ```bash
-    docker run -d -p 8000:8000 --name zop-api zopdev/zop-api:v0.0.3
+    docker run -d -p 8000:8000 --name zop-api zopdev/api:v0.0.1
 
     # To run the UI in a separate container:
     docker run -d -p 3000:3000 -e NEXT_PUBLIC_API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/zop-ui:v0.0.3
