@@ -66,14 +66,14 @@ func (*GCP) fetchDeployments(ctx *gofr.Context, client *http.Client, credBody []
 	// Get a token
 	token, err := tokenSource.Token()
 	if err != nil {
-		ctx.Logger.Errorf("failed to get token: %v", err)
+		ctx.Errorf("failed to get token: %v", err)
 		return err
 	}
 
 	// Make a request to the Kubernetes API to list deployments
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, apiEndpoint, http.NoBody)
 	if err != nil {
-		ctx.Logger.Errorf("failed to create request: %w", err)
+		ctx.Errorf("failed to create request: %w", err)
 		return err
 	}
 
@@ -89,7 +89,7 @@ func (*GCP) fetchDeployments(ctx *gofr.Context, client *http.Client, credBody []
 	// Handle unexpected status codes
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
-		ctx.Logger.Errorf("API call failed with status code %d: %s", resp.StatusCode, body)
+		ctx.Errorf("API call failed with status code %d: %s", resp.StatusCode, body)
 
 		return errUnexpectedStatusCode{statusCode: resp.StatusCode}
 	}
