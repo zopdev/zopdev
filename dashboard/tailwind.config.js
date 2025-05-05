@@ -1,19 +1,13 @@
 /** @type {import('tailwindcss').Config} */
-const colors = require('tailwindcss/colors');
-
-delete colors.lightBlue;
-delete colors.warmGray;
-delete colors.trueGray;
-delete colors.coolGray;
-delete colors.blueGray;
+const typographyPlugin = require('@tailwindcss/typography');
 
 module.exports = {
-  content: [
-    './app/**/*.{js,ts,jsx,tsx,mdx}',
-    './pages/**/*.{js,ts,jsx,tsx,mdx}',
-    './components/**/*.{js,ts,jsx,tsx,mdx}',
-    './partials/**/*.{js,ts,jsx,tsx,mdx}',
-    './src/**/*.{js,ts,jsx,tsx,mdx}',
+  darkMode: false,
+  plugins: [
+    require('@tailwindcss/forms')({
+      strategy: 'class',
+    }),
+    typographyPlugin,
   ],
   theme: {
     fontSize: {
@@ -31,40 +25,7 @@ module.exports = {
       '8xl': ['6rem', { lineHeight: '1' }],
       '9xl': ['8rem', { lineHeight: '1' }],
     },
-    // colors: {
-    //   ...colors,
-    //   transparent: 'transparent',
-    //   current: 'currentColor',
-    //   'landing-bg': '#12161E',
-    //   primary: {
-    //     DEFAULT: '#1f2937',
-    //     hover: '#374151',
-    //     selected: '#111827',
-    //   },
-    //   secondary: {
-    //     DEFAULT: '#4f46e5',
-    //   },
-    //   txtPrimary: {
-    //     DEFAULT: '#d1d5db',
-    //     hover: '#ffffff',
-    //     selected: '#ffffff',
-    //     landing: '#BBCADE',
-    //     // disabled: '#06b6d4',
-    //   },
-    // },
-    colors: {
-      transparent: 'transparent',
-      current: 'currentColor',
-      black: colors.black,
-      white: colors.white,
-      gray: colors.slate,
-      primary: colors.cyan,
-      green: colors.emerald,
-      yellow: colors.yellow,
-      red: colors.rose,
-      indigo: colors.indigo,
-      orange: colors.orange,
-    },
+
     screens: {
       xs: '10px',
       // => @media (min-width: 10px) { ... }
@@ -85,10 +46,4 @@ module.exports = {
       // => @media (min-width: 1536px) { ... }
     },
   },
-  plugins: [
-    require('@tailwindcss/forms')({
-      // strategy: 'base',
-      strategy: 'class',
-    }),
-  ],
 };
