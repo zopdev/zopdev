@@ -1,0 +1,46 @@
+name: "Feature Request"
+description: "Suggest a new feature or enhancement for the project"
+title: "[Feature Request]: "
+labels: ["enhancement"]
+projects: ["zopdev"]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting a feature! Please fill out the following details to help us understand your request.
+
+  - type: input
+    id: feature_summary
+    attributes:
+      label: "Feature Summary"
+      description: "Provide a brief summary of the feature you are requesting."
+      placeholder: "e.g., Add dark mode support"
+
+  - type: textarea
+    id: feature_description
+    attributes:
+      label: "Feature Description"
+      description: "Describe the feature in detail. Include any relevant context or examples."
+      placeholder: "Explain why this feature is needed and how it would be used."
+
+  - type: input
+    id: use_case
+    attributes:
+      label: "Use Case"
+      description: "Describe the problem this feature would solve or the use case it would support."
+      placeholder: "e.g., Improve accessibility for users in low-light environments"
+
+  - type: input
+    id: alternatives
+    attributes:
+      label: "Alternatives Considered"
+      description: "List any alternative solutions or features you have considered."
+      placeholder: "e.g., Using browser extensions for dark mode"
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: "Additional Context"
+      description: "Add any other context, screenshots, or references to support your request."
+      placeholder: "e.g., Links to similar features in other projects"
