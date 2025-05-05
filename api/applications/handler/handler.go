@@ -24,7 +24,7 @@ func (h *Handler) AddApplication(ctx *gofr.Context) (interface{}, error) {
 
 	err := ctx.Bind(&application)
 	if err != nil {
-		ctx.Logger.Error(err)
+		ctx.Error(err)
 		return nil, http.ErrorInvalidParam{Params: []string{"body"}}
 	}
 
