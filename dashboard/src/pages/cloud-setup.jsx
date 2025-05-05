@@ -1,0 +1,168 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import StepperUI from "@/components/organisms/StepperUI.jsx";
+import CreateCloud from "@/components/organisms/CreateCloud.jsx";
+import DynamicFormRadioWithIcon from "@/components/atom/Button/RadioButtonWithIcon/index.jsx";
+
+const ResourceAudit = ({ data, updateData, setIsComplete }) => {
+    const auditOptions = [
+        {
+            label: 'Stale',
+            description: 'Identify the resources that are no longer in use.',
+            value: 'Stale',
+            // icon: 'https://cdn-icons-png.flaticon.com/512/1214/1214428.png',
+        },
+        {
+            label: 'Overprovisioned',
+            description: 'Resources that have more capacity than needed',
+            value: 'Overprovisioned',
+            // icon: 'https://cdn-icons-png.flaticon.com/512/2910/2910768.png',
+        },
+        {
+            label: 'Security',
+            description: 'Resources with potential security issues',
+            value: 'Security',
+            // icon: 'https://cdn-icons-png.flaticon.com/512/2913/2913465.png',
+        },
+        {
+            label: 'Run All',
+            description: 'Run all types of audits on your resources',
+            value: 'run-all',
+            // icon: 'https://cdn-icons-png.flaticon.com/512/3524/3524636.png',
+        },
+    ];
+    const handleChange = (newValue) => {
+        const updatedData = { ...data, selectedOption: newValue };
+        updateData(updatedData);
+        validateStep(updatedData);
+    };
+
+    const validateStep = (stepData) => {
+        const isValid = !!stepData?.selectedOption;
+        setIsComplete(isValid);
+    };
+
+    useEffect(() => {
+        if (!data?.selectedOption) {
+            updateData({ ...data, selectedOption: 'run-all' });
+        } else {
+            validateStep(data);
+        }
+    }, [data, updateData, setIsComplete]);
+
+    return (
+        <div className="md:flex xs:space-y-12 space-x-8 min-h-[28rem] mt-10 ml-2">
+            <div className="md:w-[34%] md:m-12 md:mx-14">
+                <h2 className="text-md font-semibold mb-2">Select an Audit Type</h2>
+                <p className="text-secondary-600">
+                    Evaluate your cloud environment for security risks, performance bottlenecks, or cost
+                    inefficiencies.
+                </p>
+            </div>
+            <div className="md:w-[45%] md:my-14">
+                <DynamicFormRadioWithIcon
+                    options={auditOptions}
+                    name="resource-audit"
+                    value={data?.selectedOption}
+                    defaultSelected={data?.selectedOption || 'run-all'}
+                    onChange={handleChange}
+                    orientation="horizontal"
+                />
+            </div>
+        </div>
+    );
+};
+
+const ScheduleStep = ({ data, updateData, setIsComplete }) => {
+    const cronPattern =
+        /(@(annually|yearly|monthly|weekly|daily|hourly|reboot))|(@every (\d+(ns|us|µs|ms|s|m|h))+)|((((\d+,)+\d+|(\d+(\/|-)\d+)|\d+|sun|mon|tue|wed|thu|fri|sat|\*) ?){5,7})/;
+    const [error, setError] = useState('');
+
+    const handleChange = (e) => {
+        const { value } = e.target;
+        const updatedData = { ...data, cronSchedule: value };
+        updateData(updatedData);
+        validateStep(updatedData);
+    };
+
+    const validateStep = (stepData) => {
+        const value = stepData?.cronSchedule || '';
+        if (value.trim() === '') {
+            setError('');
+            setIsComplete(false);
+        } else if (!cronPattern.test(value)) {
+            setError('Invalid Schedule Time');
+            setIsComplete(false);
+        } else {
+            setError('');
+            setIsComplete(true);
+        }
+    };
+
+    useEffect(() => {
+        validateStep(data);
+    }, [data, setIsComplete]);
+
+    return (
+        <div className="md:flex xs:space-y-12 space-x-8 min-h-[28rem] mt-10 ml-2">
+            <div className="md:w-[34%] md:m-12 md:mx-14">
+                <h2 className="text-md font-semibold mb-2">Give Audit Schedule</h2>
+                <p className="text-secondary-600 mb-2">
+                    Specify how often you want to run the resource audit by entering a time interval.
+                </p>
+                <p className="text-sm text-secondary-500">
+                    You can use special formats like @daily, @hourly, or @every 5m to set the frequency.
+                </p>
+            </div>
+
+            <div className="w-[35%] space-y-2 my-12">
+                <label className="block text-sm font-medium text-secondary-700 mb-1">Enter Schedule</label>
+                <input
+                    type="text"
+                    name="cronSchedule"
+                    value={data?.cronSchedule || ''}
+                    onChange={handleChange}
+                    placeholder="* 5 * * *"
+                    className="w-full px-3 py-2 border border-secondary-300 rounded-md focus:outline-none focus:ring-1 focus:ring-primary-500"
+                />
+                {error && <span className="text-yellow-500 text-sm">{error}</span>}
+            </div>
+        </div>
+    );
+};
+
+const Audit = () => {
+    // const { applications, loading, error } = useApplicationList();
+
+    const steps = [
+        {
+            title: 'Cloud Account',
+            component: (props) => <CreateCloud {...props} audit={true} />,
+        },
+
+        {
+            title: 'Resource Audit',
+            component: ResourceAudit,
+        },
+        {
+            title: 'Schedule',
+            component: ScheduleStep,
+        },
+    ];
+    return (
+        <div className="px-4 sm:px-6 lg:px-8 w-full overflow-auto text-left pt-8 ">
+            <StepperUI steps={steps} />
+            {/* <EmptyComponent */}
+            {/*  imageComponent={<BlankCloudAccountSvg />} */}
+            {/*  redirectLink={'/applications/create'} */}
+            {/*  buttonTitle={'Add Application'} */}
+            {/*  title={'Please start by setting up your first application'} */}
+            {/* /> */}
+
+            {/* {error && <ErrorComponent errorText={error || 'Something went wrong'} />} */}
+        </div>
+    );
+};
+
+export default Audit;
