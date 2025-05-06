@@ -5,8 +5,7 @@ export function useImageServiceGetQueryById(reqParams, options = {}) {
   return useQuery({
     queryKey: ['resourceAuditGetData', reqParams],
     queryFn: async () => {
-      const { serviceGroupId } = reqParams;
-      const url = `/resource/${serviceGroupId}`;
+      const url = `/cloud-accounts`;
       return fetchData(url);
     },
     staleTime: 0,

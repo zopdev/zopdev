@@ -6,6 +6,28 @@ import { useCreateResourceMutation } from '@/Queries/CloudAccount/index.js';
 import { useNavigate } from 'react-router-dom';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 
+function transformPayload(inputPayload) {
+  try {
+    if (!inputPayload || !inputPayload['0'] || !inputPayload['0'].credentials) {
+      throw new Error('Invalid input payload structure');
+    }
+    let parsedCredentials;
+    try {
+      parsedCredentials = JSON.parse(inputPayload['0'].credentials);
+    } catch (error) {
+      throw new Error('Failed to parse credentials JSON: ' + error.message);
+    }
+    return {
+      name: parsedCredentials.name,
+      provider: 'gcp',
+      credentials: parsedCredentials.credentials,
+    };
+  } catch (error) {
+    console.error('Transformation error:', error);
+    return { error: error.message };
+  }
+}
+
 const Stepper = ({ steps }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState({});
@@ -17,13 +39,15 @@ const Stepper = ({ steps }) => {
   const postData = useCreateResourceMutation();
   const navigate = useNavigate();
   const handleComplete = (data) => {
-    postData.mutate({
-      data,
-    });
+    const transformedData = transformPayload(data);
+    postData.mutate(transformedData);
+  };
+
+  useEffect(() => {
     if (postData?.isSuccess) {
       navigate('/');
     }
-  };
+  }, [postData]);
 
   useEffect(() => {
     const checkScreenSize = () => {
