@@ -3,7 +3,7 @@ import { ErrorBoundary } from './components/organisms/ErrorBoundary';
 import { Suspense } from 'react';
 import { routes } from './routes';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
-import TopBar from '@/components/molecule/TopBar/index.jsx';
+import TopBar from '@/components/molecules/TopBar/index.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 function App() {

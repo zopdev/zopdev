@@ -4,7 +4,6 @@ import Button from '@/components/atom/Button/index.jsx';
 import Label from '@/components/atom/Loaders/index.jsx';
 import Input from '@/components/atom/Input/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/componentMapper.jsx';
-import { enforceCharLimit } from '@/utils/index.js';
 
 export const isValidJSON = (str) => {
   try {
@@ -31,7 +30,6 @@ const useAddCloudAccount = (initialValues = {}) => {
 };
 
 const CloudForm = ({
-  provider,
   options,
   tabValue,
   handleTabChange,
@@ -68,11 +66,6 @@ const CloudForm = ({
         }
         return { ...prev, [name]: value };
       }
-
-      if (name === 'name' && provider === 'azure') {
-        return { ...prev, [name]: enforceCharLimit(value, 11) };
-      }
-
       return { ...prev, [name]: value };
     });
   };
@@ -117,28 +110,26 @@ const CloudForm = ({
           </div>
         </div>
 
-        {provider === 'gcp' && (
-          <div className="col-span-full">
-            <Label htmlFor="credentials">Service Account Credential (JSON)</Label>
-            <div className="mt-2">
-              <Textarea
-                rows={6}
-                placeholder="Enter GCP credentials"
-                multiline="true"
-                id="credentials"
-                variant="outlined"
-                name="credentials"
-                className="focus:outline-none focus:ring-1 focus:ring-primary-500"
-                onChange={handleChange}
-                value={values?.credentials}
-                error={values.credentials ? !isValidJSON(values.credentials) : false}
-                helperText={
-                  values.credentials && !isValidJSON(values.credentials) ? 'Not a valid JSON' : ' '
-                }
-              />
-            </div>
+        <div className="col-span-full">
+          <Label htmlFor="credentials">Service Account Credential (JSON)</Label>
+          <div className="mt-2">
+            <Textarea
+              rows={6}
+              placeholder="Enter GCP credentials"
+              multiline="true"
+              id="credentials"
+              variant="outlined"
+              name="credentials"
+              className="focus:outline-none focus:ring-1 focus:ring-primary-500"
+              onChange={handleChange}
+              value={values?.credentials}
+              error={values.credentials ? !isValidJSON(values.credentials) : false}
+              helperText={
+                values.credentials && !isValidJSON(values.credentials) ? 'Not a valid JSON' : ' '
+              }
+            />
           </div>
-        )}
+        </div>
       </div>
     </form>
   );
