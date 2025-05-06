@@ -6,23 +6,17 @@ import CloudForm from '@/components/organisms/CloudForm.jsx';
 const CreateCloud = ({ audit, setIsComplete, updateData, data }) => {
   const PROVIDER_OPTIONS = {
     0: 'gcp',
-    // 1: "aws",
-    // 2: "azure",
   };
 
   const PROVIDER_TO_TAB_OPTIONS = {
     gcp: 0,
-    // aws: 1,
-    // azure: 2,
   };
-  // const FORM_PROVIDER_OPTIONS = ["GCP", "AWS", "AZURE"];
   const FORM_PROVIDER_OPTIONS = ['GCP'];
 
   const [value, setValue] = useState(PROVIDER_TO_TAB_OPTIONS.gcp);
 
   const options = FORM_PROVIDER_OPTIONS.map((item) => ({
     label: item,
-    // disabled: isEdit && item.toLowerCase() !== initialValues?.cloudPlatform,
   }));
 
   const handleChange = (newValue) => {
