@@ -65,7 +65,9 @@ func main() {
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
 	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
 
-	app.POST("/audit/cloud-accounts/{id}", auditHandler.Audit)
+	app.POST("/audit/cloud-accounts/{id}/all", auditHandler.RunAll)
+	app.POST("/audit/cloud-accounts/{id}/category/{category}", auditHandler.RunByCategory)
+	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", auditHandler.RunById)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
