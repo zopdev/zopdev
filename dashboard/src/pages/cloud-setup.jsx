@@ -1,9 +1,9 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import StepperUI from '@/components/organisms/StepperUI.jsx';
 import CreateCloud from '@/components/organisms/CreateCloud.jsx';
 import DynamicFormRadioWithIcon from '@/components/atom/Button/RadioButtonWithIcon/index.jsx';
+import Stepper from '@/components/organisms/Stepper.jsx';
 
 const ResourceAudit = ({ data, updateData, setIsComplete }) => {
   const auditOptions = [
@@ -11,25 +11,21 @@ const ResourceAudit = ({ data, updateData, setIsComplete }) => {
       label: 'Stale',
       description: 'Identify the resources that are no longer in use.',
       value: 'Stale',
-      // icon: 'https://cdn-icons-png.flaticon.com/512/1214/1214428.png',
     },
     {
       label: 'Overprovisioned',
       description: 'Resources that have more capacity than needed',
       value: 'Overprovisioned',
-      // icon: 'https://cdn-icons-png.flaticon.com/512/2910/2910768.png',
     },
     {
       label: 'Security',
       description: 'Resources with potential security issues',
       value: 'Security',
-      // icon: 'https://cdn-icons-png.flaticon.com/512/2913/2913465.png',
     },
     {
       label: 'Run All',
       description: 'Run all types of audits on your resources',
       value: 'run-all',
-      // icon: 'https://cdn-icons-png.flaticon.com/512/3524/3524636.png',
     },
   ];
   const handleChange = (newValue) => {
@@ -133,8 +129,6 @@ const ScheduleStep = ({ data, updateData, setIsComplete }) => {
 };
 
 const Audit = () => {
-  // const { applications, loading, error } = useApplicationList();
-
   const steps = [
     {
       title: 'Cloud Account',
@@ -152,15 +146,7 @@ const Audit = () => {
   ];
   return (
     <div className="px-4 sm:px-6 lg:px-8 w-full overflow-auto text-left pt-8 ">
-      <StepperUI steps={steps} />
-      {/* <EmptyComponent */}
-      {/*  imageComponent={<BlankCloudAccountSvg />} */}
-      {/*  redirectLink={'/applications/create'} */}
-      {/*  buttonTitle={'Add Application'} */}
-      {/*  title={'Please start by setting up your first application'} */}
-      {/* /> */}
-
-      {/* {error && <ErrorComponent errorText={error || 'Something went wrong'} />} */}
+      <Stepper steps={steps} />
     </div>
   );
 };

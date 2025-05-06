@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import Textarea from '../../components/TextArea';
 import Button from '@/components/atom/Button/index.jsx';
 import Label from '@/components/atom/Loaders/index.jsx';
 import Input from '@/components/atom/Input/index.jsx';
-import { PROVIDER_ICON_MAPPER } from '@/componentMapper.jsx';
+import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
+import Textarea from '@/components/atom/Textarea/index.jsx';
 
 export const isValidJSON = (str) => {
   try {
@@ -81,8 +81,8 @@ const CloudForm = ({
               onClick={() => handleTabChange(idx)}
               className="pointer-events-none"
             >
-              {PROVIDER_ICON_MAPPER[item.label.toLowerCase()]}
-              {item.label}
+              {PROVIDER_ICON_MAPPER[item?.label?.toLowerCase()]}
+              {item?.label}
             </Button>
           ))}
         </div>

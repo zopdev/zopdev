@@ -1,4 +1,6 @@
-const BASE_URL = 'https://your-api-endpoint.com';
+import { API_URL } from '@/utils/constant.js';
+
+const BASE_URL = API_URL;
 
 const createRequestOptions = (method, data, customHeaders = {}) => {
   const options = {

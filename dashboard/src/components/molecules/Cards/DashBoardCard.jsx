@@ -5,7 +5,6 @@ import Button from '@/components/atom/Button/index.jsx';
 const DashBoardCard = ({
   title,
   description,
-  icon,
   features,
   buttonText,
   buttonVariant = 'primary',
@@ -18,9 +17,6 @@ const DashBoardCard = ({
       data-v0-t="card"
     >
       <div className="flex flex-col space-y-1.5 p-6 pb-3">
-        <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-          {icon}
-        </div>
         <h3 className="font-semibold tracking-tight text-xl">{title}</h3>
         <p className="text-muted-foreground text-base">{description}</p>
       </div>

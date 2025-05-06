@@ -1,6 +1,6 @@
 import React from 'react';
 import IconButton from '../Button/IconButton/index.jsx';
-import { colourCode, REFRESH_STATUS } from '@/constant.jsx';
+import { colourCode, REFRESH_STATUS } from '@/utils/constant.js';
 import DotWithProgress from '@/components/atom/Loaders/DotWithProgress.jsx';
 import Tooltip from '@/components/atom/Tooltip/index.jsx';
 import RefreshIcon from '@/assets/svg/RefreshIcon.jsx';

@@ -9,7 +9,7 @@ import {
   GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
-import { PROVIDER_ICON_MAPPER } from '@/componentMapper.jsx';
+import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 
 const ICONS = {
   cloud: CloudIcon,

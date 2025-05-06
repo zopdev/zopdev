@@ -189,6 +189,7 @@ const Dashboard = () => {
       {getData?.isError && (
         <ErrorComponent errorText={getData?.error?.message} className={' !p-2'} />
       )}
+      {getData?.isLoading && <CompleteLoader />}
       {getData?.isSuccess && (
         <div
           className={`mx-auto ${cloudAccounts?.length === 0 ? 'max-w-5xl' : 'max-w-6xl'}  space-y-8`}
@@ -203,8 +204,6 @@ const Dashboard = () => {
               </p>
             </div>
           )}
-
-          {getData?.isLoading && <CompleteLoader />}
 
           <div className="flex flex-col md:flex-row gap-6">
             {!getData?.data ? (

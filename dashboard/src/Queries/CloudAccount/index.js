@@ -21,7 +21,7 @@ export function useImageServiceGetQueryById(reqParams, options = {}) {
 export function useCreateResourceMutation(options = {}) {
   return useMutation({
     mutationFn: async (payload) => {
-      const url = '/resource';
+      const url = '/cloud-accounts';
       return postData(url, payload);
     },
     ...options,

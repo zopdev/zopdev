@@ -201,6 +201,7 @@ const Stepper = ({ steps }) => {
         )}
 
         <Button
+          loading={postData?.isPending}
           className={`flex items-center px-3 py-2 md:px-4 md:py-2 rounded-md ${
             !isCurrentStepComplete()
               ? 'bg-primary-300 text-white cursor-not-allowed'
@@ -209,8 +210,8 @@ const Stepper = ({ steps }) => {
           disabled={!isCurrentStepComplete()}
           onClick={goToNextStep}
         >
-          {currentStep === steps.length - 1 ? 'Finish' : isMobile ? '' : 'Next'}
-          {currentStep !== steps.length - 1 && <ChevronRightIcon className="w-4 h-4 ml-1" />}
+          {currentStep === steps?.length - 1 ? 'Finish' : isMobile ? '' : 'Next'}
+          {currentStep !== steps?.length - 1 && <ChevronRightIcon className="w-4 h-4 ml-1" />}
         </Button>
       </div>
     </div>
