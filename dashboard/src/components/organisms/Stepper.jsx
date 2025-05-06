@@ -2,8 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CheckIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
 import Button from '@/components/atom/Button/index.jsx';
+import { useCreateResourceMutation } from '@/Queries/CloudAccount/index.js';
+import { useNavigate } from 'react-router-dom';
+import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 
-const Stepper = ({ steps, onComplete }) => {
+const Stepper = ({ steps }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState({});
   const [stepStatus, setStepStatus] = useState(
@@ -11,6 +14,16 @@ const Stepper = ({ steps, onComplete }) => {
   );
   const [stepsComplete, setStepsComplete] = useState(steps.map(() => false));
   const [isMobile, setIsMobile] = useState(false);
+  const postData = useCreateResourceMutation();
+  const navigate = useNavigate();
+  const handleComplete = (data) => {
+    postData.mutate({
+      data,
+    });
+    if (postData?.isSuccess) {
+      navigate('/');
+    }
+  };
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -56,7 +69,7 @@ const Stepper = ({ steps, onComplete }) => {
     if (currentStep < steps.length - 1 && isCurrentStepComplete()) {
       setCurrentStep((prev) => prev + 1);
     } else if (currentStep === steps.length - 1 && isCurrentStepComplete()) {
-      onComplete?.(stepData);
+      handleComplete(stepData);
     }
   };
 
@@ -168,6 +181,9 @@ const Stepper = ({ steps, onComplete }) => {
       <div className="mb-8">
         {/* <h2 className="text-xl font-semibold mb-4">{steps[currentStep].title}</h2> */}
         {renderCurrentStep()}
+      </div>
+      <div className={' my-5'}>
+        {postData?.isError && <ErrorComponent errorText={postData?.error?.message} />}
       </div>
 
       <div className="flex justify-between">
