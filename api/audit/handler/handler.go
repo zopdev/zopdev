@@ -17,7 +17,7 @@ func New(service Service) *Handler {
 }
 
 func (h *Handler) RunAll(ctx *gofr.Context) (any, error) {
-	id := strings.TrimSpace(ctx.Param("id"))
+	id := strings.TrimSpace(ctx.PathParam("id"))
 	if id == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}

@@ -58,6 +58,8 @@ func main() {
 	auditService := auditService.New(auditStore)
 	auditHandler := auditHandler.New(auditService)
 
+	app.AddHTTPService("cloud-account", "http://localhost:8000")
+
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
 	app.GET("/cloud-accounts", cloudAccountHandler.ListCloudAccounts)
 	app.GET("/cloud-accounts/{id}/deployment-space/clusters", cloudAccountHandler.ListDeploymentSpace)
