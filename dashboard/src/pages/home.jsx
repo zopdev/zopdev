@@ -4,7 +4,6 @@ import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
 import Button from '@/components/atom/Button/index.jsx';
 import { useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/molecule/Cards/CloudAuditCard.jsx';
-import SimpleLoader from '@/components/atom/Loaders/SimpleLoader.jsx';
 
 const Home = () => {
   const navigate = useNavigate();
@@ -155,6 +154,7 @@ const Home = () => {
   // ];
 
   const cloudAccounts = [];
+
   const auditCardData = {
     title: 'Audit Your Cloud',
     description:
@@ -176,7 +176,7 @@ const Home = () => {
     buttonVariant: 'primary',
     onClick: () => {},
   };
-  console.log('sadada');
+
   return (
     <main className="flex-1 p-6">
       <div

@@ -1,11 +1,3 @@
-import React from 'react';
-
-import AWSIcon from '@/assets/svg/AWSIcon.jsx';
-import GCPICON from '@/assets/svg/GCPIcon.jsx';
-import AzureIcon from '@/assets/svg/AzureIcon.jsx';
-
-// import AWSIcon from "@/assets/svg/AWSIcon.jsx";
-
 export const colourCode = {
   PENDING: '#FF9D66',
   'CREATION PENDING': '#FF9D66',
