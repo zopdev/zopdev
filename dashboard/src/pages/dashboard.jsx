@@ -5,7 +5,7 @@ import Button from '@/components/atom/Button/index.jsx';
 import { useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/molecule/Cards/CloudAuditCard.jsx';
 
-const Home = () => {
+const Dashboard = () => {
   const navigate = useNavigate();
 
   const handleAuditClick = () => {
@@ -228,4 +228,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Dashboard;
