@@ -95,7 +95,7 @@ func (*Store) GetCloudAccountByProvider(ctx *gofr.Context, providerType, provide
 }
 
 // GetCloudAccountByID retrieves a cloud account by id.
-func (*Store) GetCloudAccountByID(ctx *gofr.Context, cloudAccountID int) (*CloudAccount, error) {
+func (*Store) GetCloudAccountByID(ctx *gofr.Context, cloudAccountID int64) (*CloudAccount, error) {
 	row := ctx.SQL.QueryRowContext(ctx, GETBYPROVIDERIDQUERY, cloudAccountID)
 
 	if row.Err() != nil {
