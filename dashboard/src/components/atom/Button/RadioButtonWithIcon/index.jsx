@@ -55,7 +55,7 @@ const DynamicFormRadioWithIcon = ({
               />
               <label
                 htmlFor={inputId}
-                className="text-sm flex gap-4 cursor-pointer font-medium text-secondary-600 w-full p-2 px-4 border rounded-md peer-checked:bg-primary-200/10 peer-checked:text-primary-500 peer-checked:border-primary-400"
+                className="text-sm flex gap-4 cursor-pointer font-medium text-secondary-600 w-full p-2 px-4 border border-borderDefault rounded-md peer-checked:bg-primary-200/10 peer-checked:text-primary-500 peer-checked:border-primary-400"
                 style={{
                   flexDirection: props.orientation === 'horizontal' ? 'row' : 'column',
                 }}
@@ -100,7 +100,7 @@ const DynamicFormRadioWithIcon = ({
       />
       <label
         htmlFor={inputId}
-        className="text-sm flex gap-4 cursor-pointer font-medium text-secondary-600  w-full p-2 px-4 border rounded-md peer-checked:bg-primary-200/10 peer-checked:text-primary-500 peer-checked:border-primary-400"
+        className="text-sm flex gap-4 cursor-pointer font-medium text-secondary-600  w-full p-2 px-4 border border-borderDefault rounded-md peer-checked:bg-primary-200/10 peer-checked:text-primary-500 peer-checked:border-primary-400"
         style={{
           flexDirection: props.orientation === 'horizontal' ? 'row' : 'column',
         }}

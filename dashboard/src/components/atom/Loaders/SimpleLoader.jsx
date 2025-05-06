@@ -18,7 +18,7 @@ export default function SimpleLoader({
       }}
     >
       <div
-        className="border rounded-full aspect-square"
+        className="border border-borderDefault rounded-full aspect-square"
         style={{
           border: `${thickness}px solid ${secondaryCol ?? 'currentColor'}`,
           height: size,

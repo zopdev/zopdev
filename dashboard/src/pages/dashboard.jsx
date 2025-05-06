@@ -208,7 +208,7 @@ const Dashboard = () => {
                   <h2 className="text-xl font-semibold">Cloud Accounts</h2>
                   <Button className="">Audit Cloud Accounts</Button>
                 </div>
-                <div className="border border-borderColor rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
+                <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
                   <div className="space-y-4 flex justify-center items-center flex-col">
                     <CloudAccountAuditCards cloudAccounts={cloudAccounts} />
                   </div>
@@ -216,7 +216,7 @@ const Dashboard = () => {
               </div>
 
               <div className="flex-1 flex flex-col gap-2 mt-12">
-                <div className="border border-borderColor rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
+                <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
                   <DashBoardCard {...deployCardData} />
                 </div>
               </div>
