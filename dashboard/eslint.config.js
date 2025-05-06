@@ -3,6 +3,7 @@ import js from '@eslint/js';
 import react from 'eslint-plugin-react';
 import prettier from 'eslint-plugin-prettier';
 import promise from 'eslint-plugin-promise';
+import importPlugin from 'eslint-plugin-import';
 
 export default [
   js.configs.recommended,
@@ -12,6 +13,9 @@ export default [
       react,
       prettier,
       promise,
+      // In the flat config format, the plugin name should match how you reference it in rules
+      // So for "import/first", the plugin key should be "import"
+      import: importPlugin,
     },
     languageOptions: {
       ecmaVersion: 'latest',

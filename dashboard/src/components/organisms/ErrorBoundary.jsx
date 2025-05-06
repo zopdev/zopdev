@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import Button from "@/components/atom/Button/index.jsx";
+import Button from '@/components/atom/Button/index.jsx';
 
 export class ErrorBoundary extends Component {
   constructor(props) {

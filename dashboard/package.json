@@ -7,8 +7,9 @@
     "prettier:fix": "prettier --config ./.prettierrc --write \"**/*.{js,jsx,yml,yaml,sh,json,md,css}\"",
     "prettier:check": "prettier --config ./.prettierrc --check \"**/*.{js,jsx,yml,yaml,sh,json,md,css}\"",
     "dev": "vite",
-    "build": "vite build",
     "lint": "eslint .",
+    "lint:strict": "eslint . --max-warnings=0",
+    "build": "npm run lint:strict && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -27,6 +28,7 @@
     "@vitejs/plugin-react": "^4.3.4",
     "eslint": "^9.26.0",
     "eslint-config-prettier": "^10.1.2",
+    "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-prettier": "^5.3.1",
     "eslint-plugin-promise": "^7.2.1",
