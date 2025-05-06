@@ -12,7 +12,6 @@ import {
 } from '@heroicons/react/24/outline';
 import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/componentMapper.jsx';
-import Button from '@/components/atom/Button/index.jsx';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -167,7 +166,7 @@ function CloudAccountAuditCard({
               <div className="w-full overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 <div className="inline-flex min-w-full p-1 bg-secondary-100 rounded-lg">
                   {Object.keys(auditData).map((category) => (
-                    <Button
+                    <button
                       key={category}
                       onClick={() => setActiveTab(category)}
                       className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
@@ -178,7 +177,7 @@ function CloudAccountAuditCard({
                     >
                       {getCategoryIcon(category)}
                       <span>{category.charAt(0).toUpperCase() + category.slice(1)}</span>
-                    </Button>
+                    </button>
                   ))}
                 </div>
               </div>
