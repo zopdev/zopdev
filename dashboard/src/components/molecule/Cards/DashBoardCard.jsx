@@ -14,7 +14,7 @@ const DashBoardCard = ({
 }) => {
   return (
     <div
-      className="rounded-lg  bg-card text-card-foreground shadow-md flex flex-col"
+      className="rounded-lg  bg-card text-card-foreground border border-borderDefault flex flex-col"
       data-v0-t="card"
     >
       <div className="flex flex-col space-y-1.5 p-6 pb-3">

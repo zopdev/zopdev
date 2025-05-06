@@ -183,6 +183,7 @@ const CloudForm = ({
               }
               inputProps={{ maxLength: 255, minLength: 1 }}
               helperTextClass={' text-yellow-500'}
+              className={'focus:outline-none focus:ring-1 focus:ring-primary-500'}
             />
           </div>
         </div>
@@ -200,6 +201,7 @@ const CloudForm = ({
                 id="credentials"
                 variant="outlined"
                 name="credentials"
+                className={' focus:outline-none focus:ring-1 focus:ring-primary-500'}
                 onChange={handleChange}
                 value={data?.credentials || values?.credentials}
                 error={values?.credentials ? !isValidJSON(values?.credentials) : false}

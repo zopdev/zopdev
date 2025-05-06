@@ -1,5 +1,3 @@
-'use client';
-
 import { useState } from 'react';
 import {
   ExclamationCircleIcon,
@@ -80,8 +78,8 @@ function CloudAccountAuditCard({
         return <GlobeAltIcon className="h-4 w-4" />;
       case 'compute':
         return <ServerIcon className="h-4 w-4" />;
-      default:
-        return <ExclamationCircleIcon className="h-4 w-4" />;
+      // default:
+      //   return <ExclamationCircleIcon className="h-4 w-4" />;
     }
   };
 
@@ -143,7 +141,7 @@ function CloudAccountAuditCard({
 
   return (
     <>
-      <div className="w-full max-w-lg bg-white rounded-lg shadow-md overflow-hidden">
+      <div className="w-full max-w-lg bg-white rounded-lg border border-borderDefault overflow-hidden">
         {/* Card Header */}
         <div className="p-4 pb-2">
           <div className="flex items-center space-x-2">

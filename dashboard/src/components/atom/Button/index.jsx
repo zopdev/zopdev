@@ -63,7 +63,7 @@ const CustomButton = ({
   if (href) {
     return (
       <Link
-        href={href}
+        to={href}
         {...props}
         className={`${className} ${children ? 'min-w-24 flex justify-center items-center' : ''}`}
       >

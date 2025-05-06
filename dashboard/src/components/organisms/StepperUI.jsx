@@ -1,8 +1,17 @@
 import Stepper from '@/components/organisms/Stepper.jsx';
+import { useCreateResourceMutation } from '@/Queries/CloudAccount/index.js';
+import { useNavigate } from 'react-router-dom';
 
 export default function StepperUI({ steps }) {
-  const handleComplete = () => {
-    // console.log('All steps completed! Final data:', data);
+  const postData = useCreateResourceMutation();
+  const navigate = useNavigate();
+  const handleComplete = (data) => {
+    postData.mutate({
+      data,
+    });
+    if (postData?.isSuccess) {
+      navigate('/');
+    }
   };
 
   return (
