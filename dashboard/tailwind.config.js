@@ -5,7 +5,7 @@ module.exports = {
   darkMode: false,
   plugins: [
     require('@tailwindcss/forms')({
-      strategy: 'class',
+      strategy: 'base',
     }),
     typographyPlugin,
   ],

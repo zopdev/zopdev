@@ -7,9 +7,8 @@
     "prettier:fix": "prettier --config ./.prettierrc --write \"**/*.{js,jsx,yml,yaml,sh,json,md,css}\"",
     "prettier:check": "prettier --config ./.prettierrc --check \"**/*.{js,jsx,yml,yaml,sh,json,md,css}\"",
     "dev": "vite",
-    "lint": "eslint .",
-    "lint:strict": "eslint . --max-warnings=0",
-    "build": "npm run lint:strict && vite build",
+    "lint": "eslint . --max-warnings=0",
+    "build": "npm run lint && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
