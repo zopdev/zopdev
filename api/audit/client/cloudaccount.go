@@ -25,7 +25,9 @@ func GetCloudCredentials(ctx *gofr.Context, cloudAccId int64) (*CloudAccount, er
 		return nil, fmt.Errorf("failed to get cloud credentials: %s", resp.Status)
 	}
 
-	var credentials CloudAccount
+	var credentials struct {
+		Data *CloudAccount `json:"data"`
+	}
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return nil, err
@@ -36,5 +38,5 @@ func GetCloudCredentials(ctx *gofr.Context, cloudAccId int64) (*CloudAccount, er
 		return nil, err
 	}
 
-	return nil, nil
+	return credentials.Data, nil
 }

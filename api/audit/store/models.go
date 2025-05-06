@@ -17,7 +17,6 @@ type Result struct {
 	EvaluatedAt    time.Time   `json:"evaluatedAt"`
 	RuleID         string      `json:"ruleId"`
 	Result         *ResultData `json:"result"`
-	Status         string      `json:"status"`
 }
 
 type ResultData struct {

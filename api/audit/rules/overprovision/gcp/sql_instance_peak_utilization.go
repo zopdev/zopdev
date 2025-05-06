@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -67,11 +68,11 @@ func CheckCloudSQLProvisionedUsage(ctx *gofr.Context, creds *Credentials) ([]sto
 
 		var latestVal float64
 		for {
-			resp, err := it.Next()
-			if err == iterator.Done {
+			resp, er := it.Next()
+			if errors.Is(er, iterator.Done) {
 				break
 			}
-			if err != nil {
+			if er != nil {
 				return nil, fmt.Errorf("error reading time series for instance %s: %v", instance.Name, err)
 			}
 			points := resp.Points
