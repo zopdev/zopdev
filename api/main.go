@@ -4,9 +4,13 @@ import (
 	appHandler "github.com/zopdev/zopdev/api/applications/handler"
 	appService "github.com/zopdev/zopdev/api/applications/service"
 	appStore "github.com/zopdev/zopdev/api/applications/store"
-	"github.com/zopdev/zopdev/api/cloudaccounts/handler"
-	"github.com/zopdev/zopdev/api/cloudaccounts/service"
-	"github.com/zopdev/zopdev/api/cloudaccounts/store"
+	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
+	auditService "github.com/zopdev/zopdev/api/audit/service"
+	auditStore "github.com/zopdev/zopdev/api/audit/store"
+
+	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
+	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
+	caStore "github.com/zopdev/zopdev/api/cloudaccounts/store"
 	clStore "github.com/zopdev/zopdev/api/deploymentspace/cluster/store"
 	"github.com/zopdev/zopdev/api/provider/gcp"
 
@@ -31,9 +35,9 @@ func main() {
 
 	gkeSvc := gcp.New()
 
-	cloudAccountStore := store.New()
-	cloudAccountService := service.New(cloudAccountStore, gkeSvc)
-	cloudAccountHandler := handler.New(cloudAccountService)
+	cloudAccountStore := caStore.New()
+	cloudAccountService := caService.New(cloudAccountStore, gkeSvc)
+	cloudAccountHandler := caHandler.New(cloudAccountService)
 
 	deploymentStore := deployStore.New()
 	clusterStore := clStore.New()
@@ -50,11 +54,18 @@ func main() {
 	applicationService := appService.New(applicationStore, environmentService)
 	applicationHandler := appHandler.New(applicationService)
 
+	auditStore := auditStore.New()
+	auditService := auditService.New(auditStore)
+	auditHandler := auditHandler.New(auditService)
+
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
 	app.GET("/cloud-accounts", cloudAccountHandler.ListCloudAccounts)
 	app.GET("/cloud-accounts/{id}/deployment-space/clusters", cloudAccountHandler.ListDeploymentSpace)
 	app.GET("/cloud-accounts/{id}/deployment-space/namespaces", cloudAccountHandler.ListNamespaces)
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
+	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
+
+	app.POST("/audit/cloud-accounts/{id}", auditHandler.Audit)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
