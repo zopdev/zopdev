@@ -193,19 +193,21 @@ const Dashboard = () => {
         <div
           className={`mx-auto ${cloudAccounts?.length === 0 ? 'max-w-5xl' : 'max-w-6xl'}  space-y-8`}
         >
-          <div className="text-center">
-            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-              Welcome to Zopdev
-            </h1>
-            <p className="mt-4 text-lg text-muted-foreground">
-              Get started by choosing one of the options below
-            </p>
-          </div>
+          {!getData?.data && (
+            <div className="text-center">
+              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+                Welcome to Zopdev
+              </h1>
+              <p className="mt-4 text-lg text-muted-foreground">
+                Get started by choosing one of the options below
+              </p>
+            </div>
+          )}
 
           {getData?.isLoading && <CompleteLoader />}
 
           <div className="flex flex-col md:flex-row gap-6">
-            {cloudAccounts?.length === 0 ? (
+            {!getData?.data ? (
               <>
                 <DashboardSection>
                   <DashBoardCard {...auditCardData} />
