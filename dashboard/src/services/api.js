@@ -4,12 +4,14 @@ import { HttpErrors } from './errors.js';
 const BASE_URL = API_URL;
 
 const createRequestOptions = (method, data, customHeaders = {}) => {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...customHeaders,
+  };
+
   const options = {
     method,
-    headers: {
-      'Content-Type': 'application/json',
-      ...customHeaders,
-    },
+    headers,
   };
 
   if (data) {
@@ -42,27 +44,62 @@ const safeParseJSON = async (response) => {
 
 const handleErrorResponse = async (response) => {
   const json = await safeParseJSON(response);
-  console.error(json);
   const is5xx = response.status >= 500 && response.status < 600;
 
-  const message = is5xx ? getErrorMessage(response.status) : json?.error?.message;
+  const message = is5xx
+    ? getErrorMessage(response.status)
+    : json.message || `API error: ${response.status}`;
 
   throw new HttpErrors({ message, details: json }, response.status);
 };
 
 const request = async (method, endpoint, data = null, customHeaders = {}) => {
-  const response = await fetch(
-    `${BASE_URL}${endpoint}`,
-    createRequestOptions(method, data, customHeaders),
-  );
+  try {
+    const response = await fetch(
+      `${BASE_URL}${endpoint}`,
+      createRequestOptions(method, data, customHeaders),
+    );
 
-  if (!response.ok) {
-    await handleErrorResponse(response);
+    if (!response.ok) {
+      await handleErrorResponse(response);
+    }
+
+    return response.status === 204 ? null : response.json();
+  } catch (err) {
+    if (err.name === 'AbortError') {
+      throw new HttpErrors(
+        { message: 'Request timed out. Please check your internet connection.' },
+        408,
+      );
+    }
+
+    if (err instanceof TypeError) {
+      const msg = (err.message || '').toLowerCase();
+
+      if (msg.includes('failed to fetch')) {
+        throw new HttpErrors(
+          { message: 'Unable to reach server. This may be due to no internet or CORS issues.' },
+          0,
+        );
+      }
+
+      if (msg.includes('networkerror')) {
+        throw new HttpErrors(
+          { message: 'Network error. Please check your connection or try again later.' },
+          0,
+        );
+      }
+
+      // fallback
+      throw new HttpErrors({ message: 'A network issue occurred.' }, 0);
+    }
+
+    // unexpected fetch-related errors
+    throw new HttpErrors({ message: err.message || 'Unexpected error occurred.' }, 0);
   }
-
-  return response.status === 204 ? null : response.json();
 };
 
+// Public API
 export const fetchData = (endpoint, headers = {}) => request('GET', endpoint, null, headers);
 
 export const postData = (endpoint, data, headers = {}) => request('POST', endpoint, data, headers);
