@@ -195,8 +195,9 @@ function CloudAccountAuditCard({
         </div>
 
         {(lastUpdatedBy || lastUpdatedDate) && (
-          <div className="mt-4 pt-3 text-xs flex text-secondary-500 border-t border-secondary-100">
-            Last Run on&nbsp;{lastUpdatedDate && <p>{lastUpdatedDate}</p>}
+          <div className="mt-4 pt-3 text-xs flex text-secondary-900">
+            <span className={'text-secondary-400'}>Last Run on&nbsp;</span>
+            {lastUpdatedDate && <p>{lastUpdatedDate}</p>}
           </div>
         )}
       </div>

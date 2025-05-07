@@ -1,7 +1,7 @@
 import { fetchData, postData } from '@/services/api.js';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export function useImageServiceGetQueryById(reqParams, options = {}) {
+export function useGetCloudAccounts(reqParams, options = {}) {
   const temp = {
     data: [
       {
@@ -89,7 +89,7 @@ export function useImageServiceGetQueryById(reqParams, options = {}) {
   });
 }
 
-export function useCreateChainedResourceMutation() {
+export function usePostAuditData() {
   return useMutation({
     mutationFn: async (req) => {
       const getCloudAccountRes = await postData('/cloud-accounts', req.transformedData);

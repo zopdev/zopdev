@@ -4,13 +4,13 @@ import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
 import Button from '@/components/atom/Button/index.jsx';
 import { useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/molecules/Cards/CloudAuditCard.jsx';
-import { useImageServiceGetQueryById } from '@/Queries/CloudAccount/index.js';
+import { useGetCloudAccounts } from '@/Queries/CloudAccount/index.js';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import React from 'react';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
 
 const Dashboard = () => {
-  const getData = useImageServiceGetQueryById({ serviceGroupId: '123' });
+  const getData = useGetCloudAccounts();
   const navigate = useNavigate();
 
   const handleAuditClick = () => {

@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CheckIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
 import Button from '@/components/atom/Button/index.jsx';
-import { useCreateChainedResourceMutation } from '@/Queries/CloudAccount/index.js';
+import { usePostAuditData } from '@/Queries/CloudAccount/index.js';
 import { useNavigate } from 'react-router-dom';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
@@ -15,7 +15,7 @@ const Stepper = ({ steps }) => {
     steps.map((_, index) => (index === 0 ? 'active' : 'incomplete')),
   );
   const [stepsComplete, setStepsComplete] = useState(steps.map(() => false));
-  const postData = useCreateChainedResourceMutation();
+  const postData = usePostAuditData();
   const navigate = useNavigate();
 
   const handleComplete = (data) => {
