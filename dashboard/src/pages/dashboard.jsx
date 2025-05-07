@@ -69,9 +69,9 @@ const Dashboard = () => {
             <>
               <div className="flex-1 flex flex-col gap-2 w-full">
                 <div className="flex justify-between items-center">
-                  <h2 className="text-xl font-semibold">Cloud Accounts</h2>
+                  <h2 className="text-left font-medium text-gray-600 text-xl">Cloud Accounts</h2>
                   <Link
-                    className={'text-primary-600 underline cursor-pointer hover:text-primary-500'}
+                    className={'text-primary-500 underline cursor-pointer hover:text-primary-600'}
                     to={'/cloud-setup'}
                   >
                     Audit Cloud Accounts
@@ -80,10 +80,11 @@ const Dashboard = () => {
                 <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
                   <div className="space-y-4 flex justify-center items-center flex-col">
                     {getData?.isError && (
-                      <div className={'h-80 w-full'}>
+                      <div className={'h-74 w-full'}>
                         <ErrorComponent
+                          complete={true}
                           errorText={getData?.error?.message}
-                          className={'!w-full !h-80'}
+                          className={'!w-full !h-74'}
                         />
                       </div>
                     )}

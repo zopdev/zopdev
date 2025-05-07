@@ -149,7 +149,7 @@ function CloudAccountAuditCard({
           </div>
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="text-lg sm:text-xl font-semibold truncate">{name}</h3>
+              <h3 className="text-left font-medium text-gray-600 text-xl">{name}</h3>
               <ResourceStatus status={status} />
             </div>
             <p className="text-xs sm:text-sm text-secondary-500 truncate">{subtitle}</p>

@@ -7,7 +7,6 @@ export function useGetCloudAccounts(reqParams, options = {}) {
       {
         id: 'account1',
         name: 'Zop Cloud',
-        subtitle: '2 Apps',
         status: 'READY',
         icon: 'cloud',
         provider: 'gcp',
