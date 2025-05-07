@@ -40,64 +40,70 @@ const Dashboard = () => {
 
   return (
     <main className="flex-1 p-6">
-      {getData?.isError && (
-        <ErrorComponent errorText={getData?.error?.message} className={' !p-2'} />
-      )}
       {getData?.isLoading && <CompleteLoader />}
-      {getData?.isSuccess && (
-        <div
-          className={`mx-auto ${getData?.data?.data?.length === 0 ? 'max-w-5xl' : 'max-w-6xl'}  space-y-8`}
-        >
-          {!getData?.data?.data?.length > 0 && (
-            <div className="text-center">
-              <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
-                Welcome to Zopdev
-              </h1>
-              <p className="mt-4 text-lg text-muted-foreground">
-                Get started by choosing one of the options below
-              </p>
-            </div>
-          )}
-
-          <div className="flex flex-col md:justify-center md:items-center lg:flex-row gap-6 my-5">
-            {!getData?.data?.data?.length > 0 ? (
-              <>
-                <DashboardSection>
-                  <DashBoardCard {...auditCardData} />
-                </DashboardSection>
-                <DashboardSection>
-                  <DashBoardCard {...deployCardData} />
-                </DashboardSection>
-              </>
-            ) : (
-              <>
-                <div className="flex-1 flex flex-col gap-2">
-                  <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-semibold">Cloud Accounts</h2>
-                    <Link
-                      className={'text-primary-600 underline cursor-pointer hover:text-primary-500'}
-                      to={'/cloud-setup'}
-                    >
-                      Audit Cloud Accounts
-                    </Link>
-                  </div>
-                  <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
-                    <div className="space-y-4 flex justify-center items-center flex-col">
-                      <CloudAccountAuditCards cloudAccounts={getData?.data?.data} />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex-1 flex flex-col gap-2 mt-12">
-                  <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
-                    <DashBoardCard {...deployCardData} />
-                  </div>
-                </div>
-              </>
-            )}
+      <div
+        className={`mx-auto ${getData?.data?.data?.length === 0 ? 'max-w-5xl' : 'max-w-6xl'}  space-y-8`}
+      >
+        {getData?.isSuccess && !getData?.data?.data?.length > 0 && (
+          <div className="text-center">
+            <h1 className="text-3xl font-bold tracking-tight sm:text-4xl md:text-5xl">
+              Welcome to Zopdev
+            </h1>
+            <p className="mt-4 text-lg text-muted-foreground">
+              Get started by choosing one of the options below
+            </p>
           </div>
+        )}
+
+        <div className="flex flex-col md:justify-center md:items-center lg:flex-row gap-6 my-5">
+          {getData?.isSuccess && !getData?.data?.data?.length > 0 ? (
+            <>
+              <DashboardSection>
+                <DashBoardCard {...auditCardData} />
+              </DashboardSection>
+              <DashboardSection>
+                <DashBoardCard {...deployCardData} />
+              </DashboardSection>
+            </>
+          ) : (
+            <>
+              <div className="flex-1 flex flex-col gap-2 w-full">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold">Cloud Accounts</h2>
+                  <Link
+                    className={'text-primary-600 underline cursor-pointer hover:text-primary-500'}
+                    to={'/cloud-setup'}
+                  >
+                    Audit Cloud Accounts
+                  </Link>
+                </div>
+                <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
+                  <div className="space-y-4 flex justify-center items-center flex-col">
+                    {getData?.isError && (
+                      <div className={'h-80 w-full'}>
+                        <ErrorComponent
+                          errorText={getData?.error?.message}
+                          className={'!w-full !h-80'}
+                        />
+                      </div>
+                    )}
+
+                    {getData?.isSuccess && (
+                      <CloudAccountAuditCards cloudAccounts={getData?.data?.data} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex-1 flex flex-col gap-2 mt-10 w-full">
+                <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
+                  <DashBoardCard {...deployCardData} />
+                </div>
+              </div>
+            </>
+          )}
         </div>
-      )}
+      </div>
     </main>
   );
 };
