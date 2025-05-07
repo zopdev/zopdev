@@ -18,9 +18,9 @@ function transformPayload(inputPayload) {
       throw new Error('Failed to parse credentials JSON: ' + error.message);
     }
     return {
-      name: parsedCredentials.name,
+      name: inputPayload['0'].name,
       provider: 'gcp',
-      credentials: parsedCredentials.credentials,
+      credentials: parsedCredentials,
     };
   } catch (error) {
     console.error('Transformation error:', error);

@@ -23,7 +23,7 @@ const ICONS = {
 
 export default function CloudAccountAuditCards({ cloudAccounts = [] }) {
   return (
-    <div className="space-y-4 flex justify-center items-center flex-col">
+    <div className="space-y-4 flex justify-center items-center flex-col w-full">
       {cloudAccounts?.map((account, index) => (
         <CloudAccountAuditCard key={account.id || index} {...account} />
       ))}
@@ -113,7 +113,7 @@ function CloudAccountAuditCard({
     const statuses = Object.keys(statusIconColors);
 
     return (
-      <div className="flex justify-between mt-4">
+      <div className="flex flex-wrap justify-around gap-y-3 mt-4">
         {statuses.map((statusKey) => {
           if (typeof auditData[category][statusKey] === 'undefined') return null;
 
@@ -124,11 +124,11 @@ function CloudAccountAuditCard({
           const iconColor = statusIconColors[statusKey].icon;
 
           return (
-            <div key={statusKey} className="flex flex-col items-center">
+            <div key={statusKey} className="flex flex-col items-center w-16 sm:w-auto">
               <div className={`flex items-center justify-center w-8 h-8 rounded-full ${bgColor}`}>
                 <StatusIcon className={`h-5 w-5 ${iconColor}`} />
               </div>
-              <span className="text-xs font-medium mt-1">
+              <span className="text-xs font-medium mt-1 text-center">
                 {statusKey.charAt(0).toUpperCase() + statusKey.slice(1)}
               </span>
               <span className="text-lg">{auditData[category][statusKey]}</span>
@@ -140,64 +140,66 @@ function CloudAccountAuditCard({
   };
 
   return (
-    <>
-      <div className="w-full max-w-lg bg-white rounded-lg border border-borderDefault overflow-hidden">
-        {/* Card Header */}
-        <div className="p-4 pb-2">
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full ">
-              {PROVIDER_ICON_MAPPER[provider]}
+    <div className="w-full lg:max-w-lg bg-white rounded-lg border border-borderDefault overflow-hidden ">
+      {/* Card Header */}
+      <div className="p-3 sm:p-4 sm:pb-2">
+        <div className="flex items-center space-x-2">
+          <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0">
+            {PROVIDER_ICON_MAPPER[provider]}
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="text-lg sm:text-xl font-semibold truncate">{name}</h3>
+              <ResourceStatus status={status} />
             </div>
-            <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h3 className="text-xl font-semibold">{name}</h3>
-                <ResourceStatus status={status} />
-              </div>
-              <p className="text-sm text-secondary-500">{subtitle}</p>
-            </div>
+            <p className="text-xs sm:text-sm text-secondary-500 truncate">{subtitle}</p>
           </div>
         </div>
+      </div>
 
-        <div className="p-4">
-          <div className="w-full">
-            {Object.keys(auditData).length > 0 && (
-              <div className="w-full overflow-x-auto pb-2 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <div className="inline-flex min-w-full p-1 bg-secondary-100 rounded-lg">
+      <div className="p-3 sm:p-4">
+        <div className="w-full">
+          {Object.keys(auditData).length > 0 && (
+            <div className="w-full bg-secondary-100 flex justify-center items-center rounded-lg">
+              <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex min-w-full p-1 whitespace-nowrap">
                   {Object.keys(auditData).map((category) => (
                     <button
                       key={category}
                       onClick={() => setActiveTab(category)}
-                      className={`flex items-center gap-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+                      className={`flex items-center gap-1 px-2 cursor-pointer sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors flex-1 justify-center ${
                         activeTab === category
                           ? 'bg-white shadow-sm'
                           : 'text-secondary-600 hover:bg-secondary-200'
                       }`}
                     >
-                      {getCategoryIcon(category)}
-                      <span>{category.charAt(0).toUpperCase() + category.slice(1)}</span>
+                      <span className="block">{getCategoryIcon(category)}</span>
+                      <span className="block truncate">
+                        {category.charAt(0).toUpperCase() + category.slice(1)}
+                      </span>
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-
-            <div className="mt-4">
-              {Object.keys(auditData).map((category) => (
-                <div key={category} className={`${activeTab === category ? 'block' : 'hidden'}`}>
-                  {renderStatusBar(category)}
-                  {renderStatusDetails(category)}
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {(lastUpdatedBy || lastUpdatedDate) && (
-            <div className="mt-4 pt-4 text-xs flex text-secondary-500">
-              Last Run on&nbsp;{lastUpdatedDate && <p>{lastUpdatedDate}</p>}
             </div>
           )}
+
+          <div className="mt-4">
+            {Object.keys(auditData).map((category) => (
+              <div key={category} className={`${activeTab === category ? 'block' : 'hidden'}`}>
+                {renderStatusBar(category)}
+                {renderStatusDetails(category)}
+              </div>
+            ))}
+          </div>
         </div>
+
+        {(lastUpdatedBy || lastUpdatedDate) && (
+          <div className="mt-4 pt-3 text-xs flex text-secondary-500 border-t border-secondary-100">
+            Last Run on&nbsp;{lastUpdatedDate && <p>{lastUpdatedDate}</p>}
+          </div>
+        )}
       </div>
-    </>
+    </div>
   );
 }

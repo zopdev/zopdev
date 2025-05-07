@@ -20,7 +20,7 @@ const DashBoardCard = ({
         <h3 className="font-semibold tracking-tight text-xl">{title}</h3>
         <p className="text-muted-foreground text-base">{description}</p>
       </div>
-      <div className="p-10 pt-0 flex-1">
+      <div className="p-8 pt-0 flex-1">
         <ul className="space-y-2 text-sm">
           {features.map((feature, index) => (
             <li key={index} className="flex items-center">
