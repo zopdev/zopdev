@@ -5,28 +5,8 @@ import Button from '@/components/atom/Button/index.jsx';
 import { useCreateChainedResourceMutation } from '@/Queries/CloudAccount/index.js';
 import { useNavigate } from 'react-router-dom';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
-
-function transformPayload(inputPayload) {
-  try {
-    if (!inputPayload || !inputPayload['0'] || !inputPayload['0'].credentials) {
-      throw new Error('Invalid input payload structure');
-    }
-    let parsedCredentials;
-    try {
-      parsedCredentials = JSON.parse(inputPayload['0'].credentials);
-    } catch (error) {
-      throw new Error('Failed to parse credentials JSON: ' + error.message);
-    }
-    return {
-      name: inputPayload['0'].name,
-      provider: 'gcp',
-      credentials: parsedCredentials,
-    };
-  } catch (error) {
-    console.error('Transformation error:', error);
-    return { error: error.message };
-  }
-}
+import { toast } from '@/components/molecules/Toast/index.jsx';
+import { transformResourceAuditPayload } from '@/utils/transformer.js';
 
 const Stepper = ({ steps }) => {
   const [currentStep, setCurrentStep] = useState(0);
@@ -35,32 +15,23 @@ const Stepper = ({ steps }) => {
     steps.map((_, index) => (index === 0 ? 'active' : 'incomplete')),
   );
   const [stepsComplete, setStepsComplete] = useState(steps.map(() => false));
-  const [isMobile, setIsMobile] = useState(false);
   const postData = useCreateChainedResourceMutation();
   const navigate = useNavigate();
 
   const handleComplete = (data) => {
     const selectedOptionEntry = Object.values(data).find((item) => item.selectedOption);
-    const selectedOption = selectedOptionEntry?.selectedOption;
-    const transformedData = transformPayload(data);
+    const selectedOption = selectedOptionEntry?.selectedOption?.toLowerCase();
+    const transformedData = transformResourceAuditPayload(data);
     const payload = { transformedData, selectedOption };
     postData.mutate(payload);
   };
 
   useEffect(() => {
     if (postData?.isSuccess) {
+      toast.success('Created Successfully.');
       navigate('/');
     }
   }, [postData]);
-
-  useEffect(() => {
-    const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-    checkScreenSize();
-    window.addEventListener('resize', checkScreenSize);
-    return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
 
   useEffect(() => {
     const newStepStatus = steps.map((_, index) => {
@@ -222,7 +193,7 @@ const Stepper = ({ steps }) => {
             onClick={goToPreviousStep}
           >
             <ChevronLeftIcon className="w-3 h-3 mr-1" />
-            {!isMobile ? 'Back' : ''}
+            {'Back'}
           </Button>
         ) : (
           <div />
@@ -238,7 +209,7 @@ const Stepper = ({ steps }) => {
           disabled={!isCurrentStepComplete()}
           onClick={goToNextStep}
         >
-          {currentStep === steps?.length - 1 ? 'Finish' : isMobile ? '' : 'Next'}
+          {currentStep === steps?.length - 1 ? 'Finish' : 'Next'}
           {currentStep !== steps?.length - 1 && <ChevronRightIcon className="w-4 h-4 ml-1" />}
         </Button>
       </div>

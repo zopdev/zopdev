@@ -60,7 +60,7 @@ const Dashboard = () => {
             </div>
           )}
 
-          <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex flex-col md:justify-center md:items-center lg:flex-row gap-6 my-5">
             {!getData?.data?.data?.length > 0 ? (
               <>
                 <DashboardSection>

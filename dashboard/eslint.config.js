@@ -57,6 +57,7 @@ export default [
         alert: 'readonly',
         MutationObserver: 'readonly',
         reportError: 'readonly',
+        setTimeout: 'readonly',
       },
     },
     settings: {

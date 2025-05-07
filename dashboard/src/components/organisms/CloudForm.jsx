@@ -4,6 +4,7 @@ import Label from '@/components/atom/Loaders/index.jsx';
 import Input from '@/components/atom/Input/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import Textarea from '@/components/atom/Textarea/index.jsx';
+import { enforceCharLimit } from '@/utils/common.js';
 
 export const isValidJSON = (str) => {
   try {
@@ -65,6 +66,11 @@ const CloudForm = ({
           };
         }
         return { ...prev, [name]: value };
+      } else if (e.target.name === 'name') {
+        setValues((prevValues) => ({
+          ...prevValues,
+          [e.target.name]: enforceCharLimit(e.target.value, 11),
+        }));
       }
       return { ...prev, [name]: value };
     });

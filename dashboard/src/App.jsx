@@ -5,6 +5,7 @@ import { routes } from './routes';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
 import TopBar from '@/components/molecules/TopBar/index.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import ToastContainer from '@/components/organisms/ToastContainer.jsx';
 
 const queryClient = new QueryClient();
 
@@ -14,6 +15,7 @@ function App() {
       <HashRouter>
         <ErrorBoundary>
           <Suspense fallback={<CompleteLoader />}>
+            <ToastContainer classNameParent={`absolute right-5 top-10 `} stacked={false} />
             <div className="flex flex-col h-screen">
               <div className="sticky top-0 z-50 bg-white shadow">
                 <TopBar />
