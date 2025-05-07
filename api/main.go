@@ -48,15 +48,15 @@ func main() {
 	deploymentHandler := deployHandler.New(deploymentService)
 
 	environmentService := envService.New(environmentStore, deploymentService)
-	envrionmentHandler := envHandler.New(environmentService)
+	environmentHandler := envHandler.New(environmentService)
 
 	applicationStore := appStore.New()
 	applicationService := appService.New(applicationStore, environmentService)
 	applicationHandler := appHandler.New(applicationService)
 
-	auditStore := auditStore.New()
-	auditService := auditService.New(auditStore)
-	auditHandler := auditHandler.New(auditService)
+	adStore := auditStore.New()
+	adSvc := auditService.New(adStore)
+	adHandler := auditHandler.New(adSvc)
 
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
@@ -67,17 +67,17 @@ func main() {
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
 	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
 
-	app.POST("/audit/cloud-accounts/{id}/all", auditHandler.RunAll)
-	app.POST("/audit/cloud-accounts/{id}/category/{category}", auditHandler.RunByCategory)
-	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", auditHandler.RunById)
+	app.POST("/audit/cloud-accounts/{id}/all", adHandler.RunAll)
+	app.POST("/audit/cloud-accounts/{id}/category/{category}", adHandler.RunByCategory)
+	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunById)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
 	app.GET("/applications/{id}", applicationHandler.GetApplication)
 
-	app.POST("/applications/{id}/environments", envrionmentHandler.Add)
-	app.GET("/applications/{id}/environments", envrionmentHandler.List)
-	app.PATCH("/applications/{id}/environments", envrionmentHandler.Update)
+	app.POST("/applications/{id}/environments", environmentHandler.Add)
+	app.GET("/applications/{id}/environments", environmentHandler.List)
+	app.PATCH("/applications/{id}/environments", environmentHandler.Update)
 
 	app.POST("/environments/{id}/deploymentspace", deploymentHandler.Add)
 	app.GET("/environments/{id}/deploymentspace/service/{name}", deploymentHandler.GetService)
