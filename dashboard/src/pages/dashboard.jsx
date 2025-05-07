@@ -1,8 +1,7 @@
 import { CloudIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 import DashBoardCard from '@/components/molecules/Cards/DashBoardCard.jsx';
 import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
-import Button from '@/components/atom/Button/index.jsx';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/molecules/Cards/CloudAuditCard.jsx';
 import { useGetCloudAccounts } from '@/Queries/CloudAccount/index.js';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
@@ -73,11 +72,14 @@ const Dashboard = () => {
             ) : (
               <>
                 <div className="flex-1 flex flex-col gap-2">
-                  <div className="flex justify-between">
+                  <div className="flex justify-between items-center">
                     <h2 className="text-xl font-semibold">Cloud Accounts</h2>
-                    <Button href={'/cloud-setup'} className="">
+                    <Link
+                      className={'text-primary-600 underline cursor-pointer hover:text-primary-500'}
+                      to={'/cloud-setup'}
+                    >
                       Audit Cloud Accounts
-                    </Button>
+                    </Link>
                   </div>
                   <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
                     <div className="space-y-4 flex justify-center items-center flex-col">

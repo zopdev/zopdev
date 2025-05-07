@@ -140,7 +140,7 @@ function CloudAccountAuditCard({
   };
 
   return (
-    <div className="w-full lg:max-w-lg bg-white rounded-lg border border-borderDefault overflow-hidden ">
+    <div className="w-full lg:max-w-lg bg-white rounded-lg overflow-hidden shadow-sm ">
       {/* Card Header */}
       <div className="p-3 sm:p-4 sm:pb-2">
         <div className="flex items-center space-x-2">
