@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CheckIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
 import Button from '@/components/atom/Button/index.jsx';
-import { useCreateResourceMutation } from '@/Queries/CloudAccount/index.js';
+import { useCreateChainedResourceMutation } from '@/Queries/CloudAccount/index.js';
 import { useNavigate } from 'react-router-dom';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 
@@ -36,11 +36,15 @@ const Stepper = ({ steps }) => {
   );
   const [stepsComplete, setStepsComplete] = useState(steps.map(() => false));
   const [isMobile, setIsMobile] = useState(false);
-  const postData = useCreateResourceMutation();
+  const postData = useCreateChainedResourceMutation();
   const navigate = useNavigate();
+
   const handleComplete = (data) => {
+    const selectedOptionEntry = Object.values(data).find((item) => item.selectedOption);
+    const selectedOption = selectedOptionEntry?.selectedOption;
     const transformedData = transformPayload(data);
-    postData.mutate(transformedData);
+    const payload = { transformedData, selectedOption };
+    postData.mutate(payload);
   };
 
   useEffect(() => {

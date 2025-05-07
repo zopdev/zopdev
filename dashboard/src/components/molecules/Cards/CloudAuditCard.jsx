@@ -32,10 +32,10 @@ export default function CloudAccountAuditCards({ cloudAccounts = [] }) {
 }
 
 function CloudAccountAuditCard({
-  title,
+  name,
   subtitle,
   status,
-  providerType,
+  provider,
   auditData = {},
   lastUpdatedBy,
   lastUpdatedDate,
@@ -146,11 +146,11 @@ function CloudAccountAuditCard({
         <div className="p-4 pb-2">
           <div className="flex items-center space-x-2">
             <div className="flex items-center justify-center w-8 h-8 rounded-full ">
-              {PROVIDER_ICON_MAPPER[providerType]}
+              {PROVIDER_ICON_MAPPER[provider]}
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3">
-                <h3 className="text-xl font-semibold">{title}</h3>
+                <h3 className="text-xl font-semibold">{name}</h3>
                 <ResourceStatus status={status} />
               </div>
               <p className="text-sm text-secondary-500">{subtitle}</p>
@@ -192,9 +192,8 @@ function CloudAccountAuditCard({
           </div>
 
           {(lastUpdatedBy || lastUpdatedDate) && (
-            <div className="mt-4 pt-4 border-t text-xs text-secondary-500">
-              {/* {lastUpdatedBy && <p>Updated By {lastUpdatedBy}</p>} */}
-              {lastUpdatedDate && <p>{lastUpdatedDate}</p>}
+            <div className="mt-4 pt-4 text-xs flex text-secondary-500">
+              Last Run on&nbsp;{lastUpdatedDate && <p>{lastUpdatedDate}</p>}
             </div>
           )}
         </div>
