@@ -20,7 +20,7 @@ const Dashboard = () => {
   };
 
   const handleApplicationClick = () => {
-    toast.info('This Feature is not available. Coming Soon!');
+    toast.info('This feature is currently not available. Coming Soon!');
   };
 
   const auditCardData = {

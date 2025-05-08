@@ -17,7 +17,7 @@ const Stepper = ({ steps, handleComplete, postData }) => {
 
   useEffect(() => {
     if (postData?.isSuccess) {
-      toast.success('Created Successfully.');
+      toast.success('Cloud Account Created Successfully.');
       navigate('/');
     }
   }, [postData]);
