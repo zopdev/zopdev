@@ -224,8 +224,8 @@ func (s *Service) GetResultByCategory(ctx *gofr.Context, cloudAccID int64) (map[
 	return results, nil
 }
 
-func (s *Service) GetAllResults(ctx *gofr.Context, cloudAccID int64) ([]*store.Result, error) {
-	result := make([]*store.Result, 0)
+func (s *Service) GetAllResults(ctx *gofr.Context, cloudAccID int64) (map[string][]*store.Result, error) {
+	result := make(map[string][]*store.Result)
 
 	for _, rule := range s.rules {
 		res, err := s.store.GetLastRun(ctx, cloudAccID, rule.GetName())
@@ -237,7 +237,11 @@ func (s *Service) GetAllResults(ctx *gofr.Context, cloudAccID int64) ([]*store.R
 			continue
 		}
 
-		result = append(result, res)
+		if _, ok := result[rule.GetCategory()]; !ok {
+			result[rule.GetCategory()] = make([]*store.Result, 0)
+		}
+
+		result[rule.GetCategory()] = append(result[rule.GetCategory()], res)
 	}
 
 	return result, nil

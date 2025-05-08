@@ -42,10 +42,10 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // GetAllResults mocks base method.
-func (m *MockService) GetAllResults(ctx *gofr.Context, cloudAccID int64) ([]*store.Result, error) {
+func (m *MockService) GetAllResults(ctx *gofr.Context, cloudAccID int64) (map[string][]*store.Result, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllResults", ctx, cloudAccID)
-	ret0, _ := ret[0].([]*store.Result)
+	ret0, _ := ret[0].(map[string][]*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

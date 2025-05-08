@@ -7,7 +7,7 @@ import (
 const (
 	createResultsTableQuery = `CREATE TABLE IF NOT EXISTS results
 (
-    id               int auto_increment 				primary key,
+    id               integer 				primary key,
     cloud_account_id int                                not null,
     rule_id          varchar(50)                        not null,
     result           text                               null,
