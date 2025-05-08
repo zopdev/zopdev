@@ -63,6 +63,7 @@ func TestHandler_RunAll(t *testing.T) {
 			resp, err := handler.RunAll(ctx)
 
 			assert.Equal(t, tc.expectedError, err)
+
 			if err == nil {
 				assert.Equal(t, tc.mockResponse, resp)
 			}
@@ -79,32 +80,32 @@ func TestHandler_RunById(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		ruleId        string
-		cloudAccId    string
+		ruleID        string
+		cloudAccID    string
 		expectedError error
 		mockResponse  *store.Result
 		mockError     error
 	}{
 		{
 			name:          "Missing ID",
-			cloudAccId:    "",
+			cloudAccID:    "",
 			expectedError: gofrHttp.ErrorMissingParam{Params: []string{"id"}},
 		},
 		{
 			name:          "Invalid ID",
-			cloudAccId:    "abc",
+			cloudAccID:    "abc",
 			expectedError: gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
 		},
 		{
 			name:          "Missing Rule ID",
-			cloudAccId:    "123",
-			ruleId:        "",
-			expectedError: gofrHttp.ErrorMissingParam{Params: []string{"ruleId"}},
+			cloudAccID:    "123",
+			ruleID:        "",
+			expectedError: gofrHttp.ErrorMissingParam{Params: []string{"ruleID"}},
 		},
 		{
 			name:         "Success",
-			cloudAccId:   "123",
-			ruleId:       "rule-1",
+			cloudAccID:   "123",
+			ruleID:       "rule-1",
 			mockResponse: &store.Result{},
 			mockError:    nil,
 		},
@@ -112,22 +113,23 @@ func TestHandler_RunById(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			r := httptest.NewRequest(http.MethodPost, "/api/audit/cloud-accounts/{id}/rule/{ruleId}", nil)
-			r = mux.SetURLVars(r, map[string]string{"id": tc.cloudAccId, "ruleId": tc.ruleId})
+			r := httptest.NewRequest(http.MethodPost, "/api/audit/cloud-accounts/{id}/rule/{ruleID}", nil)
+			r = mux.SetURLVars(r, map[string]string{"id": tc.cloudAccID, "ruleID": tc.ruleID})
 
 			ctx := &gofr.Context{
 				Request: gofrHttp.NewRequest(r),
 			}
 
 			if tc.mockResponse != nil || tc.mockError != nil {
-				cId, _ := strconv.ParseInt(tc.cloudAccId, 10, 64)
-				mockService.EXPECT().RunById(ctx, tc.ruleId, cId).
+				cID, _ := strconv.ParseInt(tc.cloudAccID, 10, 64)
+				mockService.EXPECT().RunById(ctx, tc.ruleID, cID).
 					Return(tc.mockResponse, tc.mockError)
 			}
 
-			resp, err := handler.RunById(ctx)
+			resp, err := handler.RunByID(ctx)
 
 			assert.Equal(t, tc.expectedError, err)
+
 			if err == nil {
 				assert.Equal(t, tc.mockResponse, resp)
 			}
@@ -144,32 +146,32 @@ func TestHandler_RunByCategory(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		categoryId    string
-		cloudAccId    string
+		categoryID    string
+		cloudAccID    string
 		expectedError error
 		mockResponse  []*store.Result
 		mockError     error
 	}{
 		{
 			name:          "Missing ID",
-			cloudAccId:    "",
+			cloudAccID:    "",
 			expectedError: gofrHttp.ErrorMissingParam{Params: []string{"id"}},
 		},
 		{
 			name:          "Invalid ID",
-			cloudAccId:    "overprovision",
+			cloudAccID:    "overprovision",
 			expectedError: gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
 		},
 		{
 			name:          "Missing Category",
-			cloudAccId:    "123",
-			categoryId:    "",
+			cloudAccID:    "123",
+			categoryID:    "",
 			expectedError: gofrHttp.ErrorMissingParam{Params: []string{"category"}},
 		},
 		{
 			name:         "Success",
-			cloudAccId:   "123",
-			categoryId:   "overprovision",
+			cloudAccID:   "123",
+			categoryID:   "overprovision",
 			mockResponse: []*store.Result{},
 			mockError:    nil,
 		},
@@ -178,21 +180,22 @@ func TestHandler_RunByCategory(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			r := httptest.NewRequest(http.MethodPost, "/api/audit/cloud-account/{id}/category/{category}", nil)
-			r = mux.SetURLVars(r, map[string]string{"id": tc.cloudAccId, "category": tc.categoryId})
+			r = mux.SetURLVars(r, map[string]string{"id": tc.cloudAccID, "category": tc.categoryID})
 
 			ctx := &gofr.Context{
 				Request: gofrHttp.NewRequest(r),
 			}
 
 			if tc.mockResponse != nil || tc.mockError != nil {
-				cId, _ := strconv.ParseInt(tc.cloudAccId, 10, 64)
-				mockService.EXPECT().RunByCategory(ctx, tc.categoryId, cId).
+				cID, _ := strconv.ParseInt(tc.cloudAccID, 10, 64)
+				mockService.EXPECT().RunByCategory(ctx, tc.categoryID, cID).
 					Return(tc.mockResponse, tc.mockError)
 			}
 
 			resp, err := handler.RunByCategory(ctx)
 
 			assert.Equal(t, tc.expectedError, err)
+
 			if err == nil {
 				assert.Equal(t, tc.mockResponse, resp)
 			}

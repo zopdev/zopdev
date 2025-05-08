@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"io"
 	"net/http"
@@ -23,7 +24,7 @@ func Test_GetCloudCredentials_Success(t *testing.T) {
 		Container: cont,
 	}
 
-	cloudAccId := int64(12345)
+	cloudAccID := int64(12345)
 	body := []byte(`{"data": {"id": 12345, "name": "Test Cloud Account"}}`)
 
 	resp := generateHTTPResponse(body, http.StatusOK)
@@ -32,7 +33,7 @@ func Test_GetCloudCredentials_Success(t *testing.T) {
 	mocks.HTTPService.EXPECT().Get(ctx, "cloud-accounts/12345/credentials", nil).
 		Return(resp, nil)
 
-	credentials, err := GetCloudCredentials(ctx, cloudAccId)
+	credentials, err := GetCloudCredentials(ctx, cloudAccID)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -43,7 +44,7 @@ func Test_GetCloudCredentials_Success(t *testing.T) {
 	}
 }
 
-var serviceError = errors.New("service error")
+var errService = errors.New("service error")
 
 func Test_GetCloudCredentials_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -56,7 +57,7 @@ func Test_GetCloudCredentials_Error(t *testing.T) {
 
 	testCases := []struct {
 		name          string
-		cloudAccId    int64
+		cloudAccID    int64
 		expectedError error
 		serviceError  error
 		statusCode    int
@@ -64,20 +65,20 @@ func Test_GetCloudCredentials_Error(t *testing.T) {
 	}{
 		{
 			name:          "Cloud Account Id not present",
-			cloudAccId:    0,
+			cloudAccID:    0,
 			expectedError: errFailedToGetCloudCredentials,
 			statusCode:    http.StatusBadRequest,
 		},
 		{
 			name:          "error calling the API",
-			cloudAccId:    12345,
-			serviceError:  serviceError,
-			expectedError: serviceError,
+			cloudAccID:    12345,
+			serviceError:  errService,
+			expectedError: errService,
 			statusCode:    0,
 		},
 		{
 			name:          "invalid response from API",
-			cloudAccId:    12345,
+			cloudAccID:    12345,
 			expectedError: errInvalidResponse,
 			statusCode:    http.StatusOK,
 			body:          []byte(`{"data" : {"id" : 123}`),
@@ -87,10 +88,10 @@ func Test_GetCloudCredentials_Error(t *testing.T) {
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
 			resp := generateHTTPResponse(tc.body, tc.statusCode)
-			mocks.HTTPService.EXPECT().Get(ctx, fmt.Sprintf("cloud-accounts/%d/credentials", tc.cloudAccId), nil).
+			mocks.HTTPService.EXPECT().Get(ctx, fmt.Sprintf("cloud-accounts/%d/credentials", tc.cloudAccID), nil).
 				Return(resp, tc.serviceError)
 
-			credentials, err := GetCloudCredentials(ctx, tc.cloudAccId)
+			credentials, err := GetCloudCredentials(ctx, tc.cloudAccID)
 			if err == nil {
 				t.Errorf("Expected error %v, got nil", tc.expectedError)
 			}
@@ -99,7 +100,7 @@ func Test_GetCloudCredentials_Error(t *testing.T) {
 				assert.NotNil(t, credentials)
 			}
 
-			assert.ErrorIs(t, err, tc.expectedError)
+			require.ErrorIs(t, err, tc.expectedError)
 
 			resp.Body.Close()
 		})

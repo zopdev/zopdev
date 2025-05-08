@@ -22,31 +22,31 @@ func (h *Handler) RunAll(ctx *gofr.Context) (any, error) {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}
 
-	cloudAccId, err := strconv.ParseInt(id, 10, 64)
+	cloudAccID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
 	}
 
-	return h.service.RunAll(ctx, cloudAccId)
+	return h.service.RunAll(ctx, cloudAccID)
 }
 
-func (h *Handler) RunById(ctx *gofr.Context) (any, error) {
+func (h *Handler) RunByID(ctx *gofr.Context) (any, error) {
 	id := strings.TrimSpace(ctx.PathParam("id"))
 	if id == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}
 
-	cloudAccId, err := strconv.ParseInt(id, 10, 64)
+	cloudAccID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
 	}
 
-	ruleId := strings.TrimSpace(ctx.PathParam("ruleId"))
-	if ruleId == "" {
+	ruleID := strings.TrimSpace(ctx.PathParam("ruleId"))
+	if ruleID == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"ruleId"}}
 	}
 
-	return h.service.RunById(ctx, ruleId, cloudAccId)
+	return h.service.RunByID(ctx, ruleID, cloudAccID)
 }
 
 func (h *Handler) RunByCategory(ctx *gofr.Context) (any, error) {
@@ -55,7 +55,7 @@ func (h *Handler) RunByCategory(ctx *gofr.Context) (any, error) {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}
 
-	cloudAccId, err := strconv.ParseInt(id, 10, 64)
+	cloudAccID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -65,5 +65,5 @@ func (h *Handler) RunByCategory(ctx *gofr.Context) (any, error) {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"category"}}
 	}
 
-	return h.service.RunByCategory(ctx, category, cloudAccId)
+	return h.service.RunByCategory(ctx, category, cloudAccID)
 }

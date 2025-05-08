@@ -15,10 +15,10 @@ var (
 	errInvalidResponse             = errors.New("invalid response from cloud account service")
 )
 
-func GetCloudCredentials(ctx *gofr.Context, cloudAccId int64) (*CloudAccount, error) {
+func GetCloudCredentials(ctx *gofr.Context, cloudAccID int64) (*CloudAccount, error) {
 	// Fetch the cloud credentials from the cloud-account entity
 	// This is a placeholder function and should be implemented based on the cloud provider
-	endpoint := fmt.Sprintf("cloud-accounts/%d/credentials", cloudAccId)
+	endpoint := fmt.Sprintf("cloud-accounts/%d/credentials", cloudAccID)
 
 	resp, err := ctx.GetHTTPService("cloud-account").
 		Get(ctx, endpoint, nil)

@@ -2,12 +2,16 @@ package overprovision
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/zopdev/zopdev/api/audit/rules/overprovision/gcp"
-	"gofr.dev/pkg/gofr"
 )
 
-func getGCPCredentials(ctx *gofr.Context, creds any) (*gcp.Credentials, error) {
+var (
+	errInvalidGCPCreds = errors.New("invalid GCP credentials")
+)
+
+func getGCPCredentials(creds any) (*gcp.Credentials, error) {
 	if creds == nil {
 		return nil, errInvalidGCPCreds
 	}

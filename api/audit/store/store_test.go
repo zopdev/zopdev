@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
 
@@ -32,28 +33,32 @@ func TestStore_GetLastRun(t *testing.T) {
 		EvaluatedAt:    time.Now(),
 	}
 
-	mocks.SQL.Sqlmock.ExpectQuery("SELECT id, cloud_account_id, rule_id, result, evaluated_at  FROM results WHERE cloud_account_id = ? AND rule_id = ? ORDER BY evaluated_at DESC LIMIT 1").
-		WithArgs(mockResult.CloudAccountID, mockResult.RuleID).WillReturnRows(sqlmock.NewRows([]string{"id", "cloud_account_id", "rule_id", "result", "evaluated_at"}).
-		AddRow(1, mockResult.CloudAccountID, mockResult.RuleID, mockResult.Result, mockResult.EvaluatedAt))
+	mocks.SQL.Sqlmock.ExpectQuery("SELECT id, cloud_account_id, rule_id, result, evaluated_at "+
+		"FROM results WHERE cloud_account_id = ? AND rule_id = ? ORDER BY evaluated_at DESC LIMIT 1").
+		WithArgs(mockResult.CloudAccountID, mockResult.RuleID).
+		WillReturnRows(sqlmock.NewRows([]string{"id", "cloud_account_id", "rule_id", "result", "evaluated_at"}).
+			AddRow(1, mockResult.CloudAccountID, mockResult.RuleID, mockResult.Result, mockResult.EvaluatedAt))
 
 	res, err := store.GetLastRun(ctx, mockCloudAccountID, mockRule)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, res, mockResult)
 
 	// no rows
-	mocks.SQL.Sqlmock.ExpectQuery("SELECT id, cloud_account_id, rule_id, result, evaluated_at  FROM results WHERE cloud_account_id = ? AND rule_id = ? ORDER BY evaluated_at DESC LIMIT 1").
+	mocks.SQL.Sqlmock.ExpectQuery("SELECT id, cloud_account_id, rule_id, result, evaluated_at "+
+		"FROM results WHERE cloud_account_id = ? AND rule_id = ? ORDER BY evaluated_at DESC LIMIT 1").
 		WithArgs(mockResult.CloudAccountID, mockResult.RuleID).WillReturnError(sql.ErrNoRows)
 
 	res, err = store.GetLastRun(ctx, mockCloudAccountID, mockRule)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Nil(t, res)
 
 	// error case
-	mocks.SQL.Sqlmock.ExpectQuery("SELECT id, cloud_account_id, rule_id, result, evaluated_at  FROM results WHERE cloud_account_id = ? AND rule_id = ? ORDER BY evaluated_at DESC LIMIT 1").
+	mocks.SQL.Sqlmock.ExpectQuery("SELECT id, cloud_account_id, rule_id, result, evaluated_at "+
+		"FROM results WHERE cloud_account_id = ? AND rule_id = ? ORDER BY evaluated_at DESC LIMIT 1").
 		WithArgs(mockResult.CloudAccountID, mockResult.RuleID).WillReturnError(sql.ErrConnDone)
 
 	res, err = store.GetLastRun(ctx, mockCloudAccountID, mockRule)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Nil(t, res)
 }
 
@@ -78,7 +83,7 @@ func TestStore_CreatePending(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	res, err := store.CreatePending(ctx, mockResult)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.NotNil(t, res)
 	assert.Equal(t, int64(1), res.ID)
 
@@ -88,7 +93,7 @@ func TestStore_CreatePending(t *testing.T) {
 		WillReturnError(sql.ErrConnDone)
 
 	res, err = store.CreatePending(ctx, mockResult)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Nil(t, res)
 }
 
@@ -112,7 +117,7 @@ func TestStore_UpdateResult(t *testing.T) {
 		WillReturnResult(sqlmock.NewResult(0, 1))
 
 	err := store.UpdateResult(ctx, mockResult)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	// Mock update error
 	mocks.SQL.Sqlmock.ExpectExec("UPDATE results SET result = ? WHERE id = ?").
@@ -120,5 +125,5 @@ func TestStore_UpdateResult(t *testing.T) {
 		WillReturnError(sql.ErrConnDone)
 
 	err = store.UpdateResult(ctx, mockResult)
-	assert.Error(t, err)
+	require.Error(t, err)
 }

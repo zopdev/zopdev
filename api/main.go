@@ -32,6 +32,7 @@ func main() {
 	app := gofr.New()
 
 	app.Migrate(migrations.All())
+	app.Metrics().NewCounter("db_error_count", "Count of DB errors")
 
 	gkeSvc := gcp.New()
 
@@ -69,7 +70,7 @@ func main() {
 
 	app.POST("/audit/cloud-accounts/{id}/all", adHandler.RunAll)
 	app.POST("/audit/cloud-accounts/{id}/category/{category}", adHandler.RunByCategory)
-	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunById)
+	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunByID)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)

@@ -10,7 +10,7 @@ import (
 	"github.com/zopdev/zopdev/api/audit/store"
 )
 
-var errInvalidGCPCreds = errors.New("invalid GCP credentials")
+var errUnsupportedCloudProvider = errors.New("unsupported cloud provider")
 
 type SQLInstancePeak struct {
 }
@@ -18,7 +18,7 @@ type SQLInstancePeak struct {
 func (*SQLInstancePeak) Execute(ctx *gofr.Context, ca *client.CloudAccount) ([]store.Items, error) {
 	switch ca.Provider {
 	case "gcp":
-		creds, err := getGCPCredentials(ctx, ca.Credentials)
+		creds, err := getGCPCredentials(ca.Credentials)
 		if err != nil {
 			return nil, err
 		}
@@ -26,7 +26,7 @@ func (*SQLInstancePeak) Execute(ctx *gofr.Context, ca *client.CloudAccount) ([]s
 		return gcp.CheckCloudSQLProvisionedUsage(ctx, creds)
 
 	default:
-		return nil, errors.New("unsupported cloud provider")
+		return nil, errUnsupportedCloudProvider
 	}
 }
 

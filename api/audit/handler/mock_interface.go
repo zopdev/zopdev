@@ -72,9 +72,9 @@ func (mr *MockServiceMockRecorder) GetResultByCategory(ctx, cloudAccId any) *gom
 }
 
 // GetResultById mocks base method.
-func (m *MockService) GetResultById(ctx *gofr.Context, cloudAccId int64, ruleId string) (*store.Result, error) {
+func (m *MockService) GetResultByID(ctx *gofr.Context, cloudAccId int64, ruleId string) (*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetResultById", ctx, cloudAccId, ruleId)
+	ret := m.ctrl.Call(m, "GetResultByID", ctx, cloudAccId, ruleId)
 	ret0, _ := ret[0].(*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -83,7 +83,7 @@ func (m *MockService) GetResultById(ctx *gofr.Context, cloudAccId int64, ruleId 
 // GetResultById indicates an expected call of GetResultById.
 func (mr *MockServiceMockRecorder) GetResultById(ctx, cloudAccId, ruleId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResultById", reflect.TypeOf((*MockService)(nil).GetResultById), ctx, cloudAccId, ruleId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResultByID", reflect.TypeOf((*MockService)(nil).GetResultByID), ctx, cloudAccId, ruleId)
 }
 
 // RunAll mocks base method.
@@ -117,9 +117,9 @@ func (mr *MockServiceMockRecorder) RunByCategory(ctx, category, cloudAccId any) 
 }
 
 // RunById mocks base method.
-func (m *MockService) RunById(ctx *gofr.Context, ruleID string, cloudAccId int64) (*store.Result, error) {
+func (m *MockService) RunByID(ctx *gofr.Context, ruleID string, cloudAccId int64) (*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunById", ctx, ruleID, cloudAccId)
+	ret := m.ctrl.Call(m, "RunByID", ctx, ruleID, cloudAccId)
 	ret0, _ := ret[0].(*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -128,5 +128,5 @@ func (m *MockService) RunById(ctx *gofr.Context, ruleID string, cloudAccId int64
 // RunById indicates an expected call of RunById.
 func (mr *MockServiceMockRecorder) RunById(ctx, ruleID, cloudAccId any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunById", reflect.TypeOf((*MockService)(nil).RunById), ctx, ruleID, cloudAccId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunByID", reflect.TypeOf((*MockService)(nil).RunByID), ctx, ruleID, cloudAccId)
 }
