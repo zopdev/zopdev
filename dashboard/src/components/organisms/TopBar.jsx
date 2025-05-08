@@ -4,7 +4,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline/index.js';
 import AppLogo from '@/assets/svg/AppLogo.jsx';
 import CloudAccountSVG from '@/assets/svg/CloudAccountSvg.jsx';
-import AppLogoWithText from '../../../assets/images/applogoWithText.svg'; // adjust path based on your component location
+import AppLogoWithText from '../../assets/images/applogoWithText.svg';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
