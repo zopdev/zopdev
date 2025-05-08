@@ -60,7 +60,7 @@ func (h *Handler) RunByCategory(ctx *gofr.Context) (any, error) {
 		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
 	}
 
-	category := strings.TrimSpace(ctx.PathParam("category"))
+	category := strings.ToLower(strings.TrimSpace(ctx.PathParam("category")))
 	if category == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"category"}}
 	}
