@@ -3,7 +3,7 @@ import DashBoardCard from '@/components/molecules/Cards/DashBoardCard.jsx';
 import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
 import { useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/molecules/Cards/CloudAuditCard.jsx';
-import { useGetCloudAccounts } from '@/Queries/CloudAccount/index.js';
+import { useGetCloudAccounts, usePostAuditData } from '@/Queries/CloudAccount/index.js';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import React from 'react';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
@@ -11,6 +11,7 @@ import Button from '@/components/atom/Button/index.jsx';
 
 const Dashboard = () => {
   const getData = useGetCloudAccounts();
+  const reRunAudit = usePostAuditData();
   const navigate = useNavigate();
 
   const handleAuditClick = () => {
@@ -88,7 +89,10 @@ const Dashboard = () => {
                     )}
 
                     {getData?.isSuccess && (
-                      <CloudAccountAuditCards cloudAccounts={getData?.data?.data} />
+                      <CloudAccountAuditCards
+                        cloudAccounts={getData?.data?.data}
+                        reRunAudit={reRunAudit}
+                      />
                     )}
                   </div>
                 </div>

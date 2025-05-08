@@ -2,29 +2,18 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { CheckIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { ChevronRightIcon } from '@heroicons/react/20/solid';
 import Button from '@/components/atom/Button/index.jsx';
-import { usePostAuditData } from '@/Queries/CloudAccount/index.js';
 import { useNavigate } from 'react-router-dom';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
-import { transformResourceAuditPayload } from '@/utils/transformer.js';
 
-const Stepper = ({ steps }) => {
+const Stepper = ({ steps, handleComplete, postData }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepData, setStepData] = useState({});
   const [stepStatus, setStepStatus] = useState(
     steps.map((_, index) => (index === 0 ? 'active' : 'incomplete')),
   );
   const [stepsComplete, setStepsComplete] = useState(steps.map(() => false));
-  const postData = usePostAuditData();
   const navigate = useNavigate();
-
-  const handleComplete = (data) => {
-    const selectedOptionEntry = Object.values(data).find((item) => item.selectedOption);
-    const selectedOption = selectedOptionEntry?.selectedOption?.toLowerCase();
-    const transformedData = transformResourceAuditPayload(data);
-    const payload = { transformedData, selectedOption };
-    postData.mutate(payload);
-  };
 
   useEffect(() => {
     if (postData?.isSuccess) {

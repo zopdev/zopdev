@@ -11,7 +11,6 @@ import {
 import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import Button from '@/components/atom/Button/index.jsx';
-import { usePostAuditData } from '@/Queries/CloudAccount/index.js';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -23,11 +22,11 @@ const ICONS = {
   clock: ClockIcon,
 };
 
-export default function CloudAccountAuditCards({ cloudAccounts = [] }) {
+export default function CloudAccountAuditCards({ cloudAccounts = [], reRunAudit }) {
   return (
     <div className="space-y-4 flex justify-center items-center flex-col w-full">
       {cloudAccounts?.map((account, index) => (
-        <CloudAccountAuditCard key={account.id || index} {...account} />
+        <CloudAccountAuditCard key={account.id || index} {...account} reRunAudit={reRunAudit} />
       ))}
     </div>
   );
@@ -43,6 +42,7 @@ function CloudAccountAuditCard({
   lastUpdatedBy,
   updatedAt,
   initialActiveTab,
+  reRunAudit,
   categoryIcons = {},
   statusBarColors = {
     danger: 'bg-red-500',
@@ -109,7 +109,6 @@ function CloudAccountAuditCard({
       </div>
     );
   };
-  const reRunAudit = usePostAuditData();
 
   const handleRerun = () => {
     reRunAudit.mutate({
@@ -219,7 +218,7 @@ function CloudAccountAuditCard({
               variant={'primary-outline'}
               size={'sm'}
             >
-              Re Run {activeTab}
+              Re-Run {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
             </Button>
           </div>
         )}

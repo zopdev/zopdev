@@ -4,6 +4,8 @@ import React, { useEffect, useState } from 'react';
 import CreateCloud from '@/components/organisms/CreateCloud.jsx';
 import DynamicFormRadioWithIcon from '@/components/atom/Button/RadioButtonWithIcon/index.jsx';
 import Stepper from '@/components/organisms/Stepper.jsx';
+import { usePostAuditData } from '@/Queries/CloudAccount/index.js';
+import { transformResourceAuditPayload } from '@/utils/transformer.js';
 
 const ResourceAudit = ({ data, updateData, setIsComplete }) => {
   const auditOptions = [
@@ -129,6 +131,15 @@ const ScheduleStep = ({ data, updateData, setIsComplete }) => {
 };
 
 const Audit = () => {
+  const postData = usePostAuditData();
+
+  const handleComplete = (data) => {
+    const selectedOptionEntry = Object.values(data).find((item) => item.selectedOption);
+    const selectedOption = selectedOptionEntry?.selectedOption?.toLowerCase();
+    const transformedData = transformResourceAuditPayload(data);
+    const payload = { transformedData, selectedOption };
+    postData.mutate(payload);
+  };
   const steps = [
     {
       title: 'Cloud Account',
@@ -146,7 +157,7 @@ const Audit = () => {
   ];
   return (
     <div className="px-4 sm:px-6 lg:px-8 w-full overflow-auto text-left pt-8 ">
-      <Stepper steps={steps} />
+      <Stepper steps={steps} handleComplete={handleComplete} postData={postData} />
     </div>
   );
 };
