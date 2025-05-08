@@ -10,6 +10,8 @@ import {
 } from '@heroicons/react/24/outline';
 import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
+import Button from '@/components/atom/Button/index.jsx';
+import { usePostAuditData } from '@/Queries/CloudAccount/index.js';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -32,13 +34,14 @@ export default function CloudAccountAuditCards({ cloudAccounts = [] }) {
 }
 
 function CloudAccountAuditCard({
+  id,
   name,
   subtitle,
   status,
   provider,
   auditData = {},
   lastUpdatedBy,
-  lastUpdatedDate,
+  updatedAt,
   initialActiveTab,
   categoryIcons = {},
   statusBarColors = {
@@ -68,7 +71,7 @@ function CloudAccountAuditCard({
     switch (category) {
       case 'stale':
         return <ServerIcon className="h-4 w-4" />;
-      case 'overprovisioned':
+      case 'overprovision':
         return <ExclamationCircleIcon className="h-4 w-4" />;
       case 'security':
         return <ShieldCheckIcon className="h-4 w-4" />;
@@ -99,12 +102,20 @@ function CloudAccountAuditCard({
             className={statusBarColors[statusKey]}
             style={{
               width: `${getStatusPercentage(statusKey, category)}%`,
-              minWidth: auditData[category][statusKey] > 0 ? '4px' : '0', // Ensure visibility for small values
+              minWidth: auditData[category][statusKey] > 0 ? '4px' : '0',
             }}
           />
         ))}
       </div>
     );
+  };
+  const reRunAudit = usePostAuditData();
+
+  const handleRerun = () => {
+    reRunAudit.mutate({
+      id,
+      selectedOption: activeTab,
+    });
   };
 
   const renderStatusDetails = (category) => {
@@ -194,10 +205,22 @@ function CloudAccountAuditCard({
           </div>
         </div>
 
-        {(lastUpdatedBy || lastUpdatedDate) && (
-          <div className="mt-4 pt-3 text-xs flex text-secondary-900">
-            <span className={'text-secondary-400'}>Last Run on&nbsp;</span>
-            {lastUpdatedDate && <p>{lastUpdatedDate}</p>}
+        {(lastUpdatedBy || updatedAt) && (
+          <div className="mt-4 pt-3 text-xs flex text-secondary-900 justify-between items-center">
+            <div className={'md:flex'}>
+              {' '}
+              <span className={'text-secondary-400'}>Last Run on&nbsp;</span>
+              {updatedAt && <p>{updatedAt}</p>}
+            </div>
+
+            <Button
+              loading={reRunAudit?.isPending}
+              onClick={() => handleRerun()}
+              variant={'primary-outline'}
+              size={'sm'}
+            >
+              Re Run {activeTab}
+            </Button>
           </div>
         )}
       </div>

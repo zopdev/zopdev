@@ -20,7 +20,7 @@ const Dashboard = () => {
   const auditCardData = {
     title: 'Audit Your Cloud',
     description:
-      'Analyze your cloud infrastructure to identify stale resources, overprovisioned assets, and critical security vulnerabilities.',
+      'Analyze your cloud infrastructure to identify stale resources, overprovision assets, and critical security vulnerabilities.',
     icon: <CloudIcon className="h-6 w-6 text-white" />,
     features: ['Ensure Compliance', 'Performance optimization', 'Cost efficiency recommendations'],
     buttonText: 'Audit Your Cloud',

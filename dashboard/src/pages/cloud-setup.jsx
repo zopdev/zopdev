@@ -13,9 +13,9 @@ const ResourceAudit = ({ data, updateData, setIsComplete }) => {
       value: 'Stale',
     },
     {
-      label: 'Overprovisioned',
+      label: 'Overprovision',
       description: 'Resources that have more capacity than needed',
-      value: 'Overprovisioned',
+      value: 'Overprovision',
     },
     {
       label: 'Security',

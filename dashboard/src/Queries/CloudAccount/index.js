@@ -5,13 +5,13 @@ export function useGetCloudAccounts(reqParams, options = {}) {
   const temp = {
     data: [
       {
-        id: 'account1',
+        id: '1',
         name: 'Zop Cloud',
         status: 'READY',
         icon: 'cloud',
         provider: 'gcp',
         lastUpdatedBy: 'owner@zop.dev',
-        lastUpdatedDate: '28th January 2025, 15:38',
+        updatedAt: '28th January 2025, 15:38',
         auditData: {
           all: {
             danger: 15,
@@ -29,7 +29,7 @@ export function useGetCloudAccounts(reqParams, options = {}) {
             unchecked: 1,
             total: 29,
           },
-          overprovisioned: {
+          overprovision: {
             danger: 2,
             warning: 4,
             pending: 1,
@@ -64,7 +64,7 @@ export function useGetCloudAccounts(reqParams, options = {}) {
         },
         categoryIcons: {
           stale: 'server',
-          overprovisioned: 'exclamation',
+          overprovision: 'exclamation',
           security: 'shield',
         },
       },
@@ -91,28 +91,40 @@ export function useGetCloudAccounts(reqParams, options = {}) {
 export function usePostAuditData() {
   return useMutation({
     mutationFn: async (req) => {
-      const getCloudAccountRes = await postData('/cloud-accounts', req.transformedData);
-      const id = getCloudAccountRes?.data?.id;
+      let id = req?.id;
+      let createResponse = null;
 
-      if (!id) {
-        throw new Error('Missing ID in cloud account creation response');
+      // Step 1: Conditionally create cloud account
+      if (req?.transformedData) {
+        const getCloudAccountRes = await postData('/cloud-accounts', req.transformedData);
+        id = getCloudAccountRes?.data?.id;
+
+        if (!id) {
+          throw new Error('Missing ID in cloud account creation response');
+        }
+
+        createResponse = getCloudAccountRes;
       }
 
-      let auditUrl;
-      let auditPayload;
+      // Step 2: Conditionally trigger audit
+      let auditResponse = null;
+      if (id && req?.selectedOption) {
+        let auditUrl;
+        let auditPayload;
 
-      if (req?.selectedOption === 'run-all') {
-        auditUrl = `/audit/cloud-accounts/${id}/all`;
-        auditPayload = {};
-      } else {
-        auditUrl = `/audit/cloud-accounts/${id}/category/${req.selectedOption}`;
-        auditPayload = req?.selectedOption;
+        if (req.selectedOption === 'run-all') {
+          auditUrl = `/audit/cloud-accounts/${id}/all`;
+          auditPayload = {};
+        } else {
+          auditUrl = `/audit/cloud-accounts/${id}/category/${req.selectedOption}`;
+          auditPayload = req.selectedOption;
+        }
+
+        auditResponse = await postData(auditUrl, auditPayload);
       }
-
-      const auditResponse = await postData(auditUrl, auditPayload);
 
       return {
-        createResponse: getCloudAccountRes,
+        createResponse,
         auditResponse,
       };
     },
