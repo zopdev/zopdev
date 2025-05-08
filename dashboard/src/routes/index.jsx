@@ -1,7 +1,27 @@
 import { lazy } from 'react';
+import MainLayout from '@/components/layouts/MainLayout.jsx';
 
-export const routes = [
-  { path: '/', component: lazy(() => import('../pages/dashboard.jsx')) },
-  { path: '/cloud-setup', component: lazy(() => import('../pages/cloud-setup.jsx')) },
-  { path: '*', component: lazy(() => import('../pages/404')) },
+const DashboardHome = lazy(() => import('../pages/dashboard.jsx'));
+const CloudSetup = lazy(() => import('../pages/cloud-setup.jsx'));
+const NotFound = lazy(() => import('../pages/404.jsx'));
+
+export const appRoutes = [
+  {
+    path: '/',
+    element: <MainLayout />,
+    children: [
+      {
+        index: true,
+        element: <DashboardHome />,
+      },
+      {
+        path: 'cloud-setup',
+        element: <CloudSetup />,
+      },
+    ],
+  },
+  {
+    path: '*',
+    element: <NotFound />,
+  },
 ];
