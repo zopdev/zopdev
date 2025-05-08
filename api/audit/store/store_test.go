@@ -57,6 +57,8 @@ func TestStore_GetLastRun(t *testing.T) {
 		"FROM results WHERE cloud_account_id = ? AND rule_id = ? ORDER BY evaluated_at DESC LIMIT 1").
 		WithArgs(mockResult.CloudAccountID, mockResult.RuleID).WillReturnError(sql.ErrConnDone)
 
+	mocks.Metrics.EXPECT().IncrementCounter(ctx, "db_error_count", "audit_store", "GetLastRun", "error", sql.ErrConnDone.Error())
+
 	res, err = store.GetLastRun(ctx, mockCloudAccountID, mockRule)
 	require.Error(t, err)
 	assert.Nil(t, res)
@@ -91,6 +93,7 @@ func TestStore_CreatePending(t *testing.T) {
 	mocks.SQL.Sqlmock.ExpectExec(`INSERT INTO results (cloud_account_id, rule_id, evaluated_at) VALUES (?, ?, ?)`).
 		WithArgs(mockResult.CloudAccountID, mockResult.RuleID, mockResult.EvaluatedAt).
 		WillReturnError(sql.ErrConnDone)
+	mocks.Metrics.EXPECT().IncrementCounter(ctx, "db_error_count", "audit_store", "CreatePending", "error", sql.ErrConnDone.Error())
 
 	res, err = store.CreatePending(ctx, mockResult)
 	require.Error(t, err)
@@ -123,6 +126,7 @@ func TestStore_UpdateResult(t *testing.T) {
 	mocks.SQL.Sqlmock.ExpectExec("UPDATE results SET result = ? WHERE id = ?").
 		WithArgs(mockResult.Result, mockResult.ID).
 		WillReturnError(sql.ErrConnDone)
+	mocks.Metrics.EXPECT().IncrementCounter(ctx, "db_error_count", "audit_store", "UpdateResult", "error", sql.ErrConnDone.Error())
 
 	err = store.UpdateResult(ctx, mockResult)
 	require.Error(t, err)

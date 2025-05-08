@@ -224,7 +224,7 @@ func (s *Service) GetResultByCategory(ctx *gofr.Context, cloudAccID int64) (map[
 	return results, nil
 }
 
-func (s *Service) GetResultByAll(ctx *gofr.Context, cloudAccID int64) ([]*store.Result, error) {
+func (s *Service) GetAllResults(ctx *gofr.Context, cloudAccID int64) ([]*store.Result, error) {
 	result := make([]*store.Result, 0)
 
 	for _, rule := range s.rules {

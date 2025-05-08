@@ -41,92 +41,92 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
 }
 
-// GetResultByAll mocks base method.
-func (m *MockService) GetResultByAll(ctx *gofr.Context, cloudAccId int64) ([]*store.Result, error) {
+// GetAllResults mocks base method.
+func (m *MockService) GetAllResults(ctx *gofr.Context, cloudAccID int64) ([]*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetResultByAll", ctx, cloudAccId)
+	ret := m.ctrl.Call(m, "GetAllResults", ctx, cloudAccID)
 	ret0, _ := ret[0].([]*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetResultByAll indicates an expected call of GetResultByAll.
-func (mr *MockServiceMockRecorder) GetResultByAll(ctx, cloudAccId any) *gomock.Call {
+// GetAllResults indicates an expected call of GetAllResults.
+func (mr *MockServiceMockRecorder) GetAllResults(ctx, cloudAccID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResultByAll", reflect.TypeOf((*MockService)(nil).GetResultByAll), ctx, cloudAccId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllResults", reflect.TypeOf((*MockService)(nil).GetAllResults), ctx, cloudAccID)
 }
 
 // GetResultByCategory mocks base method.
-func (m *MockService) GetResultByCategory(ctx *gofr.Context, cloudAccId int64) (map[string][]*store.Result, error) {
+func (m *MockService) GetResultByCategory(ctx *gofr.Context, cloudAccID int64) (map[string][]*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetResultByCategory", ctx, cloudAccId)
+	ret := m.ctrl.Call(m, "GetResultByCategory", ctx, cloudAccID)
 	ret0, _ := ret[0].(map[string][]*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetResultByCategory indicates an expected call of GetResultByCategory.
-func (mr *MockServiceMockRecorder) GetResultByCategory(ctx, cloudAccId any) *gomock.Call {
+func (mr *MockServiceMockRecorder) GetResultByCategory(ctx, cloudAccID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResultByCategory", reflect.TypeOf((*MockService)(nil).GetResultByCategory), ctx, cloudAccId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResultByCategory", reflect.TypeOf((*MockService)(nil).GetResultByCategory), ctx, cloudAccID)
 }
 
-// GetResultById mocks base method.
-func (m *MockService) GetResultByID(ctx *gofr.Context, cloudAccId int64, ruleId string) (*store.Result, error) {
+// GetResultByID mocks base method.
+func (m *MockService) GetResultByID(ctx *gofr.Context, cloudAccID int64, ruleID string) (*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetResultByID", ctx, cloudAccId, ruleId)
+	ret := m.ctrl.Call(m, "GetResultByID", ctx, cloudAccID, ruleID)
 	ret0, _ := ret[0].(*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetResultById indicates an expected call of GetResultById.
-func (mr *MockServiceMockRecorder) GetResultById(ctx, cloudAccId, ruleId any) *gomock.Call {
+// GetResultByID indicates an expected call of GetResultByID.
+func (mr *MockServiceMockRecorder) GetResultByID(ctx, cloudAccID, ruleID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResultByID", reflect.TypeOf((*MockService)(nil).GetResultByID), ctx, cloudAccId, ruleId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResultByID", reflect.TypeOf((*MockService)(nil).GetResultByID), ctx, cloudAccID, ruleID)
 }
 
 // RunAll mocks base method.
-func (m *MockService) RunAll(ctx *gofr.Context, cloudAccId int64) (map[string][]*store.Result, error) {
+func (m *MockService) RunAll(ctx *gofr.Context, cloudAccID int64) (map[string][]*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunAll", ctx, cloudAccId)
+	ret := m.ctrl.Call(m, "RunAll", ctx, cloudAccID)
 	ret0, _ := ret[0].(map[string][]*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RunAll indicates an expected call of RunAll.
-func (mr *MockServiceMockRecorder) RunAll(ctx, cloudAccId any) *gomock.Call {
+func (mr *MockServiceMockRecorder) RunAll(ctx, cloudAccID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunAll", reflect.TypeOf((*MockService)(nil).RunAll), ctx, cloudAccId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunAll", reflect.TypeOf((*MockService)(nil).RunAll), ctx, cloudAccID)
 }
 
 // RunByCategory mocks base method.
-func (m *MockService) RunByCategory(ctx *gofr.Context, category string, cloudAccId int64) ([]*store.Result, error) {
+func (m *MockService) RunByCategory(ctx *gofr.Context, category string, cloudAccID int64) ([]*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunByCategory", ctx, category, cloudAccId)
+	ret := m.ctrl.Call(m, "RunByCategory", ctx, category, cloudAccID)
 	ret0, _ := ret[0].([]*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // RunByCategory indicates an expected call of RunByCategory.
-func (mr *MockServiceMockRecorder) RunByCategory(ctx, category, cloudAccId any) *gomock.Call {
+func (mr *MockServiceMockRecorder) RunByCategory(ctx, category, cloudAccID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunByCategory", reflect.TypeOf((*MockService)(nil).RunByCategory), ctx, category, cloudAccId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunByCategory", reflect.TypeOf((*MockService)(nil).RunByCategory), ctx, category, cloudAccID)
 }
 
-// RunById mocks base method.
-func (m *MockService) RunByID(ctx *gofr.Context, ruleID string, cloudAccId int64) (*store.Result, error) {
+// RunByID mocks base method.
+func (m *MockService) RunByID(ctx *gofr.Context, ruleID string, cloudAccID int64) (*store.Result, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RunByID", ctx, ruleID, cloudAccId)
+	ret := m.ctrl.Call(m, "RunByID", ctx, ruleID, cloudAccID)
 	ret0, _ := ret[0].(*store.Result)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// RunById indicates an expected call of RunById.
-func (mr *MockServiceMockRecorder) RunById(ctx, ruleID, cloudAccId any) *gomock.Call {
+// RunByID indicates an expected call of RunByID.
+func (mr *MockServiceMockRecorder) RunByID(ctx, ruleID, cloudAccID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunByID", reflect.TypeOf((*MockService)(nil).RunByID), ctx, ruleID, cloudAccId)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RunByID", reflect.TypeOf((*MockService)(nil).RunByID), ctx, ruleID, cloudAccID)
 }

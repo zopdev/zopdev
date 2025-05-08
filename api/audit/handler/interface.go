@@ -12,5 +12,5 @@ type Service interface {
 
 	GetResultByID(ctx *gofr.Context, cloudAccID int64, ruleID string) (*store.Result, error)
 	GetResultByCategory(ctx *gofr.Context, cloudAccID int64) (map[string][]*store.Result, error)
-	GetResultByAll(ctx *gofr.Context, cloudAccID int64) ([]*store.Result, error)
+	GetAllResults(ctx *gofr.Context, cloudAccID int64) ([]*store.Result, error)
 }
