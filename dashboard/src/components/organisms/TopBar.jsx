@@ -64,6 +64,11 @@ export function TopBar() {
                     <span className="sr-only">Open sidebar</span>
                     <Bars3Icon aria-hidden="true" className="h-6 w-6" />
                   </button>
+                  <div className="flex h-16 shrink-0 items-center mx-2 md:hidden ">
+                    <Link onClick={() => setSidebarOpen(false)} to={'/'}>
+                      <img width={134} height={42} src={AppLogoWithText} alt="App Logo" />
+                    </Link>
+                  </div>
                   <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                     {navigation.map((item, idx) => (
                       <Link key={idx} to={`${item?.routeName}`}>
@@ -122,8 +127,10 @@ export function TopBar() {
                   </button>
                 </div>
                 <div className="flex grow flex-col gap-y-8 overflow-y-auto bg-white px-6 pb-2  ring-1 ring-white/10">
-                  <div className="flex h-16 shrink-0 items-center ">
-                    <img width={134} height={42} src={AppLogoWithText} alt="App Logo" />
+                  <div className="flex h-16 shrink-0 items-center mx-2 ">
+                    <Link onClick={() => setSidebarOpen(false)} to={'/'}>
+                      <img width={134} height={42} src={AppLogoWithText} alt="App Logo" />
+                    </Link>
                   </div>
                   <nav className="flex flex-1 flex-col">
                     <ul role="list" className="flex flex-1 flex-col gap-y-7">
