@@ -111,13 +111,12 @@ export function usePostAuditData() {
       if (id && req?.selectedOption) {
         let auditUrl;
         let auditPayload;
-
-        if (req.selectedOption === 'run-all') {
+        if (req?.selectedOption === 'run-all' || req?.selectedOption === 'all') {
           auditUrl = `/audit/cloud-accounts/${id}/all`;
           auditPayload = {};
         } else {
-          auditUrl = `/audit/cloud-accounts/${id}/category/${req.selectedOption}`;
-          auditPayload = req.selectedOption;
+          auditUrl = `/audit/cloud-accounts/${id}/category/${req?.selectedOption}`;
+          auditPayload = req?.selectedOption;
         }
 
         auditResponse = await postData(auditUrl, auditPayload);

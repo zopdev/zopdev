@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ExclamationCircleIcon,
   CheckCircleIcon,
@@ -11,6 +11,7 @@ import {
 import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import Button from '@/components/atom/Button/index.jsx';
+import { toast } from '@/components/molecules/Toast/index.jsx';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -116,6 +117,9 @@ function CloudAccountAuditCard({
       selectedOption: activeTab,
     });
   };
+  useEffect(() => {
+    if (reRunAudit.isError) toast.failed(reRunAudit.error?.message);
+  }, [reRunAudit]);
 
   const renderStatusDetails = (category) => {
     if (!auditData[category]) return null;
