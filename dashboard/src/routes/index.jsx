@@ -1,7 +1,7 @@
 import { lazy } from 'react';
 import MainLayout from '@/components/layouts/MainLayout.jsx';
 
-const DashboardHome = lazy(() => import('../pages/dashboard.jsx'));
+const DashboardHome = lazy(() => import('../pages/index.jsx'));
 const CloudSetup = lazy(() => import('../pages/cloud-setup.jsx'));
 const NotFound = lazy(() => import('../pages/404.jsx'));
 

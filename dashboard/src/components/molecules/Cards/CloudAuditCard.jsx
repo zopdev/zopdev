@@ -24,7 +24,7 @@ const ICONS = {
 
 export default function CloudAccountAuditCards({ cloudAccounts = [], reRunAudit }) {
   return (
-    <div className="space-y-4 flex justify-center items-center flex-col w-full">
+    <div className="space-y-4 flex justify-center items-center flex-col w-full ">
       {cloudAccounts?.map((account, index) => (
         <CloudAccountAuditCard key={account.id || index} {...account} reRunAudit={reRunAudit} />
       ))}
@@ -150,9 +150,8 @@ function CloudAccountAuditCard({
   };
 
   return (
-    <div className="w-full lg:max-w-lg bg-white rounded-lg overflow-hidden shadow-sm ">
-      {/* Card Header */}
-      <div className="p-3 sm:p-4 sm:pb-2">
+    <div className="w-full lg:max-w-lg bg-white rounded-lg overflow-hidden shadow-sm min-h-78">
+      <div className="p-3 sm:p-4 sm:pb-2 mt-2">
         <div className="flex items-center space-x-2">
           <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0">
             {PROVIDER_ICON_MAPPER[provider]}
@@ -205,7 +204,7 @@ function CloudAccountAuditCard({
         </div>
 
         {(lastUpdatedBy || updatedAt) && (
-          <div className="mt-4 pt-3 text-xs flex text-secondary-900 justify-between items-center">
+          <div className="mt-1 pt-3 text-xs flex text-secondary-900 justify-between items-center">
             <div className={'md:flex'}>
               {' '}
               <span className={'text-secondary-400'}>Last Run on&nbsp;</span>

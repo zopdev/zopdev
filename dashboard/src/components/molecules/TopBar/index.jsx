@@ -1,5 +1,3 @@
-'use client';
-
 import { Fragment, useEffect, useState } from 'react';
 import { Disclosure, Transition, Dialog } from '@headlessui/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';

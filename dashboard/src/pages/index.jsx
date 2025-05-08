@@ -8,6 +8,7 @@ import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import React from 'react';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
 import Button from '@/components/atom/Button/index.jsx';
+import { toast } from '@/components/molecules/Toast/index.jsx';
 
 const Dashboard = () => {
   const getData = useGetCloudAccounts();
@@ -16,6 +17,10 @@ const Dashboard = () => {
 
   const handleAuditClick = () => {
     navigate('/cloud-setup');
+  };
+
+  const handleApplicationClick = () => {
+    toast.info('This Feature is not available. Coming Soon!');
   };
 
   const auditCardData = {
@@ -37,7 +42,7 @@ const Dashboard = () => {
     buttonText: 'Deploy Application',
     buttonIcon: <RocketLaunchIcon className="h-5 w-5 text-white" />,
     buttonVariant: 'primary',
-    onClick: () => {},
+    onClick: handleApplicationClick,
   };
 
   return (
@@ -57,7 +62,7 @@ const Dashboard = () => {
           </div>
         )}
 
-        <div className="flex flex-col md:justify-center md:items-center lg:flex-row gap-6 my-5">
+        <div className="flex flex-col md:justify-center lg:flex-row gap-6 my-5">
           {getData?.isSuccess && !getData?.data?.data?.length > 0 ? (
             <>
               <DashboardSection>
@@ -77,13 +82,13 @@ const Dashboard = () => {
                   </Button>
                 </div>
                 <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
-                  <div className="space-y-4 flex justify-center items-center flex-col">
+                  <div className="space-y-4 flex justify-center items-center flex-col !min-h-78">
                     {getData?.isError && (
-                      <div className={'h-74 w-full'}>
+                      <div className={'!min-h-78 w-full'}>
                         <ErrorComponent
                           complete={true}
                           errorText={getData?.error?.message}
-                          className={'!w-full !h-74'}
+                          className={'!w-full !min-h-78'}
                         />
                       </div>
                     )}

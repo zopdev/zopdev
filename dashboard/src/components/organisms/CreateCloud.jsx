@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useState } from 'react';
 import CloudForm from '@/components/organisms/CloudForm.jsx';
 
