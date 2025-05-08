@@ -48,7 +48,7 @@ const handleErrorResponse = async (response) => {
 
   const message = is5xx
     ? getErrorMessage(response.status)
-    : json.message || `API error: ${response.status}`;
+    : json?.error.message || `API error: ${response.status}`;
 
   throw new HttpErrors({ message, details: json }, response.status);
 };

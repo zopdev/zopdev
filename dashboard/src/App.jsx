@@ -19,7 +19,6 @@ function App() {
         <ErrorBoundary>
           <Suspense fallback={<CompleteLoader />}>
             <ToastContainer classNameParent="absolute right-5 top-10" stacked={false} />
-
             <AppRoutes />
           </Suspense>
         </ErrorBoundary>
