@@ -1,7 +1,7 @@
-import { API_URL } from '@/utils/constant.js';
+import { API_BASE_URL } from '@/utils/constant.js';
 import { HttpErrors } from './errors.js';
 
-const BASE_URL = API_URL;
+const BASE_URL = API_BASE_URL;
 
 const createRequestOptions = (method, data, customHeaders = {}) => {
   const headers = {
