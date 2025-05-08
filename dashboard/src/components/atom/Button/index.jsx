@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import React from 'react';
 
 const CustomButton = ({
   variant = 'primary',
@@ -20,6 +21,7 @@ const CustomButton = ({
     secondary: `inline-flex items-center ${children?.length > 0 ? 'gap-x-1.5' : ''} rounded-md bg-black/5 px-3 py-2 text-sm font-semibold text-secondary-500 shadow-sm hover:bg-black/10`,
     'secondary-outline': `inline-flex items-center ${children?.length > 0 ? 'gap-x-1.5' : ''}  rounded-md bg-white px-3 py-2 text-sm font-semibold text-secondary-600 shadow-sm hover:bg-secondary-50 border border-secondary-200`,
     danger: `inline-flex items-center ${children?.length > 0 ? 'gap-x-1.5' : ''} rounded-md bg-red-500 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-400`,
+    'text-link': 'text-primary-500 underline cursor-pointer hover:text-primary-600 !text-base',
   };
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',

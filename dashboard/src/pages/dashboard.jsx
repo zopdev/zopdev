@@ -1,12 +1,13 @@
 import { CloudIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 import DashBoardCard from '@/components/molecules/Cards/DashBoardCard.jsx';
 import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/molecules/Cards/CloudAuditCard.jsx';
 import { useGetCloudAccounts } from '@/Queries/CloudAccount/index.js';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import React from 'react';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
+import Button from '@/components/atom/Button/index.jsx';
 
 const Dashboard = () => {
   const getData = useGetCloudAccounts();
@@ -67,15 +68,12 @@ const Dashboard = () => {
             </>
           ) : (
             <>
-              <div className="flex-1 flex flex-col gap-2 w-full">
+              <div className="flex-1 flex flex-col w-full">
                 <div className="flex justify-between items-center">
                   <h2 className="text-left font-medium text-gray-600 text-xl">Cloud Accounts</h2>
-                  <Link
-                    className={'text-primary-500 underline cursor-pointer hover:text-primary-600'}
-                    to={'/cloud-setup'}
-                  >
+                  <Button href={'cloud-setup'} variant="text-link" size="md">
                     Audit Cloud Accounts
-                  </Link>
+                  </Button>
                 </div>
                 <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
                   <div className="space-y-4 flex justify-center items-center flex-col">
@@ -96,7 +94,7 @@ const Dashboard = () => {
                 </div>
               </div>
 
-              <div className="flex-1 flex flex-col gap-2 mt-10 w-full">
+              <div className="flex-1 flex flex-col gap-2 lg:mt-12 w-full">
                 <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
                   <DashBoardCard {...deployCardData} />
                 </div>
