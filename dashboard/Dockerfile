@@ -1,20 +1,12 @@
-# Stage 1: Build the application
-FROM node:18-alpine
+FROM zopdev/static-server:latest
 
-# Create and set the working directory for the app inside the container
-WORKDIR /app
+# Copy static files from the builder stage
+COPY  ./dist website
 
-# Copy the app's source code into the container
-COPY . .
+# COPY ./src/app/favicon.ico /static/favicon.ico
 
-# Install dependencies
-RUN npm install
+# Expose the port server is running on
+EXPOSE 8000
 
-# Build the Next.js application
-RUN npm run build
-
-# Expose the port the app will run on
-EXPOSE 3000
-
-# Set the default command to run when the container starts (but don't run the app yet)
-CMD ["npm", "run", "dev"]
+# Start go server
+CMD ["/main"]
