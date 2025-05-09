@@ -99,7 +99,15 @@ function CloudAccountAuditCard({
   };
 
   const renderStatusBar = (category) => {
-    if (!auditData[category]) return null;
+    const data = auditData[category];
+    if (!data) return null;
+
+    const total = data.total;
+
+    const allZero = Object.keys(statusBarColors).every((statusKey) => data[statusKey] === 0);
+    if (total === 0 || allZero) {
+      return <div className="w-full h-2 mt-2 rounded-full overflow-hidden bg-gray-300" />;
+    }
 
     return (
       <div className="w-full h-2 flex rounded-full overflow-hidden mt-2">
@@ -109,7 +117,7 @@ function CloudAccountAuditCard({
             className={statusBarColors[statusKey]}
             style={{
               width: `${getStatusPercentage(statusKey, category)}%`,
-              minWidth: auditData[category][statusKey] > 0 ? '4px' : '0',
+              minWidth: data[statusKey] > 0 ? '4px' : '',
             }}
           />
         ))}
