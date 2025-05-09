@@ -6,8 +6,7 @@ export function useGetCloudAccounts(reqParams, options = {}) {
     queryKey: ['cloudAccountGetData', reqParams],
     queryFn: async () => {
       const url = `/cloud-accounts`;
-      const data = await fetchData(url, options);
-      return data;
+      return await fetchData(url);
     },
     staleTime: 0,
     cacheTime: 0,
@@ -23,8 +22,7 @@ export function useGetAuditDetails(reqParams, options = {}) {
     queryKey: ['resourceAuditGetData', reqParams],
     queryFn: async () => {
       const url = `/audit/cloud-accounts/${reqParams?.id}/results`;
-      const data = await fetchData(url, options);
-      return data;
+      return await fetchData(url);
     },
     staleTime: 0,
     cacheTime: 0,

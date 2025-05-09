@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ExclamationCircleIcon,
   CheckCircleIcon,
@@ -14,6 +14,7 @@ import { toast } from '@/components/molecules/Toast/index.jsx';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import { useGetAuditDetails, usePostAuditData } from '@/queries/CloudAccount/index.js';
 import Button from '@/components/atom/Button/index.jsx';
+import { refreshInterval } from '@/utils/constant.js';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -132,10 +133,29 @@ function CloudAccountAuditCard({ account }) {
     compliant: { bg: 'bg-green-100', icon: 'text-green-500' },
     unchecked: { bg: 'bg-secondary-100', icon: 'text-secondary-500' },
   };
-  const auditResponseData = useGetAuditDetails({ id: account?.id });
-  const individualAuditData = auditResponseData?.data?.data || {};
-  const transformedData = transformAuditApiResponse(individualAuditData);
+
+  const [shouldPoll, setShouldPoll] = useState(false);
+  const { data: auditResponseData } = useGetAuditDetails(
+    { id: account?.id },
+    {
+      enabled: !!account?.id,
+      refetchInterval: shouldPoll ? refreshInterval : false,
+    },
+  );
+  const individualAuditData = auditResponseData?.data || {};
+  const transformedData = useMemo(() => {
+    return transformAuditApiResponse(individualAuditData);
+  }, [individualAuditData]);
+
   const auditData = transformedData?.auditData;
+  useEffect(() => {
+    if (auditData?.all?.pending > 0) {
+      setShouldPoll(true);
+    } else {
+      setShouldPoll(false);
+    }
+  }, [auditData]);
+
   const reRunAudit = usePostAuditData();
 
   const [activeTab, setActiveTab] = useState(
