@@ -1,17 +1,18 @@
 package handler
 
 import (
-	"github.com/gorilla/mux"
-	"github.com/zopdev/zopdev/api/audit/store"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
+
+	"github.com/zopdev/zopdev/api/audit/store"
 )
 
 func TestHandler_RunAll(t *testing.T) {
@@ -387,7 +388,7 @@ func TestHandler_GetAllResults(t *testing.T) {
 		name          string
 		cloudAccID    string
 		expectedError error
-		mockResponse  []*store.Result
+		mockResponse  map[string][]*store.Result
 		mockError     error
 	}{
 		{
@@ -403,8 +404,8 @@ func TestHandler_GetAllResults(t *testing.T) {
 		{
 			name:       "Success",
 			cloudAccID: "123",
-			mockResponse: []*store.Result{
-				storeResult,
+			mockResponse: map[string][]*store.Result{
+				"overprovision": []*store.Result{storeResult},
 			},
 		},
 	}

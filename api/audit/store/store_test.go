@@ -3,9 +3,10 @@ package store
 import (
 	"context"
 	"database/sql"
-	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"
@@ -29,7 +30,7 @@ func TestStore_GetLastRun(t *testing.T) {
 		ID:             1,
 		CloudAccountID: mockCloudAccountID,
 		RuleID:         mockRule,
-		Result:         &ResultData{Data: []Items{{"instance1", "passing"}}},
+		Result:         &ResultData{Data: []Items{{"instance1", "passing", nil}}},
 		EvaluatedAt:    time.Now(),
 	}
 
@@ -111,7 +112,7 @@ func TestStore_UpdateResult(t *testing.T) {
 
 	mockResult := &Result{
 		ID:     1,
-		Result: &ResultData{Data: []Items{{"instance1", "passing"}}},
+		Result: &ResultData{Data: []Items{{"instance1", "passing", nil}}},
 	}
 
 	// Mock successful update
