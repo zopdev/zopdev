@@ -8,7 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "go.uber.org/mock/gomock"
-	
+
 	gofr "gofr.dev/pkg/gofr"
 )
 

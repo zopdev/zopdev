@@ -47,6 +47,22 @@ func (h *Handler) AddCloudAccount(ctx *gofr.Context) (interface{}, error) {
 	return resp, nil
 }
 
+func (h *Handler) GetCredentials(ctx *gofr.Context) (interface{}, error) {
+	id := strings.TrimSpace(ctx.PathParam("id"))
+
+	cloudAccountID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
+	}
+
+	credentials, err := h.service.FetchCredentials(ctx, cloudAccountID)
+	if err != nil {
+		return nil, err
+	}
+
+	return credentials, nil
+}
+
 // ListCloudAccounts retrieves all existing CloudAccounts using the service layer.
 func (h *Handler) ListCloudAccounts(ctx *gofr.Context) (interface{}, error) {
 	resp, err := h.service.FetchAllCloudAccounts(ctx)
@@ -61,7 +77,7 @@ func (h *Handler) ListDeploymentSpace(ctx *gofr.Context) (interface{}, error) {
 	id := ctx.PathParam("id")
 	id = strings.TrimSpace(id)
 
-	cloudAccountID, err := strconv.Atoi(id)
+	cloudAccountID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -78,7 +94,7 @@ func (h *Handler) ListNamespaces(ctx *gofr.Context) (interface{}, error) {
 	id := ctx.PathParam("id")
 	id = strings.TrimSpace(id)
 
-	cloudAccountID, err := strconv.Atoi(id)
+	cloudAccountID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -102,7 +118,7 @@ func (h *Handler) ListDeploymentSpaceOptions(ctx *gofr.Context) (interface{}, er
 	id := ctx.PathParam("id")
 	id = strings.TrimSpace(id)
 
-	cloudAccountID, err := strconv.Atoi(id)
+	cloudAccountID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
