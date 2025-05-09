@@ -14,44 +14,48 @@ Ensure you have the following installed on your system before proceeding:
 ## Installation
 
 1. Clone the repository:
-    ```bash
-    git clone https://github.com/zopdev/zopdev.git
-    cd zopdev/api
-    ```
+
+   ```bash
+   git clone https://github.com/zopdev/zopdev.git
+   cd zopdev/api
+   ```
 
 2. Install dependencies:
-    ```bash
-    go mod tidy
-    ```
+
+   ```bash
+   go mod tidy
+   ```
 
 3. Set up environment variables:
-    Create a `.env` file in the root of the project and configure the required environment variables. Example:
-    ```env
-    DB_NAME=zop.db
-    DB_DIALECT=sqlite
-    ```
+   Create a `.env` file in the root of the project and configure the required environment variables. Example:
+   ```env
+   DB_NAME=zop.db
+   DB_DIALECT=sqlite
+   ```
 
 ## Development
 
 1. Start the development server:
-    ```bash
-    go run main.go
-    ```
+
+   ```bash
+   go run main.go
+   ```
 
 2. Run tests:
-    ```bash
-    go test ./...
-    ```
+
+   ```bash
+   go test ./...
+   ```
 
 3. Use Docker for development (optional):
-    Build and run the Docker container:
-    ```bash
-    docker run -d -p 8000:8000 --name zop-api zopdev/api:v0.0.1
+   Build and run the Docker container:
 
-    # To run the UI in a separate container:
-    docker run -d -p 3000:3000 -e NEXT_PUBLIC_API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.0.1
-    ```
+   ```bash
+   docker run -d -p 8000:8000 --name zop-api zopdev/api:v0.0.1
 
+   # To run the UI in a separate container:
+   docker run -d -p 3000:3000 -e NEXT_PUBLIC_API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.0.1
+   ```
 
 ## Contributing
 
