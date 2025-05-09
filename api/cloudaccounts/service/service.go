@@ -63,7 +63,7 @@ func fetchGCPProviderDetails(ctx *gofr.Context, cloudAccount *store.CloudAccount
 
 	body, err := json.Marshal(cloudAccount.Credentials)
 	if err != nil {
-		ctx.Logger.Error(err.Error())
+		ctx.Error(err.Error())
 		return http.ErrorInvalidParam{}
 	}
 

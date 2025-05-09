@@ -30,7 +30,7 @@ func (h *Handler) AddCloudAccount(ctx *gofr.Context) (interface{}, error) {
 
 	err := ctx.Bind(&cloudAccount)
 	if err != nil {
-		ctx.Logger.Error(err.Error())
+		ctx.Error(err.Error())
 		return nil, http.ErrorInvalidParam{Params: []string{"body"}}
 	}
 

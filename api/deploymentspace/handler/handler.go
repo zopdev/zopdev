@@ -39,7 +39,7 @@ func (h *Handler) Add(ctx *gofr.Context) (interface{}, error) {
 
 	environmentID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -88,7 +88,7 @@ func (h *Handler) ListServices(ctx *gofr.Context) (interface{}, error) {
 
 	environmentID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -107,7 +107,7 @@ func (h *Handler) ListDeployments(ctx *gofr.Context) (any, error) {
 
 	environmentID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -126,7 +126,7 @@ func (h *Handler) ListPods(ctx *gofr.Context) (any, error) {
 
 	environmentID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -145,7 +145,7 @@ func (h *Handler) ListCronJobs(ctx *gofr.Context) (any, error) {
 
 	environmentID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -164,7 +164,7 @@ func (h *Handler) GetService(ctx *gofr.Context) (any, error) {
 
 	envID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -187,7 +187,7 @@ func (h *Handler) GetDeployment(ctx *gofr.Context) (any, error) {
 
 	envID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -210,7 +210,7 @@ func (h *Handler) GetPod(ctx *gofr.Context) (any, error) {
 
 	envID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
@@ -233,7 +233,7 @@ func (h *Handler) GetCronJob(ctx *gofr.Context) (any, error) {
 
 	envID, err := strconv.Atoi(id)
 	if err != nil {
-		ctx.Logger.Error(err, "failed to convert environment id to int")
+		ctx.Error(err, "failed to convert environment id to int")
 
 		return nil, http.ErrorInvalidParam{Params: []string{"id"}}
 	}
