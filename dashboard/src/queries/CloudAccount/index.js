@@ -1,83 +1,53 @@
 import { fetchData, postData } from '@/services/api.js';
 import { useMutation, useQuery } from '@tanstack/react-query';
 
-export function useGetCloudAccounts(reqParams, options = {}) {
-  const temp = {
-    data: [
-      {
-        id: '1',
-        name: 'Zop Cloud',
-        status: 'READY',
-        icon: 'cloud',
-        provider: 'gcp',
-        lastUpdatedBy: 'owner@zop.dev',
-        updatedAt: '28th January 2025, 15:38',
-        auditData: {
-          all: {
-            danger: 15,
-            warning: 16,
-            pending: 7,
-            compliant: 85,
-            unchecked: 7,
-            total: 130,
-          },
-          stale: {
-            danger: 3,
-            warning: 5,
-            pending: 2,
-            compliant: 18,
-            unchecked: 1,
-            total: 29,
-          },
-          overprovision: {
-            danger: 2,
-            warning: 4,
-            pending: 1,
-            compliant: 22,
-            unchecked: 3,
-            total: 32,
-          },
-          security: {
-            danger: 5,
-            warning: 3,
-            pending: 0,
-            compliant: 15,
-            unchecked: 2,
-            total: 25,
-          },
-          network: {
-            danger: 1,
-            warning: 2,
-            pending: 1,
-            compliant: 10,
-            unchecked: 0,
-            total: 14,
-          },
-          storage: {
-            danger: 4,
-            warning: 2,
-            pending: 3,
-            compliant: 20,
-            unchecked: 1,
-            total: 30,
-          },
-        },
-        categoryIcons: {
-          stale: 'server',
-          overprovision: 'exclamation',
-          security: 'shield',
-        },
-      },
-    ],
-  };
-
+export function useGetCloudAccountsWithAudit(reqParams, options = {}) {
   return useQuery({
-    queryKey: ['resourceAuditGetData', reqParams],
+    queryKey: ['cloudAccountsWithAudit', reqParams],
     queryFn: async () => {
       const url = `/cloud-accounts`;
-      const data = await fetchData(url, options);
-      if (data?.data?.length > 0) return temp;
-      return data;
+      const cloudAccountsResponse = await fetchData(url, options);
+
+      if (!cloudAccountsResponse?.data || !Array.isArray(cloudAccountsResponse.data)) {
+        return cloudAccountsResponse;
+      }
+
+      const accountsWithAudit = await Promise.all(
+        cloudAccountsResponse.data.map(async (account) => {
+          try {
+            const auditUrl = `/audit/cloud-accounts/${account.id}/results`;
+            const auditResponse = await fetchData(auditUrl, options);
+
+            return {
+              ...account,
+              auditDetails: {
+                data: auditResponse?.data || null,
+                error: null,
+                status: true, // success
+              },
+            };
+          } catch (error) {
+            console.error(`Failed to fetch audit data for account ${account.id}:`, error);
+            return {
+              ...account,
+              auditDetails: {
+                data: null,
+                error: {
+                  message: error.message || 'Failed to fetch audit data',
+                  status: error.response?.status,
+                  details: error.response?.data,
+                },
+                status: false, // failure
+              },
+            };
+          }
+        }),
+      );
+
+      return {
+        ...cloudAccountsResponse,
+        data: accountsWithAudit,
+      };
     },
     staleTime: 0,
     cacheTime: 0,

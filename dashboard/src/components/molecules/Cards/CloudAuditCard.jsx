@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ExclamationCircleIcon,
   CheckCircleIcon,
@@ -10,8 +10,8 @@ import {
 } from '@heroicons/react/24/outline';
 import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
-import Button from '@/components/atom/Button/index.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
+import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -27,14 +27,19 @@ export default function CloudAccountAuditCards({ cloudAccounts = [], reRunAudit 
   return (
     <div className="space-y-4 flex justify-center items-center flex-col w-full ">
       {cloudAccounts?.map((account, index) => (
-        <CloudAccountAuditCard key={account.id || index} {...account} reRunAudit={reRunAudit} />
+        <CloudAccountAuditCard
+          key={account.id || index}
+          {...account}
+          account={account}
+          reRunAudit={reRunAudit}
+        />
       ))}
     </div>
   );
 }
 
 function CloudAccountAuditCard({
-  id,
+  // id,
   name,
   subtitle,
   status,
@@ -44,6 +49,7 @@ function CloudAccountAuditCard({
   updatedAt,
   initialActiveTab,
   reRunAudit,
+  account,
   categoryIcons = {},
   statusBarColors = {
     danger: 'bg-red-500',
@@ -111,12 +117,12 @@ function CloudAccountAuditCard({
     );
   };
 
-  const handleRerun = () => {
-    reRunAudit.mutate({
-      id,
-      selectedOption: activeTab,
-    });
-  };
+  // const handleRerun = () => {
+  //   reRunAudit.mutate({
+  //     id,
+  //     selectedOption: activeTab,
+  //   });
+  // };
   useEffect(() => {
     if (reRunAudit.isError) toast.failed(reRunAudit.error?.message);
   }, [reRunAudit]);
@@ -169,63 +175,73 @@ function CloudAccountAuditCard({
           </div>
         </div>
       </div>
-
-      <div className="p-3 sm:p-4">
-        <div className="w-full">
-          {Object.keys(auditData).length > 0 && (
-            <div className="w-full bg-secondary-100 flex justify-center items-center rounded-lg">
-              <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                <div className="flex min-w-full p-1 whitespace-nowrap">
-                  {Object.keys(auditData).map((category) => (
-                    <button
-                      key={category}
-                      onClick={() => setActiveTab(category)}
-                      className={`flex items-center gap-1 px-2 cursor-pointer sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors flex-1 justify-center ${
-                        activeTab === category
-                          ? 'bg-white shadow-sm'
-                          : 'text-secondary-600 hover:bg-secondary-200'
-                      }`}
-                    >
-                      <span className="block">{getCategoryIcon(category)}</span>
-                      <span className="block truncate">
-                        {category.charAt(0).toUpperCase() + category.slice(1)}
-                      </span>
-                    </button>
-                  ))}
+      {!account?.auditDetails?.status && (
+        <div className={'mx-2'}>
+          <ErrorComponent
+            complete={true}
+            errorText={'Something went wrong while fetching audit details.'}
+            className={'!w-full !h-56'}
+          />
+        </div>
+      )}
+      {account?.auditDetails?.data && (
+        <div className="p-3 sm:p-4">
+          <div className="w-full">
+            {Object.keys(auditData).length > 0 && (
+              <div className="w-full bg-secondary-100 flex justify-center items-center rounded-lg">
+                <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                  <div className="flex min-w-full p-1 whitespace-nowrap">
+                    {Object.keys(auditData).map((category) => (
+                      <button
+                        key={category}
+                        onClick={() => setActiveTab(category)}
+                        className={`flex items-center gap-1 px-2 cursor-pointer sm:px-3 py-1.5 text-xs sm:text-sm font-medium rounded-md transition-colors flex-1 justify-center ${
+                          activeTab === category
+                            ? 'bg-white shadow-sm'
+                            : 'text-secondary-600 hover:bg-secondary-200'
+                        }`}
+                      >
+                        <span className="block">{getCategoryIcon(category)}</span>
+                        <span className="block truncate">
+                          {category.charAt(0).toUpperCase() + category.slice(1)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </div>
+            )}
+
+            <div className="mt-4">
+              {Object.keys(auditData).map((category) => (
+                <div key={category} className={`${activeTab === category ? 'block' : 'hidden'}`}>
+                  {renderStatusBar(category)}
+                  {renderStatusDetails(category)}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {(lastUpdatedBy || updatedAt) && (
+            <div className="mt-1 pt-3 text-xs flex text-secondary-900 justify-between items-center">
+              <div className={'md:flex'}>
+                {' '}
+                <span className={'text-secondary-400'}>Last Run on&nbsp;</span>
+                {updatedAt && <p>{updatedAt}</p>}
+              </div>
+
+              {/*<Button*/}
+              {/*  loading={reRunAudit?.isPending}*/}
+              {/*  onClick={() => handleRerun()}*/}
+              {/*  variant={'primary-outline'}*/}
+              {/*  size={'sm'}*/}
+              {/*>*/}
+              {/*  Re-Run {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}*/}
+              {/*</Button>*/}
             </div>
           )}
-
-          <div className="mt-4">
-            {Object.keys(auditData).map((category) => (
-              <div key={category} className={`${activeTab === category ? 'block' : 'hidden'}`}>
-                {renderStatusBar(category)}
-                {renderStatusDetails(category)}
-              </div>
-            ))}
-          </div>
         </div>
-
-        {(lastUpdatedBy || updatedAt) && (
-          <div className="mt-1 pt-3 text-xs flex text-secondary-900 justify-between items-center">
-            <div className={'md:flex'}>
-              {' '}
-              <span className={'text-secondary-400'}>Last Run on&nbsp;</span>
-              {updatedAt && <p>{updatedAt}</p>}
-            </div>
-
-            <Button
-              loading={reRunAudit?.isPending}
-              onClick={() => handleRerun()}
-              variant={'primary-outline'}
-              size={'sm'}
-            >
-              Re-Run {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
-            </Button>
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 }
