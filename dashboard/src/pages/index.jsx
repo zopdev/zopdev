@@ -2,7 +2,7 @@ import { CloudIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 import DashBoardCard from '@/components/molecules/Cards/DashBoardCard.jsx';
 import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
 import { useNavigate } from 'react-router-dom';
-import CloudAccountAuditCards from '@/components/molecules/Cards/CloudAuditCard.jsx';
+import CloudAccountAuditCards from '@/components/ContainerComponents/CloudAuditCard.jsx';
 import { useGetCloudAccounts, usePostAuditData } from '@/queries/CloudAccount/index.js';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import React from 'react';
