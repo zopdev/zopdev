@@ -38,7 +38,7 @@ const Dashboard = () => {
     description:
       'Analyze your cloud infrastructure to identify stale resources, overprovision assets, and critical security vulnerabilities.',
     icon: <CloudIcon className="h-6 w-6 text-white" />,
-    features: ['Ensure Compliance', 'Performance optimization', 'Cost efficiency recommendations'],
+    features: ['Ensure compliance', 'Performance optimization', 'Cost efficiency recommendations'],
     buttonText: 'Audit Your Cloud',
     buttonIcon: <CloudIcon className="h-5 w-5 text-white" />,
     onClick: handleAuditClick,
@@ -48,7 +48,7 @@ const Dashboard = () => {
     title: 'Deploy Application',
     description: 'Deploy your apps quickly with our streamlined and reliable deployment process.',
     icon: <RocketLaunchIcon className="h-6 w-6 text-white" />,
-    features: ['Automate Deployments', 'Improve Reliability', 'Scale Seamlessly'],
+    features: ['Automate deployments', 'Improve reliability', 'Scale seamlessly'],
     buttonText: 'Deploy Application',
     buttonIcon: <RocketLaunchIcon className="h-5 w-5 text-white" />,
     buttonVariant: 'primary',
@@ -67,7 +67,7 @@ const Dashboard = () => {
               Welcome to Zopdev
             </h1>
             <p className="mt-4 text-lg text-muted-foreground">
-              Get started by choosing one of the options below
+              Get started by choosing one of the options below.
             </p>
           </div>
         )}
@@ -88,7 +88,7 @@ const Dashboard = () => {
                 <div className="flex justify-between items-center">
                   <h2 className="text-left font-medium text-gray-600 text-xl">Cloud Accounts</h2>
                   <Button href={'cloud-setup'} variant="text-link" size="md">
-                    Audit Cloud Accounts
+                    Start New Cloud Audit
                   </Button>
                 </div>
                 <div className="border border-borderDefault rounded-xl p-6 space-y-4 shadow-sm bg-white flex flex-col">
