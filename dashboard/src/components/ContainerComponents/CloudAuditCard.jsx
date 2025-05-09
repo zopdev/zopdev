@@ -135,7 +135,7 @@ function CloudAccountAuditCard({ account }) {
   };
 
   const [shouldPoll, setShouldPoll] = useState(false);
-  const { data: auditResponseData } = useGetAuditDetails(
+  const { data: auditResponseData, isLoading } = useGetAuditDetails(
     { id: account?.id },
     {
       enabled: !!account?.id,
@@ -310,7 +310,7 @@ function CloudAccountAuditCard({ account }) {
         </div>
       )}
 
-      {auditResponseData?.isLoading && <Skeleton shimmerClass={shimmerClass} />}
+      {isLoading && <Skeleton shimmerClass={shimmerClass} />}
 
       {!auditResponseData?.isError && !auditResponseData?.isLoading && (
         <div className="p-3 sm:p-4">
