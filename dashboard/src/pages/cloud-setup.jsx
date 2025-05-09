@@ -7,21 +7,21 @@ import { transformResourceAuditPayload } from '@/utils/transformer.js';
 
 const ResourceAudit = ({ data, updateData, setIsComplete }) => {
   const auditOptions = [
-    {
-      label: 'Stale',
-      description: 'Identify the resources that are no longer in use.',
-      value: 'Stale',
-    },
+    // {
+    //   label: 'Stale',
+    //   description: 'Identify the resources that are no longer in use.',
+    //   value: 'Stale',
+    // },
     {
       label: 'Overprovision',
       description: 'Resources that have more capacity than needed',
       value: 'Overprovision',
     },
-    {
-      label: 'Security',
-      description: 'Resources with potential security issues',
-      value: 'Security',
-    },
+    // {
+    //   label: 'Security',
+    //   description: 'Resources with potential security issues',
+    //   value: 'Security',
+    // },
     {
       label: 'Run All',
       description: 'Run all types of audits on your resources',
