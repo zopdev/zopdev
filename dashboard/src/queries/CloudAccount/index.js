@@ -1,5 +1,5 @@
 import { fetchData, postData } from '@/services/api.js';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useGetCloudAccounts(reqParams, options = {}) {
   return useQuery({
@@ -36,6 +36,7 @@ export function useGetAuditDetails(reqParams, options = {}) {
 }
 
 export function usePostAuditData() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (req) => {
       let id = req?.id;
@@ -73,6 +74,11 @@ export function usePostAuditData() {
         createResponse,
         auditResponse,
       };
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['resourceAuditGetData', { id: variables?.id }],
+      });
     },
   });
 }

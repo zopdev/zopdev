@@ -12,7 +12,8 @@ import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
-import { useGetAuditDetails } from '@/queries/CloudAccount/index.js';
+import { useGetAuditDetails, usePostAuditData } from '@/queries/CloudAccount/index.js';
+import Button from '@/components/atom/Button/index.jsx';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -38,7 +39,7 @@ export default function CloudAccountAuditCards({ cloudAccounts = [], reRunAudit 
   );
 }
 
-function CloudAccountAuditCard({ reRunAudit, account }) {
+function CloudAccountAuditCard({ account }) {
   function transformAuditApiResponse(apiResponse) {
     const getAuditSummary = (items) => {
       const summary = {
@@ -135,6 +136,7 @@ function CloudAccountAuditCard({ reRunAudit, account }) {
   const individualAuditData = auditResponseData?.data?.data || {};
   const transformedData = transformAuditApiResponse(individualAuditData);
   const auditData = transformedData?.auditData;
+  const reRunAudit = usePostAuditData();
 
   const [activeTab, setActiveTab] = useState(
     Object.keys(auditData).length > 0 ? Object.keys(auditData)[0] : '',
@@ -195,12 +197,12 @@ function CloudAccountAuditCard({ reRunAudit, account }) {
     );
   };
 
-  // const handleRerun = () => {
-  //   reRunAudit.mutate({
-  //     id,
-  //     selectedOption: activeTab,
-  //   });
-  // };
+  const handleRerun = () => {
+    reRunAudit.mutate({
+      id: account?.id,
+      selectedOption: activeTab,
+    });
+  };
   useEffect(() => {
     if (reRunAudit?.isError) toast.failed(reRunAudit.error?.message);
   }, [reRunAudit]);
@@ -258,7 +260,6 @@ function CloudAccountAuditCard({ reRunAudit, account }) {
 
   const lastEvaluatedAt = getLatestEvaluatedAt(activeTab, transformedData?.allData);
 
-  // Shimmer animation class - light in light out effect
   const shimmerClass =
     'relative overflow-hidden before:absolute before:inset-0 before:-translate-x-full before:animate-shimmer  animate-pulse before:bg-gradient-to-r before:from-transparent before:via-white/60 before:to-transparent';
 
@@ -334,20 +335,16 @@ function CloudAccountAuditCard({ reRunAudit, account }) {
                 <span className="text-secondary-400">Last Run on&nbsp;</span>
                 <p>{new Date(lastEvaluatedAt).toLocaleString()}</p>
               </div>
-              {/* Add Re-run button here if needed */}
+              <Button
+                loading={reRunAudit?.isPending}
+                onClick={() => handleRerun()}
+                variant={'primary-outline'}
+                size={'sm'}
+              >
+                Re-Run {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}
+              </Button>
             </div>
           )}
-
-          {/*    /!*<Button*!/*/}
-          {/*    /!*  loading={reRunAudit?.isPending}*!/*/}
-          {/*    /!*  onClick={() => handleRerun()}*!/*/}
-          {/*    /!*  variant={'primary-outline'}*!/*/}
-          {/*    /!*  size={'sm'}*!/*/}
-          {/*    /!*>*!/*/}
-          {/*    /!*  Re-Run {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}*!/*/}
-          {/*    /!*</Button>*!/*/}
-          {/*  </div>*/}
-          {/*)}*/}
         </div>
       )}
     </div>
@@ -359,9 +356,11 @@ const Skeleton = ({ shimmerClass }) => (
     <div className="w-full bg-secondary-100 flex justify-center items-center rounded-lg">
       <div className="w-full overflow-x-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         <div className="flex min-w-full p-1 whitespace-nowrap gap-2">
-          {Array.from({ length: 4 }).map(() => (
-            <div className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-md w-28 sm:w-32 h-9">
-              {/*<div className={`h-5 w-5 bg-secondary-200 rounded-full ${shimmerClass}`} />*/}
+          {Array.from({ length: 4 }).map((_, index) => (
+            <div
+              key={index}
+              className="flex items-center gap-2 px-2 sm:px-3 py-1.5 rounded-md w-28 sm:w-32 h-9"
+            >
               <div className={`h-3 bg-secondary-200 rounded w-3/4 ${shimmerClass}`} />
             </div>
           ))}
@@ -372,12 +371,9 @@ const Skeleton = ({ shimmerClass }) => (
     <div className={`w-full h-2 mt-6 rounded-full bg-secondary-200 ${shimmerClass}`}></div>
 
     <div className="flex flex-wrap justify-around gap-y-3 mt-4">
-      {Array.from({ length: 5 }).map(() => (
-        // <SkeletonStatusDetail key={index} shimmerClass={shimmerClass} />
-        <div className="flex flex-col items-center w-16 sm:w-auto">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="flex flex-col items-center w-16 sm:w-auto">
           <div className={`w-8 h-8 bg-secondary-200 rounded-full ${shimmerClass}`}></div>
-          {/*<div className={`h-3 w-14 mt-1 bg-secondary-200 rounded ${shimmerClass}`}></div>*/}
-          {/*<div className={`h-5 w-6 mt-1 bg-secondary-200 rounded ${shimmerClass}`}></div>*/}
         </div>
       ))}
     </div>
