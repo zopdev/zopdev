@@ -6,6 +6,7 @@ import (
 	"gofr.dev/pkg/gofr"
 
 	"github.com/zopdev/zopdev/api/audit/client"
+	"github.com/zopdev/zopdev/api/audit/rules"
 	"github.com/zopdev/zopdev/api/audit/rules/overprovision/gcp"
 	"github.com/zopdev/zopdev/api/audit/store"
 )
@@ -17,7 +18,7 @@ type SQLInstancePeak struct {
 
 func (*SQLInstancePeak) Execute(ctx *gofr.Context, ca *client.CloudAccount) ([]store.Items, error) {
 	switch ca.Provider {
-	case "gcp":
+	case rules.GCP:
 		creds, err := getGCPCredentials(ca.Credentials)
 		if err != nil {
 			return nil, err

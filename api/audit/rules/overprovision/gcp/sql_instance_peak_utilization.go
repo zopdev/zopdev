@@ -12,6 +12,7 @@ import (
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"gofr.dev/pkg/gofr"
 	"golang.org/x/oauth2/google"
+	"golang.org/x/sync/errgroup"
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -36,6 +37,7 @@ const (
 	lowerBound   = 20
 	warningBound = 70
 	upperBound   = 90
+	percentage   = 100
 )
 
 func CheckCloudSQLProvisionedUsage(ctx *gofr.Context, creds *Credentials) ([]store.Items, error) {
@@ -69,14 +71,11 @@ func getResult(ctx *gofr.Context, projectID string,
 	results := make([]store.Items, 0)
 	endTime := time.Now()
 	startTime := endTime.Add(-24 * time.Hour) // Token last 24 hours to avergage out the utilization to avoid any outliers
-	mu, wg := sync.Mutex{}, sync.WaitGroup{}
+	mu, errGrp := sync.Mutex{}, new(errgroup.Group)
 
 	for _, instance := range instancesList.Items {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		errGrp.Go(func() error {
 			resourceFilter := fmt.Sprintf(`resource.type="cloudsql_database" AND resource.labels.database_id=%q`, projectID+":"+instance.Name)
-
 			req := &monitoringpb.ListTimeSeriesRequest{
 				Name:   "projects/" + projectID,
 				Filter: `metric.type="cloudsql.googleapis.com/database/cpu/utilization" AND ` + resourceFilter,
@@ -86,9 +85,7 @@ func getResult(ctx *gofr.Context, projectID string,
 				},
 				View: monitoringpb.ListTimeSeriesRequest_FULL,
 			}
-
 			it := monitoringClient.ListTimeSeries(ctx, req)
-			fmt.Println("it: ", it)
 
 			var peakUsage float64
 
@@ -101,13 +98,13 @@ func getResult(ctx *gofr.Context, projectID string,
 				if er != nil {
 					ctx.Errorf("error reading time series: %v, intance: %s", er, instance.Name)
 
-					return
+					return errReadingTimeSeries
 				}
 
 				points := resp.Points
 				if len(points) > 0 {
 					for _, point := range points {
-						peakUsage = max(peakUsage, point.Value.GetDoubleValue()*100)
+						peakUsage = max(peakUsage, point.Value.GetDoubleValue()*percentage)
 					}
 				}
 			}
@@ -128,9 +125,14 @@ func getResult(ctx *gofr.Context, projectID string,
 				Metadata:     meta,
 			})
 			mu.Unlock()
-		}()
+
+			return nil
+		})
 	}
-	wg.Wait()
+
+	if err := errGrp.Wait(); err != nil {
+		return nil, err
+	}
 
 	return results, nil
 }
