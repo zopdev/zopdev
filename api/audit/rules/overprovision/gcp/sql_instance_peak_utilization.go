@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"sync"
 	"time"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
@@ -67,60 +68,69 @@ func getResult(ctx *gofr.Context, projectID string,
 	instancesList *sqladmin.InstancesListResponse, monitoringClient *monitoring.MetricClient) ([]store.Items, error) {
 	results := make([]store.Items, 0)
 	endTime := time.Now()
-	startTime := endTime.Add(-5 * time.Minute) // last 5 minutes window
+	startTime := endTime.Add(-24 * time.Hour) // Token last 24 hours to avergage out the utilization to avoid any outliers
+	mu, wg := sync.Mutex{}, sync.WaitGroup{}
 
 	for _, instance := range instancesList.Items {
-		resourceFilter := fmt.Sprintf(`resource.type="cloudsql_database" AND resource.labels.database_id=%q`, instance.Name)
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			resourceFilter := fmt.Sprintf(`resource.type="cloudsql_database" AND resource.labels.database_id=%q`, projectID+":"+instance.Name)
 
-		req := &monitoringpb.ListTimeSeriesRequest{
-			Name:   "projects/" + projectID,
-			Filter: `metric.type="cloudsql.googleapis.com/database/cpu/utilization" AND ` + resourceFilter,
-			Interval: &monitoringpb.TimeInterval{
-				StartTime: timestamppb.New(startTime),
-				EndTime:   timestamppb.New(endTime),
-			},
-			View: monitoringpb.ListTimeSeriesRequest_FULL,
-		}
-
-		it := monitoringClient.ListTimeSeries(ctx, req)
-
-		var latestVal float64
-
-		for {
-			resp, er := it.Next()
-			if errors.Is(er, iterator.Done) {
-				break
+			req := &monitoringpb.ListTimeSeriesRequest{
+				Name:   "projects/" + projectID,
+				Filter: `metric.type="cloudsql.googleapis.com/database/cpu/utilization" AND ` + resourceFilter,
+				Interval: &monitoringpb.TimeInterval{
+					StartTime: timestamppb.New(startTime),
+					EndTime:   timestamppb.New(endTime),
+				},
+				View: monitoringpb.ListTimeSeriesRequest_FULL,
 			}
 
-			if er != nil {
-				ctx.Errorf("error reading time series: %v, intance: %s", er, instance.Name)
+			it := monitoringClient.ListTimeSeries(ctx, req)
+			fmt.Println("it: ", it)
 
-				return nil, errReadingTimeSeries
+			var peakUsage float64
+
+			for {
+				resp, er := it.Next()
+				if errors.Is(er, iterator.Done) {
+					break
+				}
+
+				if er != nil {
+					ctx.Errorf("error reading time series: %v, intance: %s", er, instance.Name)
+
+					return
+				}
+
+				points := resp.Points
+				if len(points) > 0 {
+					for _, point := range points {
+						peakUsage = max(peakUsage, point.Value.GetDoubleValue()*100)
+					}
+				}
 			}
 
-			points := resp.Points
-			if len(points) > 0 {
-				latestVal = points[0].Value.GetDoubleValue() * 100 // utilization in percentage
+			status := compliant
+			if peakUsage <= lowerBound {
+				status = danger
 			}
-		}
 
-		// Determine status based on utilization
-		status := compliant
+			meta := map[string]any{
+				"peak_utilization": peakUsage,
+			}
 
-		switch {
-		case latestVal <= lowerBound:
-			status = danger
-		case latestVal > warningBound && latestVal <= upperBound:
-			status = warning
-		case latestVal > upperBound:
-			status = danger
-		}
-
-		results = append(results, store.Items{
-			InstanceName: instance.Name,
-			Status:       status,
-		})
+			mu.Lock()
+			results = append(results, store.Items{
+				InstanceName: instance.Name,
+				Status:       status,
+				Metadata:     meta,
+			})
+			mu.Unlock()
+		}()
 	}
+	wg.Wait()
 
 	return results, nil
 }

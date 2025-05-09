@@ -26,6 +26,7 @@ type ResultData struct {
 type Items struct {
 	InstanceName string `json:"instance_name"`
 	Status       string `json:"status"`
+	Metadata     any    `json:"metadata"`
 }
 
 func (j *ResultData) Value() (driver.Value, error) {
