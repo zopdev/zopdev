@@ -1,53 +1,28 @@
 import { fetchData, postData } from '@/services/api.js';
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-export function useGetCloudAccountsWithAudit(reqParams, options = {}) {
+export function useGetCloudAccounts(reqParams, options = {}) {
   return useQuery({
-    queryKey: ['cloudAccountsWithAudit', reqParams],
+    queryKey: ['cloudAccountGetData', reqParams],
     queryFn: async () => {
       const url = `/cloud-accounts`;
-      const cloudAccountsResponse = await fetchData(url, options);
+      return await fetchData(url);
+    },
+    staleTime: 0,
+    cacheTime: 0,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
+    ...options,
+  });
+}
 
-      if (!cloudAccountsResponse?.data || !Array.isArray(cloudAccountsResponse.data)) {
-        return cloudAccountsResponse;
-      }
-
-      const accountsWithAudit = await Promise.all(
-        cloudAccountsResponse.data.map(async (account) => {
-          try {
-            const auditUrl = `/audit/cloud-accounts/${account.id}/results`;
-            const auditResponse = await fetchData(auditUrl, options);
-
-            return {
-              ...account,
-              auditDetails: {
-                data: auditResponse?.data || null,
-                error: null,
-                status: true, // success
-              },
-            };
-          } catch (error) {
-            console.error(`Failed to fetch audit data for account ${account.id}:`, error);
-            return {
-              ...account,
-              auditDetails: {
-                data: null,
-                error: {
-                  message: error.message || 'Failed to fetch audit data',
-                  status: error.response?.status,
-                  details: error.response?.data,
-                },
-                status: false, // failure
-              },
-            };
-          }
-        }),
-      );
-
-      return {
-        ...cloudAccountsResponse,
-        data: accountsWithAudit,
-      };
+export function useGetAuditDetails(reqParams, options = {}) {
+  return useQuery({
+    queryKey: ['resourceAuditGetData', reqParams],
+    queryFn: async () => {
+      const url = `/audit/cloud-accounts/${reqParams?.id}/results`;
+      return await fetchData(url);
     },
     staleTime: 0,
     cacheTime: 0,
@@ -59,6 +34,7 @@ export function useGetCloudAccountsWithAudit(reqParams, options = {}) {
 }
 
 export function usePostAuditData() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (req) => {
       let id = req?.id;
@@ -96,6 +72,11 @@ export function usePostAuditData() {
         createResponse,
         auditResponse,
       };
+    },
+    onSuccess: (_data, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: ['resourceAuditGetData', { id: variables?.id }],
+      });
     },
   });
 }
