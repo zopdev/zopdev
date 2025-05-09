@@ -3,27 +3,17 @@ import DashBoardCard from '@/components/molecules/Cards/DashBoardCard.jsx';
 import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
 import { useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/molecules/Cards/CloudAuditCard.jsx';
-import { useGetCloudAccountsWithAudit, usePostAuditData } from '@/queries/CloudAccount/index.js';
+import { useGetCloudAccounts, usePostAuditData } from '@/queries/CloudAccount/index.js';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
 import Button from '@/components/atom/Button/index.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
-import { transformResourceAuditData } from '@/utils/transformer.js';
 
 const Dashboard = () => {
-  const getData = useGetCloudAccountsWithAudit();
+  const getData = useGetCloudAccounts();
   const reRunAudit = usePostAuditData();
   const navigate = useNavigate();
-
-  const [resourceAuditData, setResourceAuditData] = useState();
-
-  useEffect(() => {
-    if (getData?.isSuccess) {
-      const data = transformResourceAuditData(getData?.data?.data);
-      setResourceAuditData(data);
-    }
-  }, [getData?.isSuccess, getData?.data]);
 
   const handleAuditClick = () => {
     navigate('/cloud-setup');
@@ -102,9 +92,9 @@ const Dashboard = () => {
                         />
                       </div>
                     )}
-                    {getData?.isSuccess && resourceAuditData?.data.length > 0 && (
+                    {getData?.isSuccess && getData?.data?.data?.length > 0 && (
                       <CloudAccountAuditCards
-                        cloudAccounts={resourceAuditData?.data}
+                        cloudAccounts={getData?.data?.data}
                         reRunAudit={reRunAudit}
                       />
                     )}
