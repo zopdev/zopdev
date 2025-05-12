@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+@config "../tailwind.config.js";
+
+@theme {
+  --color-red-50: oklch(0.971 0.013 17.38);
+  --color-red-100: oklch(0.936 0.032 17.717);
+  --color-red-200: oklch(0.885 0.062 18.334);
+  --color-red-300: oklch(0.808 0.114 19.571);
+  --color-red-400: oklch(0.704 0.191 22.216);
+  --color-red-500: oklch(0.637 0.237 25.331);
+  --color-red-600: oklch(0.577 0.245 27.325);
+  --color-red-700: oklch(0.505 0.213 27.518);
+  --color-red-800: oklch(0.444 0.177 26.899);
+  --color-red-900: oklch(0.396 0.141 25.723);
+  --color-red-950: oklch(0.258 0.092 26.042);
+
+  --color-yellow-50: oklch(0.987 0.026 102.212);
+  --color-yellow-100: oklch(0.973 0.071 103.193);
+  --color-yellow-200: oklch(0.945 0.129 101.54);
+  --color-yellow-300: oklch(0.905 0.182 98.111);
+  --color-yellow-400: oklch(0.852 0.199 91.936);
+  --color-yellow-500: oklch(0.795 0.184 86.047);
+  --color-yellow-600: oklch(0.681 0.162 75.834);
+  --color-yellow-700: oklch(0.554 0.135 66.442);
+  --color-yellow-800: oklch(0.476 0.114 61.907);
+  --color-yellow-900: oklch(0.421 0.095 57.708);
+  --color-yellow-950: oklch(0.286 0.066 53.813);
+
+  --color-green-50: oklch(0.982 0.018 155.826);
+  --color-green-100: oklch(0.962 0.044 156.743);
+  --color-green-200: oklch(0.925 0.084 155.995);
+  --color-green-300: oklch(0.871 0.15 154.449);
+  --color-green-400: oklch(0.792 0.209 151.711);
+  --color-green-500: oklch(0.723 0.219 149.579);
+  --color-green-600: oklch(0.627 0.194 149.214);
+  --color-green-700: oklch(0.527 0.154 150.069);
+  --color-green-800: oklch(0.448 0.119 151.328);
+  --color-green-900: oklch(0.393 0.095 152.535);
+  --color-green-950: oklch(0.266 0.065 152.934);
+
+  --color-primary-50: oklch(0.984 0.019 200.873);
+  --color-primary-100: oklch(0.956 0.045 203.388);
+  --color-primary-200: oklch(0.917 0.08 205.041);
+  --color-primary-300: oklch(0.865 0.127 207.078);
+  --color-primary-400: oklch(0.789 0.154 211.53);
+  --color-primary-500: oklch(0.715 0.143 215.221);
+  --color-primary-600: oklch(0.609 0.126 221.723);
+  --color-primary-700: oklch(0.52 0.105 223.128);
+  --color-primary-800: oklch(0.45 0.085 224.283);
+  --color-primary-900: oklch(0.398 0.07 227.392);
+  --color-primary-950: oklch(0.302 0.056 229.695);
+
+  --color-secondary-50: oklch(0.984 0.003 247.858);
+  --color-secondary-100: oklch(0.968 0.007 247.896);
+  --color-secondary-200: oklch(0.929 0.013 255.508);
+  --color-secondary-300: oklch(0.869 0.022 252.894);
+  --color-secondary-400: oklch(0.704 0.04 256.788);
+  --color-secondary-500: oklch(0.554 0.046 257.417);
+  --color-secondary-600: oklch(0.446 0.043 257.281);
+  --color-secondary-700: oklch(0.372 0.044 257.287);
+  --color-secondary-800: oklch(0.279 0.041 260.031);
+  --color-secondary-900: oklch(0.208 0.042 265.755);
+  --color-secondary-950: oklch(0.129 0.042 264.695);
+  --color-borderDefault: oklch(0.869 0.022 252.894);
+
+  --color-black: #000;
+  --color-white: #fff;
+}
+
+.code-container {
+  display: block;
+  padding: 15px 10px;
+  position: relative;
+}
+
+.copy-button {
+  display: none !important;
+  position: absolute !important;
+  top: 0;
+  right: 5px;
+}
+
+.copy-button.yaml-code {
+  top: 2px;
+  right: 10px;
+}
+
+.code-container:hover .copy-button {
+  display: inline-block !important;
+}

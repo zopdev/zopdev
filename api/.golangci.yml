@@ -124,6 +124,8 @@ linters:
       - std-error-handling
     rules:
       - linters:
+          - gocritic
+          - gocyclo
           - dupl
           - goconst
           - mnd
@@ -151,6 +153,7 @@ formatters:
   exclusions:
     generated: lax
     paths:
+      - '(.+)_test\.go'
       - third_party$
       - builtin$
       - examples$

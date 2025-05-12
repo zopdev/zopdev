@@ -4,9 +4,13 @@ import (
 	appHandler "github.com/zopdev/zopdev/api/applications/handler"
 	appService "github.com/zopdev/zopdev/api/applications/service"
 	appStore "github.com/zopdev/zopdev/api/applications/store"
-	"github.com/zopdev/zopdev/api/cloudaccounts/handler"
-	"github.com/zopdev/zopdev/api/cloudaccounts/service"
-	"github.com/zopdev/zopdev/api/cloudaccounts/store"
+	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
+	auditService "github.com/zopdev/zopdev/api/audit/service"
+	auditStore "github.com/zopdev/zopdev/api/audit/store"
+
+	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
+	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
+	caStore "github.com/zopdev/zopdev/api/cloudaccounts/store"
 	clStore "github.com/zopdev/zopdev/api/deploymentspace/cluster/store"
 	"github.com/zopdev/zopdev/api/provider/gcp"
 
@@ -28,12 +32,13 @@ func main() {
 	app := gofr.New()
 
 	app.Migrate(migrations.All())
+	app.Metrics().NewCounter("db_error_count", "Count of DB errors")
 
 	gkeSvc := gcp.New()
 
-	cloudAccountStore := store.New()
-	cloudAccountService := service.New(cloudAccountStore, gkeSvc)
-	cloudAccountHandler := handler.New(cloudAccountService)
+	cloudAccountStore := caStore.New()
+	cloudAccountService := caService.New(cloudAccountStore, gkeSvc)
+	cloudAccountHandler := caHandler.New(cloudAccountService)
 
 	deploymentStore := deployStore.New()
 	clusterStore := clStore.New()
@@ -44,25 +49,38 @@ func main() {
 	deploymentHandler := deployHandler.New(deploymentService)
 
 	environmentService := envService.New(environmentStore, deploymentService)
-	envrionmentHandler := envHandler.New(environmentService)
+	environmentHandler := envHandler.New(environmentService)
 
 	applicationStore := appStore.New()
 	applicationService := appService.New(applicationStore, environmentService)
 	applicationHandler := appHandler.New(applicationService)
+
+	adStore := auditStore.New()
+	adSvc := auditService.New(adStore)
+	adHandler := auditHandler.New(adSvc)
+
+	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
 	app.GET("/cloud-accounts", cloudAccountHandler.ListCloudAccounts)
 	app.GET("/cloud-accounts/{id}/deployment-space/clusters", cloudAccountHandler.ListDeploymentSpace)
 	app.GET("/cloud-accounts/{id}/deployment-space/namespaces", cloudAccountHandler.ListNamespaces)
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
+	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
+
+	app.POST("/audit/cloud-accounts/{id}/all", adHandler.RunAll)
+	app.POST("/audit/cloud-accounts/{id}/category/{category}", adHandler.RunByCategory)
+	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunByID)
+	app.GET("/audit/cloud-accounts/{id}/results", adHandler.GetAllResults)
+	app.GET("/audit/cloud-accounts/{id}/results/{ruleId}", adHandler.GetResultByID)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
 	app.GET("/applications/{id}", applicationHandler.GetApplication)
 
-	app.POST("/applications/{id}/environments", envrionmentHandler.Add)
-	app.GET("/applications/{id}/environments", envrionmentHandler.List)
-	app.PATCH("/applications/{id}/environments", envrionmentHandler.Update)
+	app.POST("/applications/{id}/environments", environmentHandler.Add)
+	app.GET("/applications/{id}/environments", environmentHandler.List)
+	app.PATCH("/applications/{id}/environments", environmentHandler.Update)
 
 	app.POST("/environments/{id}/deploymentspace", deploymentHandler.Add)
 	app.GET("/environments/{id}/deploymentspace/service/{name}", deploymentHandler.GetService)

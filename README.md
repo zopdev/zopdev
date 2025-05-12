@@ -13,8 +13,8 @@
 
 ## 💡 **Key Features**
 
-1. **Cloud Agnostic**  
-2. **Automated Audits**   
+1. **Cloud Agnostic**
+2. **Automated Audits**
 
 ## 👍 **Contribute**
 
@@ -37,7 +37,7 @@ To contribute please refer to the [CONTRIBUTING.md](./CONTRIBUTING.md) file.
 Run the following command to pull and start the Docker image for the zop-api:
 
 ```bash
-    docker run -d -p 8000:8000 --name zop-api zopdev/api:v0.0.1
+    docker run -d -p 8000:8000 --name zop-api zopdev/api:v0.2.0
 ```
 
 #### zop-ui
@@ -45,8 +45,8 @@ Run the following command to pull and start the Docker image for the zop-api:
 Run the following command to pull and start the Docker image for the zop-ui:
 
 ```bash
-    docker run -d -p 3000:3000 -e NEXT_PUBLIC_API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.0.1
+    docker run -d -p 3000:3000 -e VITE_API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.0
 ```
 
-> **Note:** The environment variable `NEXT_PUBLIC_API_BASE_URL` is used by zop-ui to connect to the
+> **Note:** The environment variable `VITE_API_BASE_URL` is used by zop-ui to connect to the
 > zop-api. Ensure that the value matches the API's running base URL.
