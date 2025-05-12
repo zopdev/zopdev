@@ -73,7 +73,6 @@ func main() {
 	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunByID)
 	app.GET("/audit/cloud-accounts/{id}/results", adHandler.GetAllResults)
 	app.GET("/audit/cloud-accounts/{id}/results/{ruleId}", adHandler.GetResultByID)
-	app.GET("/audit/cloud-accounts/{id}/results/category/{category}", adHandler.GetResultByCategory)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)

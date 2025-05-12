@@ -18,9 +18,6 @@ func New(svc Service) *Handler {
 
 func (h *Handler) RunAll(ctx *gofr.Context) (any, error) {
 	id := strings.TrimSpace(ctx.PathParam("id"))
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
 
 	cloudAccID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -32,9 +29,6 @@ func (h *Handler) RunAll(ctx *gofr.Context) (any, error) {
 
 func (h *Handler) RunByID(ctx *gofr.Context) (any, error) {
 	id := strings.TrimSpace(ctx.PathParam("id"))
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
 
 	cloudAccID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -42,18 +36,12 @@ func (h *Handler) RunByID(ctx *gofr.Context) (any, error) {
 	}
 
 	ruleID := strings.TrimSpace(ctx.PathParam("ruleId"))
-	if ruleID == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"ruleId"}}
-	}
 
 	return h.svc.RunByID(ctx, ruleID, cloudAccID)
 }
 
 func (h *Handler) RunByCategory(ctx *gofr.Context) (any, error) {
 	id := strings.TrimSpace(ctx.PathParam("id"))
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
 
 	cloudAccID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -61,18 +49,12 @@ func (h *Handler) RunByCategory(ctx *gofr.Context) (any, error) {
 	}
 
 	category := strings.ToLower(strings.TrimSpace(ctx.PathParam("category")))
-	if category == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"category"}}
-	}
 
 	return h.svc.RunByCategory(ctx, category, cloudAccID)
 }
 
 func (h *Handler) GetResultByID(ctx *gofr.Context) (any, error) {
 	id := strings.TrimSpace(ctx.PathParam("id"))
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
 
 	cloudAccID, err := strconv.ParseInt(id, 10, 64)
 	if err != nil {
@@ -80,30 +62,8 @@ func (h *Handler) GetResultByID(ctx *gofr.Context) (any, error) {
 	}
 
 	ruleID := strings.TrimSpace(ctx.PathParam("ruleId"))
-	if ruleID == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"ruleId"}}
-	}
 
 	return h.svc.GetResultByID(ctx, cloudAccID, ruleID)
-}
-
-func (h *Handler) GetResultByCategory(ctx *gofr.Context) (any, error) {
-	id := strings.TrimSpace(ctx.PathParam("id"))
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
-
-	cloudAccID, err := strconv.ParseInt(id, 10, 64)
-	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
-	}
-
-	category := strings.ToLower(strings.TrimSpace(ctx.PathParam("category")))
-	if category == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"category"}}
-	}
-
-	return h.svc.GetResultByCategory(ctx, cloudAccID)
 }
 
 func (h *Handler) GetAllResults(ctx *gofr.Context) (any, error) {

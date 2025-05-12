@@ -22,6 +22,7 @@ import (
 )
 
 var (
+	errInvalidGCPCreds        = errors.New("invalid GCP credentials")
 	errInvalidJSONCredentials = errors.New("invalid JSON credentials")
 	errCreateSQLAdminService  = errors.New("failed to create SQL Admin service")
 	errListCloudSQLInstances  = errors.New("failed to list CloudSQL instances")
@@ -40,7 +41,11 @@ const (
 	percentage   = 100
 )
 
-func CheckCloudSQLProvisionedUsage(ctx *gofr.Context, creds *Credentials) ([]store.Items, error) {
+// CheckCloudSQLProvisionedUsage checks the provisioned usage of Cloud SQL instances
+// in a given Google Cloud project. It retrieves the list of Cloud SQL instances
+// and their utilization metrics using the Google Cloud SQL Admin API and the
+// Cloud Monitoring API.
+func CheckCloudSQLProvisionedUsage(ctx *gofr.Context, creds any) ([]store.Items, error) {
 	cred, err := getGoogleCredentials(ctx, creds)
 	if err != nil {
 		return nil, err
@@ -51,7 +56,7 @@ func CheckCloudSQLProvisionedUsage(ctx *gofr.Context, creds *Credentials) ([]sto
 		return nil, errCreateSQLAdminService
 	}
 
-	instancesList, err := sqlService.Instances.List(creds.ProjectID).Do()
+	instancesList, err := sqlService.Instances.List(cred.ProjectID).Do()
 	if err != nil {
 		return nil, errListCloudSQLInstances
 	}
@@ -63,7 +68,7 @@ func CheckCloudSQLProvisionedUsage(ctx *gofr.Context, creds *Credentials) ([]sto
 
 	defer monitoringClient.Close()
 
-	return getResult(ctx, creds.ProjectID, instancesList, monitoringClient)
+	return getResult(ctx, cred.ProjectID, instancesList, monitoringClient)
 }
 
 func getResult(ctx *gofr.Context, projectID string,
@@ -137,8 +142,22 @@ func getResult(ctx *gofr.Context, projectID string,
 	return results, nil
 }
 
-func getGoogleCredentials(ctx context.Context, creds *Credentials) (*google.Credentials, error) {
-	b, _ := json.Marshal(creds)
+func getGoogleCredentials(ctx context.Context, creds any) (*google.Credentials, error) {
+	if creds == nil {
+		return nil, errInvalidGCPCreds
+	}
+
+	b, err := json.Marshal(creds)
+	if err != nil {
+		return nil, errInvalidGCPCreds
+	}
+
+	var gcpCred Credentials
+
+	err = json.Unmarshal(b, &gcpCred)
+	if err != nil {
+		return nil, errInvalidGCPCreds
+	}
 
 	cred, err := google.CredentialsFromJSON(ctx, b, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {

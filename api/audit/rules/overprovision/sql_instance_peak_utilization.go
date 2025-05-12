@@ -19,13 +19,7 @@ type SQLInstancePeak struct {
 func (*SQLInstancePeak) Execute(ctx *gofr.Context, ca *client.CloudAccount) ([]store.Items, error) {
 	switch ca.Provider {
 	case rules.GCP:
-		creds, err := getGCPCredentials(ca.Credentials)
-		if err != nil {
-			return nil, err
-		}
-
-		return gcp.CheckCloudSQLProvisionedUsage(ctx, creds)
-
+		return gcp.CheckCloudSQLProvisionedUsage(ctx, ca.Credentials)
 	default:
 		return nil, errUnsupportedCloudProvider
 	}

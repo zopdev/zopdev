@@ -11,15 +11,6 @@ import (
 	"github.com/zopdev/zopdev/api/audit/store"
 )
 
-// Rule is an interface that defines the methods that a rule must implement.
-// It is used to execute the rule and get the result of the rule execution.
-// Rule is cloud agnostic and can be used for any cloud provider, the rule should implement the logic based on the cloud provider.
-type Rule interface {
-	GetCategory() string
-	GetName() string
-	Execute(ctx *gofr.Context, ca *client.CloudAccount) ([]store.Items, error)
-}
-
 // Service is a struct that holds the rules and their execution logic.
 // It is responsible for executing the rules and returning the results.
 type Service struct {
@@ -67,6 +58,11 @@ func (s *Service) RunByID(ctx *gofr.Context, ruleID string, cloudAccID int64) (*
 		return nil, gofrHttp.ErrorEntityNotFound{Name: "Rule", Value: ruleID}
 	}
 
+	ca, err := client.GetCloudCredentials(ctx, cloudAccID)
+	if err != nil {
+		return nil, err
+	}
+
 	// create a result entry in the database
 	res, err := s.store.CreatePending(ctx, &store.Result{
 		RuleID:         ruleID,
@@ -74,11 +70,6 @@ func (s *Service) RunByID(ctx *gofr.Context, ruleID string, cloudAccID int64) (*
 		Result:         &store.ResultData{},
 		EvaluatedAt:    time.Now(),
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	ca, err := client.GetCloudCredentials(ctx, cloudAccID)
 	if err != nil {
 		return nil, err
 	}
@@ -186,6 +177,7 @@ func (s *Service) RunAll(ctx *gofr.Context, cloudAccID int64) (map[string][]*sto
 	return results, nil
 }
 
+// GetResultByID retrieves the result of a specific rule execution by its ID.
 func (s *Service) GetResultByID(ctx *gofr.Context, cloudAccID int64, ruleID string) (*store.Result, error) {
 	res, err := s.store.GetLastRun(ctx, cloudAccID, ruleID)
 	if err != nil {
@@ -199,31 +191,9 @@ func (s *Service) GetResultByID(ctx *gofr.Context, cloudAccID int64, ruleID stri
 	return res, nil
 }
 
-func (s *Service) GetResultByCategory(ctx *gofr.Context, cloudAccID int64) (map[string][]*store.Result, error) {
-	results := make(map[string][]*store.Result, 0)
-
-	for category, rules := range s.categoryRuleMap {
-		res := make([]*store.Result, 0)
-
-		for _, rule := range rules {
-			lastRun, err := s.store.GetLastRun(ctx, cloudAccID, rule.GetName())
-			if err != nil {
-				return nil, err
-			}
-
-			if lastRun == nil {
-				continue
-			}
-
-			res = append(res, lastRun)
-		}
-
-		results[category] = res
-	}
-
-	return results, nil
-}
-
+// GetAllResults retrieves the latest results for all rules associated with a given cloud account ID.
+// It organizes the results into a map where the keys are rule categories and the values are slices
+// of results belonging to those categories.
 func (s *Service) GetAllResults(ctx *gofr.Context, cloudAccID int64) (map[string][]*store.Result, error) {
 	result := make(map[string][]*store.Result)
 
