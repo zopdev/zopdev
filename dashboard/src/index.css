@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 @config "../tailwind.config.js";
 
 @theme {
@@ -62,8 +62,30 @@
   --color-secondary-800: oklch(0.279 0.041 260.031);
   --color-secondary-900: oklch(0.208 0.042 265.755);
   --color-secondary-950: oklch(0.129 0.042 264.695);
-  --color-borderDefault:oklch(0.869 0.022 252.894);
+  --color-borderDefault: oklch(0.869 0.022 252.894);
 
   --color-black: #000;
   --color-white: #fff;
+}
+
+.code-container {
+  display: block;
+  padding: 15px 10px;
+  position: relative;
+}
+
+.copy-button {
+  display: none !important;
+  position: absolute !important;
+  top: 0;
+  right: 5px;
+}
+
+.copy-button.yaml-code {
+  top: 2px;
+  right: 10px;
+}
+
+.code-container:hover .copy-button {
+  display: inline-block !important;
 }
