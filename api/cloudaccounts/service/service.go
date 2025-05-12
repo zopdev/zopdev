@@ -81,7 +81,7 @@ func fetchGCPProviderDetails(ctx *gofr.Context, cloudAccount *store.CloudAccount
 	return nil
 }
 
-func (s *Service) FetchDeploymentSpace(ctx *gofr.Context, cloudAccountID int) (interface{}, error) {
+func (s *Service) FetchDeploymentSpace(ctx *gofr.Context, cloudAccountID int64) (interface{}, error) {
 	cloudAccount, err := s.store.GetCloudAccountByID(ctx, cloudAccountID)
 	if err != nil {
 		return nil, err
@@ -108,7 +108,7 @@ func (s *Service) FetchDeploymentSpace(ctx *gofr.Context, cloudAccountID int) (i
 	return clusters, nil
 }
 
-func (s *Service) ListNamespaces(ctx *gofr.Context, id int, clusterName, clusterRegion string) (interface{}, error) {
+func (s *Service) ListNamespaces(ctx *gofr.Context, id int64, clusterName, clusterRegion string) (interface{}, error) {
 	cloudAccount, err := s.store.GetCloudAccountByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -140,12 +140,13 @@ func (s *Service) ListNamespaces(ctx *gofr.Context, id int, clusterName, cluster
 	return res, nil
 }
 
-func (*Service) FetchDeploymentSpaceOptions(_ *gofr.Context, id int) ([]DeploymentSpaceOptions, error) {
+func (*Service) FetchDeploymentSpaceOptions(_ *gofr.Context, id int64) ([]DeploymentSpaceOptions, error) {
 	options := []DeploymentSpaceOptions{
 		{
 			Name: "gke",
 			Path: fmt.Sprintf("/cloud-accounts/%v/deployment-space/clusters", id),
-			Type: "type"},
+			Type: "type",
+		},
 	}
 
 	return options, nil
@@ -157,5 +158,12 @@ func (s *Service) FetchCredentials(ctx *gofr.Context, cloudAccountID int64) (int
 		return nil, err
 	}
 
-	return credentials, nil
+	cloudAcc, err := s.store.GetCloudAccountByID(ctx, cloudAccountID)
+	if err != nil {
+		return nil, err
+	}
+
+	cloudAcc.Credentials = credentials
+
+	return cloudAcc, nil
 }
