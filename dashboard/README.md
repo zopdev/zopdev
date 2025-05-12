@@ -1,6 +1,7 @@
 # Zopdev Dashboard
 
-This directory contains the frontend application for the Zopdev platform. Built using **React.js** and **Vite**, it provides the user interface for interacting with the Zopdev API server.
+This directory contains the frontend application for the Zopdev platform. Built using **React.js**
+and **Vite**, it provides the user interface for interacting with the Zopdev API server.
 
 ## ⚙️ Tech Stack
 
@@ -20,7 +21,8 @@ Before starting, ensure you have the following installed on your system:
 
 ## 🧰 Prerequisites
 
-- The backend Zopdev API server should be running locally at `http://localhost:8000` or configured accordingly in the `.env` file.
+- The backend Zopdev API server should be running locally at `http://localhost:8000` or configured
+  accordingly in the `.env` file.
 - Basic understanding of React and component-based design.
 
 ## 🧩 Project Structure
@@ -57,21 +59,21 @@ dashboard/
 
 1. Navigate to the `dashboard` directory:
 
-    ```bash
-    cd dashboard
-    ```
+   ```bash
+   cd dashboard
+   ```
 
 2. Install dependencies:
 
-    ```bash
-    npm install
-    ```
+   ```bash
+   npm install
+   ```
 
 3. Create a `.env` file for local environment variables:
 
-    ```env
-    VITE_API_BASE_URL=http://localhost:8000
-    ```
+   ```env
+   VITE_API_BASE_URL=http://localhost:8000
+   ```
 
 ### Running the Development Server
 
@@ -80,7 +82,6 @@ npm run dev
 ```
 
 The application will start on [http://localhost:3000](http://localhost:3000) by default.
-
 
 ## 🐳 Docker (Optional)
 
@@ -93,6 +94,5 @@ docker run -d -p 3000:3000 -e VITE_API_BASE_URL='http://localhost:8000' --name z
 
 ## 🤝 Contributing
 
-Feel free to open issues or submit pull requests to improve the project. Follow the [contribution guidelines](../CONTRIBUTING.md) for more details.
-
-
+Feel free to open issues or submit pull requests to improve the project. Follow the
+[contribution guidelines](../CONTRIBUTING.md) for more details.
