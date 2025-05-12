@@ -5,6 +5,10 @@ import Input from '@/components/atom/Input/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import Textarea from '@/components/atom/Textarea/index.jsx';
 import { enforceCharLimit } from '@/utils/common.js';
+import FullScreenOverlay from '@/components/atom/FullScreenOverlay/index.jsx';
+import { InformationCircleIcon } from '@heroicons/react/20/solid';
+import Tooltip from '@/components/atom/Tooltip/index.jsx';
+import CloudAccountCreationGuide from '@/components/molecules/SetupGuides/CloudAccountSetupGuide.jsx';
 
 export const isValidJSON = (str) => {
   try {
@@ -117,7 +121,35 @@ const CloudForm = ({
         </div>
 
         <div className="col-span-full">
-          <Label htmlFor="credentials">Service Account Credential (JSON)</Label>
+          <div className="flex justify-between items-center flex-wrap">
+            <Label htmlFor="credentials">Service Account Credential (JSON)</Label>
+            <FullScreenOverlay
+              customCTA={
+                <div className={'cursor-pointer group hover:text-primary-500'}>
+                  <Tooltip
+                    className={{
+                      root: 'flex justify-center items-center',
+                    }}
+                    title={'Cloud Account Setup Guide'}
+                  >
+                    <div
+                      className={
+                        'flex items-center justify-center text-gray-600 group-hover:text-primary-600 gap-1'
+                      }
+                    >
+                      <InformationCircleIcon className="w-5 h-5 text-gray-600 group-hover:text-primary-600" />
+                      <span>Setup Guide</span>
+                    </div>
+                  </Tooltip>
+                </div>
+              }
+              title="Cloud Account Setup Guide"
+              size={'4xl'}
+              maxHeight={'90vh'}
+              renderContent={CloudAccountCreationGuide}
+            />
+          </div>
+
           <div className="mt-2">
             <Textarea
               rows={6}
