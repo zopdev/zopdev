@@ -116,8 +116,7 @@ linters:
         - name: deep-exit
         - name: unused-receiver
   exclusions:
-    generated: enable
-    path: '(.+)_test\.go'
+    generated: lax
     presets:
       - comments
       - common-false-positives
