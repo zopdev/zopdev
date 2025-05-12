@@ -70,3 +70,5 @@ export const REFRESH_STATUS = [
   'PROVISIONING',
   'STOPPING',
 ];
+
+export const refreshInterval = 10000;
