@@ -22,7 +22,7 @@ Before starting, ensure you have the following installed on your system:
 ## 🧰 Prerequisites
 
 - The backend Zopdev API server should be running locally at `http://localhost:8000` or configured
-  accordingly in the `.env` file.
+  accordingly in the `./public/env.js` file.
 - Basic understanding of React and component-based design.
 
 ## 🧩 Project Structure
@@ -39,6 +39,7 @@ dashboard/
 │   │   ├── molecules/      # Groups of atoms (form fields, card layouts)
 │   │   ├── organisms/      # Complex UI components (modals, headers)
 │   │   └── layouts/        # Page-level layout components
+│   │   └── container/      # Components with the ability to use APIs.
 │   ├── pages/              # Route-based views
 │   ├── hooks/              # Custom React hooks
 │   ├── services/           # API request handlers
@@ -69,12 +70,6 @@ dashboard/
    npm install
    ```
 
-3. Create a `.env` file for local environment variables:
-
-   ```env
-   API_BASE_URL=http://localhost:8000
-   ```
-
 ### Running the Development Server
 
 ```bash
@@ -88,8 +83,8 @@ The application will start on [http://localhost:3000](http://localhost:3000) by 
 If you'd like to run the frontend in a Docker container:
 
 ```bash
-docker build -t zopdev/dashboard:v0.2.1 .
-docker run -d -p 3000:3000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.1
+docker build -t zopdev/dashboard:v0.2.2 .
+docker run -d -p 3000:8000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.2
 ```
 
 ## 🤝 Contributing
