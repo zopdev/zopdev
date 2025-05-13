@@ -45,7 +45,7 @@ Run the following command to pull and start the Docker image for the zop-api:
 Run the following command to pull and start the Docker image for the zop-ui:
 
 ```bash
-    docker run -d -p 3000:3000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.1
+    docker run -d -p 3000:8000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.1
 ```
 
 > **Note:** The environment variable `API_BASE_URL` is used by zop-ui to connect to the
