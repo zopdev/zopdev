@@ -72,7 +72,7 @@ dashboard/
 3. Create a `.env` file for local environment variables:
 
    ```env
-   VITE_API_BASE_URL=http://localhost:8000
+   API_BASE_URL=http://localhost:8000
    ```
 
 ### Running the Development Server
@@ -88,8 +88,8 @@ The application will start on [http://localhost:3000](http://localhost:3000) by 
 If you'd like to run the frontend in a Docker container:
 
 ```bash
-docker build -t zopdev/dashboard:v0.0.1 .
-docker run -d -p 3000:3000 -e VITE_API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.0
+docker build -t zopdev/dashboard:v0.2.1 .
+docker run -d -p 3000:3000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.1
 ```
 
 ## 🤝 Contributing
