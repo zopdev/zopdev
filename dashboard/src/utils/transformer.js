@@ -1,4 +1,5 @@
 export function transformResourceAuditPayload(inputPayload) {
+  console.log(inputPayload);
   try {
     if (!inputPayload || !inputPayload['0'] || !inputPayload['0'].credentials) {
       throw new Error('Invalid input payload structure');
@@ -11,7 +12,7 @@ export function transformResourceAuditPayload(inputPayload) {
     }
     return {
       name: inputPayload['0'].name,
-      provider: 'gcp',
+      provider: inputPayload['0'].provider,
       credentials: parsedCredentials,
     };
   } catch (error) {
