@@ -14,13 +14,13 @@ import (
 	"testing"
 )
 
-func getServer(t *testing.T, resp any, error bool) *httptest.Server {
+func getServer(t *testing.T, resp any, isError bool) *httptest.Server {
 	t.Helper()
 
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
-		if error {
+		if isError {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
 		}
@@ -41,13 +41,14 @@ func Test_GetAllInstances(t *testing.T) {
 			{Name: "test-instance", Project: "test-project"},
 		},
 	}
+
 	srv := getServer(t, resp, false)
+	defer srv.Close()
 
 	instSvc, err := sqladmin.NewService(context.Background(), option.WithoutAuthentication(), option.WithEndpoint(srv.URL))
 	require.NoError(t, err)
 
 	c := Client{SQL: instSvc.Instances}
-	defer srv.Close()
 
 	admin, err := c.GetAllInstances(nil, "test-project")
 
@@ -58,6 +59,8 @@ func Test_GetAllInstances(t *testing.T) {
 
 func Test_GetAllInstances_Error(t *testing.T) {
 	srv := getServer(t, nil, true)
+	defer srv.Close()
+
 	expected := &googleapi.Error{
 		Code: http.StatusInternalServerError,
 		Body: "Internal server error\n",
@@ -67,7 +70,6 @@ func Test_GetAllInstances_Error(t *testing.T) {
 	require.NoError(t, err)
 
 	c := Client{SQL: instSvc.Instances}
-	defer srv.Close()
 
 	admin, err := c.GetAllInstances(nil, "test-project")
 

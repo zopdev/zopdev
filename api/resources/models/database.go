@@ -10,18 +10,11 @@ type SQLInstance struct {
 }
 
 type Metric struct {
-	Points []Point `json:"points"`
+	Point any `json:"points"`
 }
 
-type Value interface {
-}
-
-type Point struct {
-	Value any
-}
-
-func (p *Point) GetDoubleValue() float64 {
-	v, ok := p.Value.(float64)
+func (m *Metric) GetDoubleValue() float64 {
+	v, ok := m.Point.(float64)
 	if !ok {
 		return 0
 	}

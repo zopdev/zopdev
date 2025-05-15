@@ -18,18 +18,21 @@ type Client struct {
 }
 
 func (c *Client) GetTimeSeries(ctx *gofr.Context, start, end time.Time, projectID, filter string) ([]models.Metric, error) {
-	req := &monitoringpb.ListTimeSeriesRequest{
-		Name:   "projects/" + projectID,
-		Filter: filter,
-		Interval: &monitoringpb.TimeInterval{
-			StartTime: timestamppb.New(start),
-			EndTime:   timestamppb.New(end),
-		},
-		View: monitoringpb.ListTimeSeriesRequest_FULL,
-	}
+	var (
+		metrics = make([]models.Metric, 0)
+		req     = &monitoringpb.ListTimeSeriesRequest{
+			Name:   "projects/" + projectID,
+			Filter: filter,
+			Interval: &monitoringpb.TimeInterval{
+				StartTime: timestamppb.New(start),
+				EndTime:   timestamppb.New(end),
+			},
+			View: monitoringpb.ListTimeSeriesRequest_FULL,
+		}
 
-	it := c.MetricClient.ListTimeSeries(ctx, req)
-	var metrics []models.Metric
+		// Create an iterator to list time series
+		it = c.MetricClient.ListTimeSeries(ctx, req)
+	)
 
 	for {
 		resp, err := it.Next()
@@ -41,24 +44,16 @@ func (c *Client) GetTimeSeries(ctx *gofr.Context, start, end time.Time, projectI
 			return nil, err
 		}
 
+		if len(resp.Points) == 0 {
+			continue
+		}
+
 		metrics = append(metrics, models.Metric{
-			Points: getPoints(resp.GetPoints()),
+			Point: getTypedValue(resp.Points[0].Value),
 		})
 	}
 
 	return metrics, nil
-}
-
-func getPoints(points []*monitoringpb.Point) []models.Point {
-	var p []models.Point
-
-	for _, point := range points {
-		p = append(p, models.Point{
-			Value: getTypedValue(point.Value),
-		})
-	}
-
-	return p
 }
 
 func getTypedValue(val *monitoringpb.TypedValue) any {

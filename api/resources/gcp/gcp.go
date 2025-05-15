@@ -11,11 +11,11 @@ import (
 	metric "github.com/zopdev/zopdev/api/resources/gcp/monitoring"
 )
 
-type client struct{}
+type Client struct{}
 
-func New() *client { return &client{} }
+func New() *Client { return &Client{} }
 
-func (*client) NewSQLInstanceLister(ctx context.Context, opts ...option.ClientOption) (InstanceLister, error) {
+func (*Client) NewSQLInstanceLister(ctx context.Context, opts ...option.ClientOption) (InstanceLister, error) {
 	admin, err := sqladmin.NewService(ctx, opts...)
 	if err != nil {
 		return nil, err
@@ -24,7 +24,7 @@ func (*client) NewSQLInstanceLister(ctx context.Context, opts ...option.ClientOp
 	return &sql.Client{SQL: admin.Instances}, nil
 }
 
-func (*client) NewMetricsClient(ctx context.Context, opts ...option.ClientOption) (MetricsClient, error) {
+func (*Client) NewMetricsClient(ctx context.Context, opts ...option.ClientOption) (TimeSeriesLister, error) {
 	mCl, err := gmonitoring.NewMetricClient(ctx, opts...)
 	if err != nil {
 		return nil, err

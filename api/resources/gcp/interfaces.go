@@ -9,9 +9,9 @@ import (
 )
 
 type InstanceLister interface {
-	GetAllInstances(ctx *gofr.Context, projectId string) ([]models.SQLInstance, error)
+	GetAllInstances(ctx *gofr.Context, projectID string) ([]models.SQLInstance, error)
 }
 
-type MetricsClient interface {
-	GetTimeSeries(ctx *gofr.Context, start, end time.Time, projectId, filter string) ([]models.Metric, error)
+type TimeSeriesLister interface {
+	GetTimeSeries(ctx *gofr.Context, start, end time.Time, projectID, filter string) ([]models.Metric, error)
 }

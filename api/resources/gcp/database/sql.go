@@ -11,13 +11,13 @@ type Client struct {
 	SQL *sqladmin.InstancesService
 }
 
-func (c *Client) GetAllInstances(_ *gofr.Context, projectId string) ([]models.SQLInstance, error) {
-	list, err := c.SQL.List(projectId).Do()
+func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.SQLInstance, error) {
+	list, err := c.SQL.List(projectID).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	var instances []models.SQLInstance
+	var instances = make([]models.SQLInstance, 0)
 
 	for _, item := range list.Items {
 		instances = append(instances, models.SQLInstance{
