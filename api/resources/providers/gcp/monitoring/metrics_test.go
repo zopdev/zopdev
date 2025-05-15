@@ -1,20 +1,22 @@
 package monitoring
 
 import (
-	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
-	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"context"
 	"errors"
+	"net"
+	"testing"
+	"time"
+
+	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"github.com/zopdev/zopdev/api/resources/models"
 	"gofr.dev/pkg/gofr"
 	"google.golang.org/api/option"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"net"
-	"testing"
-	"time"
+
+	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
 var errMock = errors.New("error")

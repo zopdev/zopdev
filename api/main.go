@@ -24,6 +24,9 @@ import (
 
 	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
 
+	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
+	resourceService "github.com/zopdev/zopdev/api/resources/service"
+
 	"github.com/zopdev/zopdev/api/migrations"
 	"gofr.dev/pkg/gofr"
 )
@@ -59,6 +62,9 @@ func main() {
 	adSvc := auditService.New(adStore)
 	adHandler := auditHandler.New(adSvc)
 
+	resSvc := resourceService.New()
+	resHld := resrouceHandler.New(resSvc)
+
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
@@ -91,6 +97,9 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/pod", deploymentHandler.ListPods)
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
+
+	// GET with post as we need cloud credentials
+	app.POST("/cloud/sql", resHld.GetCloudSQLInstances)
 
 	app.Run()
 }

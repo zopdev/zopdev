@@ -4,7 +4,7 @@ import (
 	"gofr.dev/pkg/gofr"
 	"google.golang.org/api/sqladmin/v1"
 
-	"github.com/zopdev/zopdev/api/resources/models"
+	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
 type Client struct {

@@ -5,7 +5,7 @@ import (
 
 	"gofr.dev/pkg/gofr"
 
-	"github.com/zopdev/zopdev/api/resources/models"
+	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
 type InstanceLister interface {

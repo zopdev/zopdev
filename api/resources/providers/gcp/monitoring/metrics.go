@@ -10,7 +10,7 @@ import (
 	"google.golang.org/api/iterator"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
-	"github.com/zopdev/zopdev/api/resources/models"
+	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
 type Client struct {
