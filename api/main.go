@@ -4,9 +4,14 @@ import (
 	appHandler "github.com/zopdev/zopdev/api/applications/handler"
 	appService "github.com/zopdev/zopdev/api/applications/service"
 	appStore "github.com/zopdev/zopdev/api/applications/store"
+
 	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
+
+	awsintegrationHandler "github.com/zopdev/zopdev/api/integration/handler"
+	awsintegrationService "github.com/zopdev/zopdev/api/integration/service"
+	awsintegrationStore "github.com/zopdev/zopdev/api/integration/store"
 
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
@@ -59,6 +64,12 @@ func main() {
 	adSvc := auditService.New(adStore)
 	adHandler := auditHandler.New(adSvc)
 
+	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
+
+	integrationStore := awsintegrationStore.New()
+	integrationService := awsintegrationService.New(integrationStore, awsAccountID)
+	integrationHandler := awsintegrationHandler.New(integrationService)
+
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
@@ -91,6 +102,9 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/pod", deploymentHandler.ListPods)
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
+
+	app.POST("/integration", integrationHandler.CreateIntegration)
+	app.POST("/assume-role", integrationHandler.AssumeRole)
 
 	app.Run()
 }
