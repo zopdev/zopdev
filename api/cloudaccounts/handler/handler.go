@@ -149,10 +149,6 @@ func validateCloudAccount(cloudAccount *store.CloudAccount) error {
 		return http.ErrorMissingParam{Params: params}
 	}
 
-	if !strings.EqualFold(cloudAccount.Provider, "gcp") {
-		return http.ErrorInvalidParam{Params: []string{"provider"}}
-	}
-
 	if len(cloudAccount.Name) > nameLength {
 		return http.ErrorInvalidParam{Params: []string{"name"}}
 	}
