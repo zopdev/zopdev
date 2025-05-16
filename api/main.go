@@ -67,7 +67,7 @@ func main() {
 
 	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
 
-	//TODO fix the number of statements according to the linters
+	// TODO fix the number of statements according to the linters
 	integrationStore := awsintegrationStore.New()
 	integrationService := awsintegrationService.New(integrationStore, awsAccountID)
 	integrationHandler := awsintegrationHandler.New(integrationService)
