@@ -4,12 +4,13 @@ import Label from '@/components/atom/Loaders/index.jsx';
 import Input from '@/components/atom/Input/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import Textarea from '@/components/atom/Textarea/index.jsx';
-import { enforceCharLimit } from '@/utils/common.js';
-import Tooltip from '@/components/atom/Tooltip/index.jsx';
+// import { enforceCharLimit } from '@/utils/common.js';
+// import Tooltip from '@/components/atom/Tooltip/index.jsx';
 import FullScreenOverlay from '@/components/atom/FullScreenOverlay/index.jsx';
 import { InformationCircleIcon } from '@heroicons/react/24/outline/index.js';
 import CloudAccountCreationGuide from '@/components/molecules/SetupGuides/CloudAccountSetupGuide.jsx';
 import NameValidation from '@/components/molecules/Validations/NameValidation.jsx';
+import AwsAccountCreationGuide from '../molecules/SetupGuides/AwsAccountCreationGuid';
 
 // Provider-specific form configurations
 const CloudForm = ({
@@ -97,7 +98,7 @@ const CloudForm = ({
       case 'gcp':
         return (
           <>
-            <div className="col-span-full">
+            <div className="col-span-full mb-4">
               <Label htmlFor="name">Name</Label>
               <div className="mt-2">
                 <Input
@@ -108,7 +109,7 @@ const CloudForm = ({
                   name="name"
                   placeholder="Enter name"
                   value={values?.name}
-                  helperText={<NameValidation value={values.name} min={2} max={16} />}
+                  helperText={<NameValidation value={values?.name} min={2} max={16} />}
                   inputProps={{ maxLength: 16, minLength: 2 }}
                   // inputProps={
                   //   provider === 'azure' ? { minLength: 6 } : { maxLength: 16, minLength: 6 }
@@ -191,7 +192,7 @@ const CloudForm = ({
       case 'aws':
         return (
           <>
-            <div className="col-span-full">
+            <div className="col-span-full mb-4">
               <Label htmlFor="name">Name</Label>
               <div className="mt-2">
                 <Input
@@ -213,15 +214,26 @@ const CloudForm = ({
                 />
               </div>
             </div>
-            <div className="col-span-full">
-              <div className="flex justify-between items-center flex-wrap">
+            <div className="col-span-full mb-4">
+              <div className="flex justify-between items-center flex-wrap mb-2">
                 <Label htmlFor="credentials">AWS Access Key ID</Label>
                 <FullScreenOverlay
-                  isGuide
-                  RenderIcon={InformationCircleIcon}
-                  // RenderComponent={AwsAccountCreationGuide}
-                  popupTitle={'Service Account Setup Guide'}
-                  title={'Cloud Account Setup Guide'}
+                  customCTA={
+                    <div className={'cursor-pointer group hover:text-primary-500'}>
+                      <div
+                        className={
+                          'flex items-center justify-center text-gray-600 group-hover:text-primary-600 gap-1'
+                        }
+                      >
+                        <InformationCircleIcon className="w-5 h-5 text-gray-600 group-hover:text-primary-600" />
+                        <span>Setup Guide</span>
+                      </div>
+                    </div>
+                  }
+                  title="Cloud Account Setup Guide"
+                  size={'4xl'}
+                  maxHeight={'90vh'}
+                  renderContent={AwsAccountCreationGuide}
                 />
               </div>
               <div>
@@ -258,7 +270,7 @@ const CloudForm = ({
       case 'azure':
         return (
           <>
-            <div className="col-span-full">
+            <div className="col-span-full mb-4">
               <Label htmlFor="name">Name</Label>
               <div className="mt-2">
                 <Input
@@ -280,7 +292,7 @@ const CloudForm = ({
                 />
               </div>
             </div>
-            <div className="col-span-full">
+            <div className="col-span-full mb-4">
               <div className="flex justify-between items-center flex-wrap">
                 <Label htmlFor="credentials">Resource Group</Label>
                 <FullScreenOverlay
@@ -305,7 +317,7 @@ const CloudForm = ({
                 />
               </div>
             </div>
-            <div className="sm:col-span-3">
+            <div className="sm:col-span-3 mb-4">
               <Label htmlFor="credentials">Subscription Key</Label>
               <div className="mt-2">
                 <Input
@@ -320,7 +332,7 @@ const CloudForm = ({
                 />
               </div>
             </div>
-            <div className="sm:col-span-3">
+            <div className="sm:col-span-3 mb-4">
               <Label htmlFor="credentials">Tenant Id</Label>
               <div className="mt-2">
                 <Input

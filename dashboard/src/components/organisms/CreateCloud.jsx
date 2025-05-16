@@ -5,7 +5,7 @@ const CreateCloud = ({ audit, setIsComplete, updateData, data }) => {
   const PROVIDERS = [
     { key: 'gcp', label: 'GCP' },
     { key: 'aws', label: 'AWS' },
-    { key: 'azure', label: 'Azure' },
+    // { key: 'azure', label: 'Azure' },
   ];
 
   const [activeProvider, setActiveProvider] = useState(PROVIDERS[0]);

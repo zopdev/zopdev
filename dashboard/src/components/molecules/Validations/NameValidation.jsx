@@ -1,5 +1,4 @@
 export default function NameValidation({ value, type, field, min, max }) {
-  console.log(value)
   if (min && max) {
     return (
       <ValidationMessage
@@ -91,5 +90,5 @@ export function ValidationMessage({ value, maxLength, minLength, pattern, type }
       </span>
     );
 
-  return <span className={`text-yellow-500`}>&nbsp;</span>;
+  return <span className={`text-yellow-500`}></span>;
 }
