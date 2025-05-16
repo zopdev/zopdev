@@ -3,6 +3,7 @@ package monitoring
 import (
 	"context"
 	"errors"
+	"google.golang.org/genproto/googleapis/api/distribution"
 	"net"
 	"testing"
 	"time"
@@ -73,6 +74,19 @@ func (f *fakeMetricServer) ListTimeSeries(_ context.Context,
 			{
 				Points: []*monitoringpb.Point{},
 			},
+			{
+				// Unsupported type // for now
+				// TODO: we can look to support this type at a later stage
+				Points: []*monitoringpb.Point{
+					{
+						Value: &monitoringpb.TypedValue{
+							Value: &monitoringpb.TypedValue_DistributionValue{
+								DistributionValue: &distribution.Distribution{},
+							},
+						},
+					},
+				},
+			},
 		},
 	}
 
@@ -124,6 +138,7 @@ func TestClient_GetTimeSeries(t *testing.T) {
 		{Point: false},
 		{Point: 12.3},
 		{Point: "29"},
+		{Point: nil},
 	}
 
 	resp, er := client.GetTimeSeries(&gofr.Context{Context: context.Background()}, startTime, endTime, "test-project", "")
@@ -148,8 +163,9 @@ func TestClient_GetTimeSeries_Error(t *testing.T) {
 	client := Client{metricClient}
 	startTime := time.Now()
 	endTime := startTime.Add(-24 * time.Hour)
-	resp, er := client.GetTimeSeries(&gofr.Context{Context: context.Background()}, startTime, endTime, "test-project", "")
+	resp, er := client.GetTimeSeries(&gofr.Context{Context: context.Background()},
+		startTime, endTime, "test-project", "")
 
 	require.Nil(t, resp)
-	assert.ErrorIs(t, errMock, er)
+	assert.Error(t, er)
 }

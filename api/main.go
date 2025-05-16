@@ -25,6 +25,7 @@ import (
 	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
 
 	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
+	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	resourceService "github.com/zopdev/zopdev/api/resources/service"
 
 	"github.com/zopdev/zopdev/api/migrations"
@@ -62,7 +63,8 @@ func main() {
 	adSvc := auditService.New(adStore)
 	adHandler := auditHandler.New(adSvc)
 
-	resSvc := resourceService.New()
+	gcpClient := gcpResource.New()
+	resSvc := resourceService.New(gcpClient)
 	resHld := resrouceHandler.New(resSvc)
 
 	app.AddHTTPService("cloud-account", "http://localhost:8000")

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/api/googleapi"
@@ -56,7 +56,7 @@ func Test_GetAllInstances(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, admin)
-	assert.Equal(t, []models.SQLInstance{{InstanceName: "test-instance", ProjectID: "test-project"}}, admin)
+	assert.Equal(t, []models.SQLInstance{{Name: "test-instance", ProjectID: "test-project"}}, admin)
 }
 
 func Test_GetAllInstances_Error(t *testing.T) {

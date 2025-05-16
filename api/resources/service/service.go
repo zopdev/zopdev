@@ -12,7 +12,9 @@ type Service struct {
 	gcp GCPClient
 }
 
-func New() *Service { return &Service{} }
+func New(gcp GCPClient) *Service {
+	return &Service{gcp: gcp}
+}
 
 func (s *Service) GetAllSQLInstances(ctx *gofr.Context, req Request) ([]models.SQLInstance, error) {
 	switch req.CloudType {

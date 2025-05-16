@@ -6,6 +6,8 @@ const (
 	GCP   CloudProvider = 0
 	AWS   CloudProvider = 1
 	AZURE CloudProvider = 2
+
+	UNSUPPORTED CloudProvider = -1
 )
 
 type Request struct {

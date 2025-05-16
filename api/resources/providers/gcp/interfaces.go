@@ -8,6 +8,14 @@ import (
 	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
+type SQLClient interface {
+	InstanceLister
+}
+
+type MetricsClient interface {
+	TimeSeriesLister
+}
+
 type InstanceLister interface {
 	GetAllInstances(ctx *gofr.Context, projectID string) ([]models.SQLInstance, error)
 }

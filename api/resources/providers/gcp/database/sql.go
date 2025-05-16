@@ -21,7 +21,7 @@ func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.SQ
 
 	for _, item := range list.Items {
 		instances = append(instances, models.SQLInstance{
-			InstanceName: item.Name,
+			Name:         item.Name,
 			ProjectID:    item.Project,
 			Region:       item.Region,
 			Zone:         item.GceZone,
@@ -31,4 +31,13 @@ func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.SQ
 	}
 
 	return instances, nil
+}
+
+func (c *Client) StopInstance(_ *gofr.Context, projectID, instanceID string) error {
+	_, err := c.SQL.StopReplica(projectID, instanceID).Do()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
