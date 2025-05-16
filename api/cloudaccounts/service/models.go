@@ -14,6 +14,11 @@ type gcpCredentials struct {
 	UniverseDomain          string `json:"universe_domain"`
 }
 
+type awsCredentials struct {
+	AccessKey    string `json:"aws_access_key_id"`
+	AccessSecret string `json:"aws_secret_access_key"`
+}
+
 type DeploymentSpaceOptions struct {
 	Name string `json:"name"`
 	Path string `json:"path"`
