@@ -9,12 +9,21 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 )
 
+var (
+	errFailedToLoadAWSConfig            = errors.New("failed to load AWS config")
+	errFailedToCreateIAMGroup           = errors.New("failed to create IAM group")
+	errFailedToAttachAdminPolicyToGroup = errors.New("failed to attach AdministratorAccess policy to group")
+	errFailedToCreateIAMUser            = errors.New("failed to create IAM user")
+	errFailedToAddUserToGroup           = errors.New("failed to add user to group")
+	errFailedToCreateAccessKeyForUser   = errors.New("failed to create access key for user")
+)
+
 func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, sessionToken, userName, groupName string) (string, string, error) {
 	cfg, err := config.LoadDefaultConfig(ctx,
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, sessionToken)),
 	)
 	if err != nil {
-		return "", "", errors.New("failed to load AWS config")
+		return "", "", errFailedToLoadAWSConfig
 	}
 
 	iamClient := iam.NewFromConfig(cfg)
@@ -24,7 +33,7 @@ func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, session
 		GroupName: aws.String(groupName),
 	})
 	if err != nil && !isEntityAlreadyExists(err) {
-		return "", "", errors.New("failed to create IAM group")
+		return "", "", errFailedToCreateIAMGroup
 	}
 
 	// Attach AdministratorAccess policy to group
@@ -33,7 +42,7 @@ func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, session
 		PolicyArn: aws.String("arn:aws:iam::aws:policy/AdministratorAccess"),
 	})
 	if err != nil {
-		return "", "", errors.New("failed to attach AdministratorAccess policy to group")
+		return "", "", errFailedToAttachAdminPolicyToGroup
 	}
 
 	// Create user if not exists
@@ -41,7 +50,7 @@ func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, session
 		UserName: aws.String(userName),
 	})
 	if err != nil && !isEntityAlreadyExists(err) {
-		return "", "", errors.New("failed to create IAM user")
+		return "", "", errFailedToCreateIAMUser
 	}
 
 	// Add user to group
@@ -50,7 +59,7 @@ func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, session
 		UserName:  aws.String(userName),
 	})
 	if err != nil {
-		return "", "", errors.New("failed to add user to group")
+		return "", "", errFailedToAddUserToGroup
 	}
 
 	// Create access key for user
@@ -58,7 +67,7 @@ func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, session
 		UserName: aws.String(userName),
 	})
 	if err != nil {
-		return "", "", errors.New("failed to create access key for user")
+		return "", "", errFailedToCreateAccessKeyForUser
 	}
 
 	return *accessKeyOut.AccessKey.AccessKeyId, *accessKeyOut.AccessKey.SecretAccessKey, nil

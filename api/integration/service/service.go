@@ -2,6 +2,7 @@ package service
 
 import (
 	"crypto/rand"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -13,13 +14,21 @@ import (
 
 const s3TemplateBaseURL = "https://zopdev-aws-one-click.s3.us-east-1.amazonaws.com/aws-service.yaml"
 
+var (
+	errMissingIntegrationOrAccountID = errors.New("missing required fields: integration_id or account_id")
+	errFailedToCreateAdminUserGroup  = errors.New("failed to create admin user/group")
+)
+
 type IntegrationService struct {
 	store               *store.Store
 	trustedPrincipalArn string
 }
 
 func New(store *store.Store, accountID string) *IntegrationService {
-	return &IntegrationService{store: store, trustedPrincipalArn: fmt.Sprintf("arn:aws:iam::%s:role/CrossAccountAssumer", accountID)}
+	return &IntegrationService{
+		store:               store,
+		trustedPrincipalArn: fmt.Sprintf("arn:aws:iam::%s:role/CrossAccountAssumer", accountID),
+	}
 }
 
 func (s *IntegrationService) CreateIntegration(ctx *gofr.Context, permissionLevel string) (models.Integration, error) {
@@ -52,7 +61,7 @@ func (s *IntegrationService) CreateIntegrationWithURL(ctx *gofr.Context, permiss
 
 func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, integrationID, accountID, userName, groupName string) (map[string]string, error) {
 	if integrationID == "" || accountID == "" {
-		return nil, fmt.Errorf("missing required fields: integration_id or account_id")
+		return nil, errMissingIntegrationOrAccountID
 	}
 
 	// Generate user_name and group_name
@@ -84,7 +93,7 @@ func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, 
 
 	ak, sk, err := CreateAdminUserWithGroup(ctx, *creds.AccessKeyId, *creds.SecretAccessKey, *creds.SessionToken, userName, groupName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create admin user/group: %w", err)
+		return nil, errFailedToCreateAdminUserGroup
 	}
 
 	return map[string]string{

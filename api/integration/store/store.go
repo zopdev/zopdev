@@ -2,10 +2,17 @@ package store
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
-	"github.com/zopdev/zopdev/api/integration/models"
 
+	"github.com/zopdev/zopdev/api/integration/models"
 	"gofr.dev/pkg/gofr"
+)
+
+var (
+	errFailedToSaveIntegration = errors.New("failed to save integration")
+	errIntegrationNotFound     = errors.New("integration not found")
+	errFailedToGetIntegration  = errors.New("failed to get integration")
 )
 
 type Store struct{}
@@ -19,8 +26,8 @@ func (s *Store) SaveIntegration(ctx *gofr.Context, i models.Integration) error {
 
 	_, err := ctx.SQL.ExecContext(ctx, query, i.IntegrationID, i.ExternalID, i.RoleName, i.TemplateURL)
 	if err != nil {
-		ctx.Logger.Errorf("Failed to save integration: %v", err)
-		return err
+		ctx.Logger.Errorf("%v: %v", errFailedToSaveIntegration, err)
+		return errFailedToSaveIntegration
 	}
 	return nil
 }
@@ -33,10 +40,10 @@ func (s *Store) GetIntegration(ctx *gofr.Context, id string) (models.Integration
 
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return i, fmt.Errorf("integration not found with id: %s", id)
+			return i, fmt.Errorf("%w: %s", errIntegrationNotFound, id)
 		}
-		ctx.Logger.Errorf("Failed to get integration: %v", err)
-		return i, err
+		ctx.Logger.Errorf("%v: %v", errFailedToGetIntegration, err)
+		return i, errFailedToGetIntegration
 	}
 
 	return i, nil
