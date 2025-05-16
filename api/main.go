@@ -33,6 +33,7 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
+//nolint:funlen // too many statements but acceptable for main for now
 func main() {
 	app := gofr.New()
 
@@ -66,6 +67,7 @@ func main() {
 
 	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
 
+	//TODO fix the number of statements according to the linters
 	integrationStore := awsintegrationStore.New()
 	integrationService := awsintegrationService.New(integrationStore, awsAccountID)
 	integrationHandler := awsintegrationHandler.New(integrationService)
