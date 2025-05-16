@@ -31,7 +31,7 @@ func New(st *store.Store, accountID string) *IntegrationService {
 	}
 }
 
-func (s *IntegrationService) CreateIntegration(ctx *gofr.Context, permissionLevel string) (models.Integration, error) {
+func (s *IntegrationService) CreateIntegration(ctx *gofr.Context) (models.Integration, error) {
 	integrationID := uuid.New().String()
 	externalID := fmt.Sprintf("ext-%s", integrationID)
 
@@ -43,6 +43,7 @@ func (s *IntegrationService) CreateIntegration(ctx *gofr.Context, permissionLeve
 	}
 
 	err := s.store.SaveIntegration(ctx, integration)
+
 	return integration, err
 }
 
@@ -51,10 +52,11 @@ func (s *IntegrationService) GetIntegration(ctx *gofr.Context, id string) (model
 }
 
 func (s *IntegrationService) CreateIntegrationWithURL(ctx *gofr.Context, permissionLevel string) (models.Integration, string, error) {
-	integration, err := s.CreateIntegration(ctx, permissionLevel)
+	integration, err := s.CreateIntegration(ctx)
 	if err != nil {
 		return integration, "", err
 	}
+
 	cfnURL := GenerateCloudFormationURL(integration, permissionLevel, s.trustedPrincipalArn)
 
 	return integration, cfnURL, nil
@@ -72,6 +74,7 @@ func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, 
 		if _, err := rand.Read(b); err != nil {
 			panic(fmt.Sprintf("failed to read random bytes: %v", err))
 		}
+
 		return fmt.Sprintf("%x", b)[:n]
 	}
 
@@ -81,6 +84,7 @@ func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, 
 		suffix := randomSuffix(suffixLength)
 		userName = "Zop-Admin-" + suffix
 	}
+
 	if groupName == "" {
 		suffix := randomSuffix(suffixLength)
 		groupName = "ZopAdminGroup-" + suffix
@@ -94,10 +98,11 @@ func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, 
 	roleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", accountID, integration.RoleName)
 
 	result, err := AssumeRole(roleARN, integration.ExternalID, "session-"+integration.IntegrationID)
-	if err != nil {
 
+	if err != nil {
 		return nil, err
 	}
+
 	creds := result.Credentials
 
 	ak, sk, err := CreateAdminUserWithGroup(ctx, *creds.AccessKeyId, *creds.SecretAccessKey, *creds.SessionToken, userName, groupName)

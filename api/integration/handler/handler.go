@@ -6,19 +6,19 @@ import (
 	"github.com/zopdev/zopdev/api/integration/service"
 )
 
-type handler struct {
+type Handler struct {
 	service *service.IntegrationService
 }
 
-func New(svc *service.IntegrationService) *handler {
-	return &handler{service: svc}
+func New(svc *service.IntegrationService) *Handler {
+	return &Handler{service: svc}
 }
 
-func (h *handler) CreateIntegration(ctx *gofr.Context) (any, error) {
+func (h *Handler) CreateIntegration(ctx *gofr.Context) (any, error) {
 	permissionLevel := "Admin"
 	integration, cfnURL, err := h.service.CreateIntegrationWithURL(ctx, permissionLevel)
-	if err != nil {
 
+	if err != nil {
 		return nil, err
 	}
 
@@ -28,7 +28,7 @@ func (h *handler) CreateIntegration(ctx *gofr.Context) (any, error) {
 	}, nil
 }
 
-func (h *handler) AssumeRole(ctx *gofr.Context) (any, error) {
+func (h *Handler) AssumeRole(ctx *gofr.Context) (any, error) {
 	var req struct {
 		IntegrationID string `json:"integration_id"`
 		AccountID     string `json:"account_id"`

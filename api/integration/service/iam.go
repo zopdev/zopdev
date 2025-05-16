@@ -19,9 +19,9 @@ var (
 	errFailedToCreateAccessKeyForUser   = errors.New("failed to create access key for user")
 )
 
-func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, sessionToken,
-	userName, groupName string) (accessKeyID string, secretAccessKey string, err error) {
-
+func CreateAdminUserWithGroup(ctx context.Context,
+	accessKey, secretKey, sessionToken, userName, groupName string,
+) (accessKeyID, secretAccessKey string, err error) {
 	cfg, err := config.LoadDefaultConfig(ctx,
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, sessionToken)),
 	)
