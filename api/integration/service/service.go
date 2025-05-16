@@ -24,9 +24,9 @@ type IntegrationService struct {
 	trustedPrincipalArn string
 }
 
-func New(store *store.Store, accountID string) *IntegrationService {
+func New(st *store.Store, accountID string) *IntegrationService {
 	return &IntegrationService{
-		store:               store,
+		store:               st,
 		trustedPrincipalArn: fmt.Sprintf("arn:aws:iam::%s:role/CrossAccountAssumer", accountID),
 	}
 }
@@ -56,10 +56,12 @@ func (s *IntegrationService) CreateIntegrationWithURL(ctx *gofr.Context, permiss
 		return integration, "", err
 	}
 	cfnURL := GenerateCloudFormationURL(integration, permissionLevel, s.trustedPrincipalArn)
+
 	return integration, cfnURL, nil
 }
 
-func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, integrationID, accountID, userName, groupName string) (map[string]string, error) {
+func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, integrationID, accountID,
+	userName, groupName string) (map[string]string, error) {
 	if integrationID == "" || accountID == "" {
 		return nil, errMissingIntegrationOrAccountID
 	}
@@ -67,15 +69,20 @@ func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, 
 	// Generate user_name and group_name
 	randomSuffix := func(n int) string {
 		b := make([]byte, n)
-		rand.Read(b)
+		if _, err := rand.Read(b); err != nil {
+			panic(fmt.Sprintf("failed to read random bytes: %v", err))
+		}
 		return fmt.Sprintf("%x", b)[:n]
 	}
+
+	const suffixLength = 6
+
 	if userName == "" {
-		suffix := randomSuffix(6)
+		suffix := randomSuffix(suffixLength)
 		userName = "Zop-Admin-" + suffix
 	}
 	if groupName == "" {
-		suffix := randomSuffix(6)
+		suffix := randomSuffix(suffixLength)
 		groupName = "ZopAdminGroup-" + suffix
 	}
 
@@ -85,8 +92,10 @@ func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, 
 	}
 
 	roleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", accountID, integration.RoleName)
+
 	result, err := AssumeRole(roleARN, integration.ExternalID, "session-"+integration.IntegrationID)
 	if err != nil {
+
 		return nil, err
 	}
 	creds := result.Credentials

@@ -29,6 +29,7 @@ func (s *Store) SaveIntegration(ctx *gofr.Context, i models.Integration) error {
 		ctx.Logger.Errorf("%v: %v", errFailedToSaveIntegration, err)
 		return errFailedToSaveIntegration
 	}
+
 	return nil
 }
 
@@ -39,10 +40,11 @@ func (s *Store) GetIntegration(ctx *gofr.Context, id string) (models.Integration
 	err := ctx.SQL.QueryRowContext(ctx, query).Scan(&i.IntegrationID, &i.ExternalID, &i.RoleName, &i.TemplateURL)
 
 	if err != nil {
-		if err == sql.ErrNoRows {
+		if errors.Is(err, sql.ErrNoRows) {
 			return i, fmt.Errorf("%w: %s", errIntegrationNotFound, id)
 		}
 		ctx.Logger.Errorf("%v: %v", errFailedToGetIntegration, err)
+
 		return i, errFailedToGetIntegration
 	}
 

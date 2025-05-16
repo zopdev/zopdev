@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
@@ -18,7 +19,9 @@ var (
 	errFailedToCreateAccessKeyForUser   = errors.New("failed to create access key for user")
 )
 
-func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, sessionToken, userName, groupName string) (string, string, error) {
+func CreateAdminUserWithGroup(ctx context.Context, accessKey, secretKey, sessionToken,
+	userName, groupName string) (accessKeyID string, secretAccessKey string, err error) {
+
 	cfg, err := config.LoadDefaultConfig(ctx,
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider(accessKey, secretKey, sessionToken)),
 	)

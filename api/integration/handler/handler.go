@@ -2,7 +2,7 @@ package handler
 
 import (
 	"gofr.dev/pkg/gofr"
-	
+
 	"github.com/zopdev/zopdev/api/integration/service"
 )
 
@@ -18,6 +18,7 @@ func (h *handler) CreateIntegration(ctx *gofr.Context) (any, error) {
 	permissionLevel := "Admin"
 	integration, cfnURL, err := h.service.CreateIntegrationWithURL(ctx, permissionLevel)
 	if err != nil {
+
 		return nil, err
 	}
 

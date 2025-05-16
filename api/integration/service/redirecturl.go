@@ -3,7 +3,7 @@ package service
 import (
 	"fmt"
 	"net/url"
-	
+
 	"github.com/zopdev/zopdev/api/integration/models"
 )
 
