@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 
 const CloudAccountCard = ({ item }) => {
   return (
-    <Link to={`/cloud-accounts/${item?.id}`}>
+    <Link to={`/cloud-accounts/${item?.id}/resources`}>
       <div
         className={`break-words rounded-md  duration-200 ease-in-out px-6 py-5 w-[330px] h-[166px] border border-gray-200  hover:bg-gray-50 hover:shadow-lg transition-shadow cursor-pointer`}
       >
