@@ -35,6 +35,14 @@ export function TopBar() {
       isLoading: false,
       icon: CloudAccountSVG,
     },
+    {
+      name: 'Cloud Accounts',
+      routeName: '/cloud-accounts',
+      hover: true,
+      selected: true,
+      isLoading: false,
+      icon: CloudAccountSVG,
+    },
   ];
 
   const navigate = useNavigate();
