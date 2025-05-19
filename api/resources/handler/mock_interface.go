@@ -13,7 +13,6 @@ import (
 	reflect "reflect"
 
 	models "github.com/zopdev/zopdev/api/resources/providers/models"
-	service "github.com/zopdev/zopdev/api/resources/service"
 	gomock "go.uber.org/mock/gomock"
 	gofr "gofr.dev/pkg/gofr"
 )
@@ -40,21 +39,6 @@ func NewMockService(ctrl *gomock.Controller) *MockService {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
-}
-
-// GetAllSQLInstances mocks base method.
-func (m *MockService) GetAllSQLInstances(ctx *gofr.Context, req service.Request) ([]models.Instance, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllSQLInstances", ctx, req)
-	ret0, _ := ret[0].([]models.Instance)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetAllSQLInstances indicates an expected call of GetAllSQLInstances.
-func (mr *MockServiceMockRecorder) GetAllSQLInstances(ctx, req any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSQLInstances", reflect.TypeOf((*MockService)(nil).GetAllSQLInstances), ctx, req)
 }
 
 // GetResources mocks base method.

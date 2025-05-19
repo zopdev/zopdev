@@ -110,6 +110,4 @@ func registerCloudResourceRoutes(app *gofr.App) {
 	resHld := resrouceHandler.New(resSvc)
 
 	app.GET("/cloud-account/{id}/resources", resHld.GetResources)
-	// GET with post as we need cloud credentials
-	app.POST("/cloud/sql", resHld.GetCloudSQLInstances)
 }

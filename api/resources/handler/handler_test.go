@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
@@ -25,7 +25,7 @@ func TestHandler_GetCloudSQLInstances(t *testing.T) {
 	defer ctrl.Finish()
 
 	req := httptest.NewRequest(http.MethodPost, "/cloud/sql",
-		bytes.NewBufferString(`{"cloudType": 0, "creds": {"projectId": "test-project"}}`))
+		bytes.NewBufferString(`{"cloudType": "GCP", "creds": {"projectId": "test-project"}}`))
 	req.Header.Set("content-type", "application/json")
 
 	mockSvc := NewMockService(ctrl)

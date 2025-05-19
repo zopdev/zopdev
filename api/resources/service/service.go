@@ -36,7 +36,7 @@ func (s *Service) GetResources(ctx *gofr.Context, id int64, resources []string) 
 	for _, resource := range resources {
 		switch resource {
 		case string(SQL):
-			sql, erRes := s.GetAllSQLInstances(ctx, Request{
+			sql, erRes := s.getAllSQLInstances(ctx, Request{
 				CloudType: CloudProvider(ca.Provider),
 				Creds:     ca.Credentials,
 			})
@@ -71,7 +71,7 @@ func (s *Service) getAllInstances(ctx *gofr.Context, cred any) ([]models.Instanc
 	return instances, nil
 }
 
-func (s *Service) GetAllSQLInstances(ctx *gofr.Context, req Request) ([]models.Instance, error) {
+func (s *Service) getAllSQLInstances(ctx *gofr.Context, req Request) ([]models.Instance, error) {
 	switch req.CloudType {
 	case GCP:
 		return s.getGCPSQLInstances(ctx, req.Creds)

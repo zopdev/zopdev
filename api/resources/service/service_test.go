@@ -36,7 +36,7 @@ func TestService_GetAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	req := Request{CloudType: "AWS"}
 
 	s := New(nil)
-	instances, err := s.GetAllSQLInstances(ctx, req)
+	instances, err := s.getAllSQLInstances(ctx, req)
 
 	assert.Nil(t, instances)
 	require.Error(t, err)
@@ -128,7 +128,7 @@ func TestService_GetAllSQLInstances_GCP(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockCalls()
 
-			instances, err := s.GetAllSQLInstances(ctx, req)
+			instances, err := s.getAllSQLInstances(ctx, req)
 
 			assert.Equal(t, tc.expResp, instances)
 			assert.Equal(t, tc.expErr, err)

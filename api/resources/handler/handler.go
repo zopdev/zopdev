@@ -5,8 +5,6 @@ import (
 
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
-
-	"github.com/zopdev/zopdev/api/resources/service"
 )
 
 type Handler struct {
@@ -31,15 +29,4 @@ func (h *Handler) GetResources(ctx *gofr.Context) (any, error) {
 	resourceType := ctx.Params("type")
 
 	return h.svc.GetResources(ctx, accID, resourceType)
-}
-
-func (h *Handler) GetCloudSQLInstances(ctx *gofr.Context) (any, error) {
-	var req service.Request
-
-	err := ctx.Bind(&req)
-	if err != nil {
-		return nil, err
-	}
-
-	return h.svc.GetAllSQLInstances(ctx, req)
 }
