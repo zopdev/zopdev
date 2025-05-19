@@ -128,7 +128,7 @@ const ResourceAudit = ({ data, updateData, setIsComplete }) => {
 //   );
 // };
 
-const Audit = () => {
+const CloudSetupPage = () => {
   const postData = usePostAuditData();
 
   const handleComplete = (data) => {
@@ -160,4 +160,4 @@ const Audit = () => {
   );
 };
 
-export default Audit;
+export default CloudSetupPage;

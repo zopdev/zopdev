@@ -10,7 +10,7 @@ import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
 import Button from '@/components/atom/Button/index.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
 
-const Dashboard = () => {
+const DashboardPage = () => {
   const getData = useGetCloudAccounts();
 
   const navigate = useNavigate();
@@ -112,4 +112,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

@@ -1,9 +1,9 @@
 import { lazy } from 'react';
 import MainLayout from '@/components/layouts/MainLayout.jsx';
 
-const DashboardHome = lazy(() => import('../pages/index.jsx'));
-const CloudSetup = lazy(() => import('../pages/cloud-setup.jsx'));
-const NotFound = lazy(() => import('../pages/404.jsx'));
+const DashboardPage = lazy(() => import('../pages/index.jsx'));
+const CloudSetupPage = lazy(() => import('../pages/cloud-setup.jsx'));
+const NotFoundPage = lazy(() => import('../pages/404.jsx'));
 
 export const appRoutes = [
   {
@@ -12,16 +12,16 @@ export const appRoutes = [
     children: [
       {
         index: true,
-        element: <DashboardHome />,
+        element: <DashboardPage />,
       },
       {
         path: 'cloud-setup',
-        element: <CloudSetup />,
+        element: <CloudSetupPage />,
       },
     ],
   },
   {
     path: '*',
-    element: <NotFound />,
+    element: <NotFoundPage />,
   },
 ];
