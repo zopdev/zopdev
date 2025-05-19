@@ -33,10 +33,10 @@ func New(accountID string) *IntegrationService {
 	}
 }
 
-func (s *IntegrationService) CreateIntegration(_ *gofr.Context, provider string) (models.Integration, string, error) {
+func (s *IntegrationService) GetIntegrationURL(_ *gofr.Context, provider string) (models.AWSIntegrationINFO, error) {
 	// Validate provider
 	if provider != awsProvider {
-		return models.Integration{}, "", errUnsupportedProvider
+		return models.AWSIntegrationINFO{}, errUnsupportedProvider
 	}
 
 	integrationID := uuid.New().String()
@@ -47,15 +47,15 @@ func (s *IntegrationService) CreateIntegration(_ *gofr.Context, provider string)
 	cfnURL := generateCloudFormationURL(integrationID, externalID, roleName, defaultPermissionLevel, s.trustedPrincipalArn)
 
 	// Construct the integration object for the response
-	integration := models.Integration{
+	integration := models.AWSIntegrationINFO{
 		CloudformationURL: cfnURL,
 		IntegrationID:     integrationID,
 	}
 
-	return integration, cfnURL, nil
+	return integration, nil
 }
 
-func (*IntegrationService) AssumeRoleAndCreateAdmin(ctx *gofr.Context, req *models.AssumeRole) (map[string]string, error) {
+func (*IntegrationService) AssumeRoleAndCreateAdmin(ctx *gofr.Context, req *models.RoleRequest) (map[string]string, error) {
 	if req.IntegrationID == "" || req.AccountID == "" {
 		return nil, errMissingIntegrationOrAccountID
 	}

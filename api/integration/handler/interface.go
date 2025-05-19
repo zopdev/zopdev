@@ -7,6 +7,6 @@ import (
 )
 
 type service interface {
-	CreateIntegration(ctx *gofr.Context, provider string) (models.Integration, string, error)
-	AssumeRoleAndCreateAdmin(ctx *gofr.Context, req *models.AssumeRole) (map[string]string, error)
+	GetIntegrationURL(ctx *gofr.Context, provider string) (models.AWSIntegrationINFO, error)
+	AssumeRoleAndCreateAdmin(ctx *gofr.Context, req *models.RoleRequest) (map[string]string, error)
 }

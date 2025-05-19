@@ -1,10 +1,11 @@
 package models
 
-type Integration struct {
+type AWSIntegrationINFO struct {
 	CloudformationURL string `json:"cloudformation_url"`
 	IntegrationID     string `json:"integration_id"`
 }
-type AssumeRole struct {
+
+type RoleRequest struct {
 	IntegrationID string `json:"integration_id"`
 	AccountID     string `json:"account_id"`
 }

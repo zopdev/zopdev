@@ -19,7 +19,7 @@ func New(svc service) *Handler {
 	return &Handler{service: svc}
 }
 
-// CreateIntegration handles GET request to get integration form data or account list.
+// GetIntegration handles GET request to get integration form data or account list.
 // It validates the provider and returns integration details with CloudFormation URL.
 func (h *Handler) GetIntegration(ctx *gofr.Context) (any, error) {
 	provider := strings.ToLower(strings.TrimSpace(ctx.PathParam("provider")))
@@ -32,23 +32,18 @@ func (h *Handler) GetIntegration(ctx *gofr.Context) (any, error) {
 		return nil, http.ErrorInvalidParam{Params: []string{"provider"}}
 	}
 
-	integration, cfnURL, err := h.service.CreateIntegration(ctx, provider)
+	integration, err := h.service.GetIntegrationURL(ctx, provider)
 	if err != nil {
 		return nil, err
 	}
 
-	response := models.Integration{
-		CloudformationURL: cfnURL,
-		IntegrationID:     integration.IntegrationID,
-	}
-
-	return response, nil
+	return integration, nil
 }
 
-// AssumeRole handles POST request to create integration.
-// It validates the provider and request body, then creates a temporary admin user.
+// Connect handles POST request to create integration.
+// It validates the request body and creates a temporary admin user.
 func (h *Handler) Connect(ctx *gofr.Context) (any, error) {
-	var req models.AssumeRole
+	var req models.RoleRequest
 	if err := ctx.Bind(&req); err != nil {
 		return nil, err
 	}
