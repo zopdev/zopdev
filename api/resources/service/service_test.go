@@ -3,25 +3,27 @@ package service
 import (
 	"context"
 	"errors"
+	"testing"
+
 	"github.com/stretchr/testify/assert"
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
-	"testing"
 
-	"go.uber.org/mock/gomock"
+	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
 var errMock = errors.New("mock error")
 
 type mockInstanceLister struct {
 	isError   bool
-	instances []models.SQLInstance
+	instances []models.Instance
 }
 
-func (m *mockInstanceLister) GetAllInstances(_ *gofr.Context, _ string) ([]models.SQLInstance, error) {
+func (m *mockInstanceLister) GetAllInstances(_ *gofr.Context, _ string) ([]models.Instance, error) {
 	if m.isError {
 		return nil, errMock
 	}
@@ -31,13 +33,13 @@ func (m *mockInstanceLister) GetAllInstances(_ *gofr.Context, _ string) ([]model
 
 func TestService_GetAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	ctx := &gofr.Context{}
-	req := Request{CloudType: UNSUPPORTED}
+	req := Request{CloudType: "AWS"}
 
 	s := New(nil)
 	instances, err := s.GetAllSQLInstances(ctx, req)
 
 	assert.Nil(t, instances)
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}}, err)
 }
 
@@ -58,7 +60,7 @@ func TestService_GetAllSQLInstances_GCP(t *testing.T) {
 
 	mockGCP := NewMockGCPClient(ctrl)
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
-	mockResp := []models.SQLInstance{
+	mockResp := []models.Instance{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
 	mockLister := &mockInstanceLister{
@@ -69,7 +71,7 @@ func TestService_GetAllSQLInstances_GCP(t *testing.T) {
 	testCases := []struct {
 		name      string
 		req       Request
-		expResp   []models.SQLInstance
+		expResp   []models.Instance
 		expErr    error
 		mockCalls func()
 	}{

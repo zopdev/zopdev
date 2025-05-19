@@ -33,7 +33,7 @@ func Test_Metric(t *testing.T) {
 			case "int64":
 				assert.Equal(t, test.expected, m.GetIns64Value())
 			case "float64":
-				assert.Equal(t, test.expected, m.GetDoubleValue())
+				assert.InEpsilon(t, test.expected, m.GetDoubleValue(), 0.0)
 			case "bool":
 				assert.Equal(t, test.expected, m.GetBoolValue())
 			case "string":

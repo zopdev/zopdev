@@ -1,13 +1,21 @@
 package service
 
-type CloudProvider int32
+type (
+	CloudProvider string
+	ResourceType  string
+)
 
 const (
-	GCP   CloudProvider = 0
-	AWS   CloudProvider = 1
-	AZURE CloudProvider = 2
+	// Cloud Providers that are currently supported in zopdev.
 
-	UNSUPPORTED CloudProvider = -1
+	GCP CloudProvider = "GCP"
+
+	// Resource Types that are currently supported in zopdev.
+	// TODO: add more resource types.
+
+	ALL ResourceType = "all"
+	SQL ResourceType = "sql"
+	VM  ResourceType = "vm"
 )
 
 type Request struct {

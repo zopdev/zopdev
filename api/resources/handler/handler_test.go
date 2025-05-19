@@ -4,51 +4,54 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"github.com/stretchr/testify/assert"
-	"github.com/zopdev/zopdev/api/resources/providers/models"
-	"github.com/zopdev/zopdev/api/resources/service"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
+
+	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/service"
 )
+
+var errMock = errors.New("mock error")
 
 func TestHandler_GetCloudSQLInstances(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	req := httptest.NewRequest(http.MethodPost, "/cloud/sql", bytes.NewBuffer([]byte(`{"cloudType": 0, "creds": {"projectId": "test-project"}}`)))
+	req := httptest.NewRequest(http.MethodPost, "/cloud/sql",
+		bytes.NewBufferString(`{"cloudType": 0, "creds": {"projectId": "test-project"}}`))
 	req.Header.Set("content-type", "application/json")
 
 	mockSvc := NewMockService(ctrl)
 	// to test the binding of the request body
 	mockReq := service.Request{
-		CloudType: 0,
+		CloudType: "GCP",
 		Creds:     map[string]any{"projectId": "test-project"},
 	}
 	ctx := &gofr.Context{
 		Context: context.Background(),
 		Request: gofrHttp.NewRequest(req),
 	}
-	mockResp := []models.SQLInstance{
+	mockResp := []models.Instance{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
-	errMock := errors.New("error")
 
 	// Test success case
 	mockSvc.EXPECT().GetAllSQLInstances(ctx, mockReq).Return(mockResp, nil)
 
 	h := New(mockSvc)
 	resp, err := h.GetCloudSQLInstances(ctx)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, mockResp, resp)
 
 	// Test error case
 	mockSvc.EXPECT().GetAllSQLInstances(ctx, mockReq).Return(nil, errMock)
-	resp, err = h.GetCloudSQLInstances(ctx)
-	assert.Error(t, err)
-
+	_, err = h.GetCloudSQLInstances(ctx)
+	require.Error(t, err)
 }

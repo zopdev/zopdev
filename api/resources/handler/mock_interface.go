@@ -43,10 +43,10 @@ func (m *MockService) EXPECT() *MockServiceMockRecorder {
 }
 
 // GetAllSQLInstances mocks base method.
-func (m *MockService) GetAllSQLInstances(ctx *gofr.Context, req service.Request) ([]models.SQLInstance, error) {
+func (m *MockService) GetAllSQLInstances(ctx *gofr.Context, req service.Request) ([]models.Instance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAllSQLInstances", ctx, req)
-	ret0, _ := ret[0].([]models.SQLInstance)
+	ret0, _ := ret[0].([]models.Instance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -55,4 +55,19 @@ func (m *MockService) GetAllSQLInstances(ctx *gofr.Context, req service.Request)
 func (mr *MockServiceMockRecorder) GetAllSQLInstances(ctx, req any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllSQLInstances", reflect.TypeOf((*MockService)(nil).GetAllSQLInstances), ctx, req)
+}
+
+// GetResources mocks base method.
+func (m *MockService) GetResources(ctx *gofr.Context, id int64, resources []string) ([]models.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetResources", ctx, id, resources)
+	ret0, _ := ret[0].([]models.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResources indicates an expected call of GetResources.
+func (mr *MockServiceMockRecorder) GetResources(ctx, id, resources any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResources", reflect.TypeOf((*MockService)(nil).GetResources), ctx, id, resources)
 }

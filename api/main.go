@@ -59,14 +59,6 @@ func main() {
 	applicationService := appService.New(applicationStore, environmentService)
 	applicationHandler := appHandler.New(applicationService)
 
-	adStore := auditStore.New()
-	adSvc := auditService.New(adStore)
-	adHandler := auditHandler.New(adSvc)
-
-	gcpClient := gcpResource.New()
-	resSvc := resourceService.New(gcpClient)
-	resHld := resrouceHandler.New(resSvc)
-
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
@@ -75,12 +67,6 @@ func main() {
 	app.GET("/cloud-accounts/{id}/deployment-space/namespaces", cloudAccountHandler.ListNamespaces)
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
 	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
-
-	app.POST("/audit/cloud-accounts/{id}/all", adHandler.RunAll)
-	app.POST("/audit/cloud-accounts/{id}/category/{category}", adHandler.RunByCategory)
-	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunByID)
-	app.GET("/audit/cloud-accounts/{id}/results", adHandler.GetAllResults)
-	app.GET("/audit/cloud-accounts/{id}/results/{ruleId}", adHandler.GetResultByID)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
@@ -100,8 +86,30 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
 
-	// GET with post as we need cloud credentials
-	app.POST("/cloud/sql", resHld.GetCloudSQLInstances)
+	registerAuditAPIRoutes(app)
+	registerCloudResourceRoutes(app)
 
 	app.Run()
+}
+
+func registerAuditAPIRoutes(app *gofr.App) {
+	adStore := auditStore.New()
+	adSvc := auditService.New(adStore)
+	adHandler := auditHandler.New(adSvc)
+
+	app.POST("/audit/cloud-accounts/{id}/all", adHandler.RunAll)
+	app.POST("/audit/cloud-accounts/{id}/category/{category}", adHandler.RunByCategory)
+	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunByID)
+	app.GET("/audit/cloud-accounts/{id}/results", adHandler.GetAllResults)
+	app.GET("/audit/cloud-accounts/{id}/results/{ruleId}", adHandler.GetResultByID)
+}
+
+func registerCloudResourceRoutes(app *gofr.App) {
+	gcpClient := gcpResource.New()
+	resSvc := resourceService.New(gcpClient)
+	resHld := resrouceHandler.New(resSvc)
+
+	app.GET("/cloud-account/{id}/resources", resHld.GetResources)
+	// GET with post as we need cloud credentials
+	app.POST("/cloud/sql", resHld.GetCloudSQLInstances)
 }

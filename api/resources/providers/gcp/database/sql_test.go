@@ -56,7 +56,7 @@ func Test_GetAllInstances(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, admin)
-	assert.Equal(t, []models.SQLInstance{{Name: "test-instance", ProjectID: "test-project"}}, admin)
+	assert.Equal(t, []models.Instance{{Name: "test-instance", ProviderID: "test-project"}}, admin)
 }
 
 func Test_GetAllInstances_Error(t *testing.T) {
