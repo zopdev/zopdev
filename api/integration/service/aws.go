@@ -87,7 +87,7 @@ func isEntityAlreadyExists(err error) bool {
 }
 
 // generateCloudFormationURL generates a CloudFormation console URL for stack creation.
-func generateCloudFormationURL(integrationID, externalID, roleName, permissionLevel, trustedPrincipalArn string) string {
+func generateCloudFormationURL(integrationID, externalID, _, permissionLevel, trustedPrincipalArn string) string {
 	region := "us-east-1"
 	templateURL := s3TemplateBaseURL
 
