@@ -4,9 +4,13 @@ import (
 	appHandler "github.com/zopdev/zopdev/api/applications/handler"
 	appService "github.com/zopdev/zopdev/api/applications/service"
 	appStore "github.com/zopdev/zopdev/api/applications/store"
+
 	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
+
+	awsintegrationHandler "github.com/zopdev/zopdev/api/integration/handler"
+	awsintegrationService "github.com/zopdev/zopdev/api/integration/service"
 
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
@@ -28,6 +32,9 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
+// TODO fix the number of statements according to the linters
+//
+//nolint:funlen // too many statements but acceptable for main for now
 func main() {
 	app := gofr.New()
 
@@ -58,6 +65,11 @@ func main() {
 	adStore := auditStore.New()
 	adSvc := auditService.New(adStore)
 	adHandler := auditHandler.New(adSvc)
+
+	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
+
+	integrationService := awsintegrationService.New(awsAccountID)
+	integrationHandler := awsintegrationHandler.New(integrationService)
 
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
@@ -91,6 +103,9 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/pod", deploymentHandler.ListPods)
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
+
+	app.GET("/{provider}/connect", integrationHandler.GetIntegration)
+	app.POST("/{provider}/connect", integrationHandler.Connect)
 
 	app.Run()
 }

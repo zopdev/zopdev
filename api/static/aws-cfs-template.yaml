@@ -1,0 +1,51 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >
+  Secure cross-account IAM role for granting temporary access using sts:AssumeRole
+  with external ID validation. Grants AdministratorAccess and includes zopdev user by default.
+
+Parameters:
+  IntegrationId:
+    Type: String
+    Description: An ID for tracking this integration (e.g. customer ID or app name)
+
+  TrustedPrincipalArn:
+    Type: String
+    Description: The IAM Role ARN in the trusted account allowed to assume this role
+
+  ExternalId:
+    Type: String
+    Description: External ID used by trusted party to assume role securely
+
+Resources:
+  CrossAccountRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'CrossAccountAccessRole-${IntegrationId}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              AWS:
+                - !Ref TrustedPrincipalArn
+                - "arn:aws:iam::277707114893:user/zopdev"
+            Action: sts:AssumeRole
+            Condition:
+              StringEquals:
+                sts:ExternalId: !Ref ExternalId
+      Path: '/'
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+
+Outputs:
+  RoleArn:
+    Description: ARN of the IAM role that can be assumed using sts:AssumeRole
+    Value: !GetAtt CrossAccountRole.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-CrossAccountRoleArn'
+
+  ExternalIdUsed:
+    Description: External ID required to assume the role
+    Value: !Ref ExternalId
+    Export:
+      Name: !Sub '${AWS::StackName}-ExternalId'
