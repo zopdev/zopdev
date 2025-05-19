@@ -1,23 +1,38 @@
 package handler
 
 import (
-	"gofr.dev/pkg/gofr"
+	"strings"
 
-	"github.com/zopdev/zopdev/api/integration/service"
+	"gofr.dev/pkg/gofr"
+	"gofr.dev/pkg/gofr/http"
+
+	"github.com/zopdev/zopdev/api/integration/models"
 )
 
+// Handler handles HTTP requests for AWS integration.
 type Handler struct {
-	service *service.IntegrationService
+	service service
 }
 
-func New(svc *service.IntegrationService) *Handler {
+// New creates a new Handler instance.
+func New(svc service) *Handler {
 	return &Handler{service: svc}
 }
 
+// CreateIntegration handles GET request to get integration form data or account list.
+// It validates the provider and returns integration details with CloudFormation URL.
 func (h *Handler) CreateIntegration(ctx *gofr.Context) (any, error) {
-	permissionLevel := "Admin"
-	integration, cfnURL, err := h.service.CreateIntegrationWithURL(ctx, permissionLevel)
+	provider := strings.ToLower(strings.TrimSpace(ctx.PathParam("provider")))
+	if provider == "" {
+		return nil, http.ErrorMissingParam{Params: []string{"provider"}}
+	}
 
+	// Validate provider.
+	if !isValidProvider(provider) {
+		return nil, http.ErrorInvalidParam{Params: []string{"provider"}}
+	}
+
+	integration, cfnURL, err := h.service.CreateIntegration(ctx, provider)
 	if err != nil {
 		return nil, err
 	}
@@ -28,17 +43,36 @@ func (h *Handler) CreateIntegration(ctx *gofr.Context) (any, error) {
 	}, nil
 }
 
+// AssumeRole handles POST request to create integration.
+// It validates the provider and request body, then creates a temporary admin user.
 func (h *Handler) AssumeRole(ctx *gofr.Context) (any, error) {
-	var req struct {
-		IntegrationID string `json:"integration_id"`
-		AccountID     string `json:"account_id"`
-		UserName      string `json:"user_name"`
-		GroupName     string `json:"group_name"`
+	provider := strings.ToLower(strings.TrimSpace(ctx.PathParam("provider")))
+	if provider == "" {
+		return nil, http.ErrorMissingParam{Params: []string{"provider"}}
 	}
 
+	// Validate provider
+	if !isValidProvider(provider) {
+		return nil, http.ErrorInvalidParam{Params: []string{"provider"}}
+	}
+
+	var req models.AssumeRoleRequest
 	if err := ctx.Bind(&req); err != nil {
 		return nil, err
 	}
 
-	return h.service.AssumeRoleWithOptionalAdminUser(ctx, req.IntegrationID, req.AccountID, req.UserName, req.GroupName)
+	// Set provider in request
+	req.Provider = provider
+
+	return h.service.AssumeRoleAndCreateTemporaryAdmin(ctx, &req)
+}
+
+// isValidProvider checks if the provider is supported.
+// Currently only AWS is supported.
+func isValidProvider(provider string) bool {
+	supportedProviders := map[string]bool{
+		"aws": true,
+	}
+
+	return supportedProviders[provider]
 }

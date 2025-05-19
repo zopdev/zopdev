@@ -3,11 +3,17 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/url"
+	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
+
+	"github.com/zopdev/zopdev/api/integration/models"
 )
 
 var (
@@ -19,7 +25,8 @@ var (
 	errFailedToCreateAccessKeyForUser   = errors.New("failed to create access key for user")
 )
 
-func CreateAdminUserWithGroup(ctx context.Context,
+// createAdminUserWithGroup creates an IAM user and group with admin access.
+func createAdminUserWithGroup(ctx context.Context,
 	accessKey, secretKey, sessionToken, userName, groupName string,
 ) (accessKeyID, secretAccessKey string, err error) {
 	cfg, err := config.LoadDefaultConfig(ctx,
@@ -31,7 +38,7 @@ func CreateAdminUserWithGroup(ctx context.Context,
 
 	iamClient := iam.NewFromConfig(cfg)
 
-	// Create group if not exists
+	// Create group if not exists.
 	_, err = iamClient.CreateGroup(ctx, &iam.CreateGroupInput{
 		GroupName: aws.String(groupName),
 	})
@@ -39,7 +46,7 @@ func CreateAdminUserWithGroup(ctx context.Context,
 		return "", "", errFailedToCreateIAMGroup
 	}
 
-	// Attach AdministratorAccess policy to group
+	// Attach AdministratorAccess policy to group.
 	_, err = iamClient.AttachGroupPolicy(ctx, &iam.AttachGroupPolicyInput{
 		GroupName: aws.String(groupName),
 		PolicyArn: aws.String("arn:aws:iam::aws:policy/AdministratorAccess"),
@@ -48,7 +55,7 @@ func CreateAdminUserWithGroup(ctx context.Context,
 		return "", "", errFailedToAttachAdminPolicyToGroup
 	}
 
-	// Create user if not exists
+	// Create user if not exists.
 	_, err = iamClient.CreateUser(ctx, &iam.CreateUserInput{
 		UserName: aws.String(userName),
 	})
@@ -56,7 +63,7 @@ func CreateAdminUserWithGroup(ctx context.Context,
 		return "", "", errFailedToCreateIAMUser
 	}
 
-	// Add user to group
+	// Add user to group.
 	_, err = iamClient.AddUserToGroup(ctx, &iam.AddUserToGroupInput{
 		GroupName: aws.String(groupName),
 		UserName:  aws.String(userName),
@@ -65,7 +72,7 @@ func CreateAdminUserWithGroup(ctx context.Context,
 		return "", "", errFailedToAddUserToGroup
 	}
 
-	// Create access key for user
+	// Create access key for user.
 	accessKeyOut, err := iamClient.CreateAccessKey(ctx, &iam.CreateAccessKeyInput{
 		UserName: aws.String(userName),
 	})
@@ -76,10 +83,55 @@ func CreateAdminUserWithGroup(ctx context.Context,
 	return *accessKeyOut.AccessKey.AccessKeyId, *accessKeyOut.AccessKey.SecretAccessKey, nil
 }
 
+// isEntityAlreadyExists checks if the error indicates an entity already exists.
 func isEntityAlreadyExists(err error) bool {
-	return err != nil && (contains(err.Error(), "EntityAlreadyExists") || contains(err.Error(), "already exists"))
+	return err != nil && (strings.Contains(err.Error(), "EntityAlreadyExists") || strings.Contains(err.Error(), "already exists"))
 }
 
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || (len(s) > len(substr) && (contains(s[1:], substr) || contains(s[:len(s)-1], substr))))
+// generateCloudFormationURL generates a CloudFormation console URL for stack creation.
+func generateCloudFormationURL(integration *models.Integration, permissionLevel, trustedPrincipalArn string) string {
+	region := "us-east-1"
+
+	// Base CloudFormation URL.
+	baseURL := fmt.Sprintf("https://%s.console.aws.amazon.com/cloudformation/home", region)
+
+	stackName := fmt.Sprintf("Zopdev-%s", integration.IntegrationID)
+
+	// Quick create stack parameters
+	cfnURL := fmt.Sprintf("%s?region=%s#/stacks/quickcreate"+
+		"?templateURL=%s"+
+		"&stackName=%s"+
+		"&param_IntegrationId=%s"+
+		"&param_ExternalId=%s"+
+		"&param_TrustedPrincipalArn=%s"+
+		"&param_PermissionLevel=%s",
+		baseURL,
+		region,
+		url.QueryEscape(integration.TemplateURL),
+		url.QueryEscape(stackName),
+		url.QueryEscape(integration.IntegrationID),
+		url.QueryEscape(integration.ExternalID),
+		url.QueryEscape(trustedPrincipalArn),
+		url.QueryEscape(permissionLevel),
+	)
+
+	return cfnURL
+}
+
+// AssumeRole assumes an IAM role using AWS STS.
+func AssumeRole(roleArn, externalID, sessionName string) (*sts.AssumeRoleOutput, error) {
+	cfg, err := config.LoadDefaultConfig(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	client := sts.NewFromConfig(cfg)
+
+	input := &sts.AssumeRoleInput{
+		RoleArn:         aws.String(roleArn),
+		RoleSessionName: aws.String(sessionName),
+		ExternalId:      aws.String(externalID),
+	}
+
+	return client.AssumeRole(context.TODO(), input)
 }

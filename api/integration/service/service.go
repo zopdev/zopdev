@@ -9,63 +9,61 @@ import (
 	"gofr.dev/pkg/gofr"
 
 	"github.com/zopdev/zopdev/api/integration/models"
-	"github.com/zopdev/zopdev/api/integration/store"
 )
 
-const s3TemplateBaseURL = "https://zopdev-aws-one-click.s3.us-east-1.amazonaws.com/aws-service.yaml"
+const (
+	s3TemplateBaseURL      = "https://zopdev-aws-one-click.s3.us-east-1.amazonaws.com/aws-service.yaml"
+	defaultPermissionLevel = "Admin"
+	awsProvider            = "aws"
+)
 
 var (
 	errMissingIntegrationOrAccountID = errors.New("missing required fields: integration_id or account_id")
 	errFailedToCreateAdminUserGroup  = errors.New("failed to create admin user/group")
+	errUnsupportedProvider           = errors.New("unsupported provider")
 )
 
 type IntegrationService struct {
-	store               *store.Store
 	trustedPrincipalArn string
 }
 
-func New(st *store.Store, accountID string) *IntegrationService {
+func New(accountID string) *IntegrationService {
 	return &IntegrationService{
-		store:               st,
 		trustedPrincipalArn: fmt.Sprintf("arn:aws:iam::%s:role/CrossAccountAssumer", accountID),
 	}
 }
 
-func (s *IntegrationService) CreateIntegration(ctx *gofr.Context) (models.Integration, error) {
-	integrationID := uuid.New().String()
-	externalID := fmt.Sprintf("ext-%s", integrationID)
+func (s *IntegrationService) CreateIntegration(_ *gofr.Context, provider string) (models.Integration, string, error) {
+	// Validate provider
+	if provider != awsProvider {
+		return models.Integration{}, "", errUnsupportedProvider
+	}
 
+	integrationID := uuid.New().String()
+
+	// Construct the integration object for the response
 	integration := models.Integration{
 		IntegrationID: integrationID,
-		ExternalID:    externalID,
+		ExternalID:    fmt.Sprintf("ext-%s", integrationID),
 		TemplateURL:   s3TemplateBaseURL,
 		RoleName:      fmt.Sprintf("CrossAccountAccessRole-%s", integrationID),
+		Provider:      provider,
 	}
 
-	err := s.store.SaveIntegration(ctx, integration)
-
-	return integration, err
-}
-
-func (s *IntegrationService) GetIntegration(ctx *gofr.Context, id string) (models.Integration, error) {
-	return s.store.GetIntegration(ctx, id)
-}
-
-func (s *IntegrationService) CreateIntegrationWithURL(ctx *gofr.Context, permissionLevel string) (models.Integration, string, error) {
-	integration, err := s.CreateIntegration(ctx)
-	if err != nil {
-		return integration, "", err
-	}
-
-	cfnURL := GenerateCloudFormationURL(integration, permissionLevel, s.trustedPrincipalArn)
+	// Generate CloudFormation URL.
+	cfnURL := generateCloudFormationURL(&integration, defaultPermissionLevel, s.trustedPrincipalArn)
 
 	return integration, cfnURL, nil
 }
 
-func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, integrationID, accountID,
-	userName, groupName string) (map[string]string, error) {
-	if integrationID == "" || accountID == "" {
+func (*IntegrationService) AssumeRoleAndCreateTemporaryAdmin(ctx *gofr.Context, req *models.AssumeRoleRequest) (map[string]string, error) {
+	if req.IntegrationID == "" || req.AccountID == "" {
 		return nil, errMissingIntegrationOrAccountID
+	}
+
+	// Validate provider
+	if req.Provider != awsProvider {
+		return nil, errUnsupportedProvider
 	}
 
 	// Generate user_name and group_name
@@ -80,32 +78,35 @@ func (s *IntegrationService) AssumeRoleWithOptionalAdminUser(ctx *gofr.Context, 
 
 	const suffixLength = 6
 
+	userName := req.UserName
 	if userName == "" {
 		suffix := randomSuffix(suffixLength)
 		userName = "Zop-Admin-" + suffix
 	}
 
+	groupName := req.GroupName
 	if groupName == "" {
 		suffix := randomSuffix(suffixLength)
 		groupName = "ZopAdminGroup-" + suffix
 	}
 
-	integration, err := s.GetIntegration(ctx, integrationID)
-	if err != nil {
-		return nil, err
+	// Construct integration object from request
+	integration := models.Integration{
+		IntegrationID: req.IntegrationID,
+		ExternalID:    fmt.Sprintf("ext-%s", req.IntegrationID),
+		RoleName:      fmt.Sprintf("CrossAccountAccessRole-%s", req.IntegrationID),
 	}
 
-	roleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", accountID, integration.RoleName)
+	roleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", req.AccountID, integration.RoleName)
 
 	result, err := AssumeRole(roleARN, integration.ExternalID, "session-"+integration.IntegrationID)
-
 	if err != nil {
 		return nil, err
 	}
 
 	creds := result.Credentials
 
-	ak, sk, err := CreateAdminUserWithGroup(ctx, *creds.AccessKeyId, *creds.SecretAccessKey, *creds.SessionToken, userName, groupName)
+	ak, sk, err := createAdminUserWithGroup(ctx, *creds.AccessKeyId, *creds.SecretAccessKey, *creds.SessionToken, userName, groupName)
 	if err != nil {
 		return nil, errFailedToCreateAdminUserGroup
 	}

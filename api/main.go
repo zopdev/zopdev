@@ -11,7 +11,6 @@ import (
 
 	awsintegrationHandler "github.com/zopdev/zopdev/api/integration/handler"
 	awsintegrationService "github.com/zopdev/zopdev/api/integration/service"
-	awsintegrationStore "github.com/zopdev/zopdev/api/integration/store"
 
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
@@ -33,6 +32,8 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
+// TODO fix the number of statements according to the linters
+//
 //nolint:funlen // too many statements but acceptable for main for now
 func main() {
 	app := gofr.New()
@@ -67,9 +68,7 @@ func main() {
 
 	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
 
-	// TODO fix the number of statements according to the linters
-	integrationStore := awsintegrationStore.New()
-	integrationService := awsintegrationService.New(integrationStore, awsAccountID)
+	integrationService := awsintegrationService.New(awsAccountID)
 	integrationHandler := awsintegrationHandler.New(integrationService)
 
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
@@ -105,8 +104,9 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
 
-	app.POST("/integration", integrationHandler.CreateIntegration)
-	app.POST("/assume-role", integrationHandler.AssumeRole)
+	// Integration endpoints with provider path parameter
+	app.GET("/{provider}/connect", integrationHandler.CreateIntegration)
+	app.POST("/{provider}/connect", integrationHandler.AssumeRole)
 
 	app.Run()
 }
