@@ -104,9 +104,8 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
 
-	// Integration endpoints with provider path parameter
-	app.GET("/{provider}/connect", integrationHandler.CreateIntegration)
-	app.POST("/{provider}/connect", integrationHandler.AssumeRole)
+	app.GET("/{provider}/connect", integrationHandler.GetIntegration)
+	app.POST("/{provider}/connect", integrationHandler.Connect)
 
 	app.Run()
 }

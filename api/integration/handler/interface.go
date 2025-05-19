@@ -8,5 +8,5 @@ import (
 
 type service interface {
 	CreateIntegration(ctx *gofr.Context, provider string) (models.Integration, string, error)
-	AssumeRoleAndCreateTemporaryAdmin(ctx *gofr.Context, req *models.AssumeRoleRequest) (map[string]string, error)
+	AssumeRoleAndCreateAdmin(ctx *gofr.Context, req *models.AssumeRole) (map[string]string, error)
 }

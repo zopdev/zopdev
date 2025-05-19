@@ -12,8 +12,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/credentials"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
-
-	"github.com/zopdev/zopdev/api/integration/models"
 )
 
 var (
@@ -89,13 +87,14 @@ func isEntityAlreadyExists(err error) bool {
 }
 
 // generateCloudFormationURL generates a CloudFormation console URL for stack creation.
-func generateCloudFormationURL(integration *models.Integration, permissionLevel, trustedPrincipalArn string) string {
+func generateCloudFormationURL(integrationID, externalID, roleName, permissionLevel, trustedPrincipalArn string) string {
 	region := "us-east-1"
+	templateURL := s3TemplateBaseURL
 
 	// Base CloudFormation URL.
 	baseURL := fmt.Sprintf("https://%s.console.aws.amazon.com/cloudformation/home", region)
 
-	stackName := fmt.Sprintf("Zopdev-%s", integration.IntegrationID)
+	stackName := fmt.Sprintf("Zopdev-%s", integrationID)
 
 	// Quick create stack parameters
 	cfnURL := fmt.Sprintf("%s?region=%s#/stacks/quickcreate"+
@@ -107,10 +106,10 @@ func generateCloudFormationURL(integration *models.Integration, permissionLevel,
 		"&param_PermissionLevel=%s",
 		baseURL,
 		region,
-		url.QueryEscape(integration.TemplateURL),
+		url.QueryEscape(templateURL),
 		url.QueryEscape(stackName),
-		url.QueryEscape(integration.IntegrationID),
-		url.QueryEscape(integration.ExternalID),
+		url.QueryEscape(integrationID),
+		url.QueryEscape(externalID),
 		url.QueryEscape(trustedPrincipalArn),
 		url.QueryEscape(permissionLevel),
 	)

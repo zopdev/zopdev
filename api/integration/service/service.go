@@ -40,30 +40,24 @@ func (s *IntegrationService) CreateIntegration(_ *gofr.Context, provider string)
 	}
 
 	integrationID := uuid.New().String()
+	externalID := fmt.Sprintf("ext-%s", integrationID)
+	roleName := fmt.Sprintf("CrossAccountAccessRole-%s", integrationID)
+
+	// Generate CloudFormation URL
+	cfnURL := generateCloudFormationURL(integrationID, externalID, roleName, defaultPermissionLevel, s.trustedPrincipalArn)
 
 	// Construct the integration object for the response
 	integration := models.Integration{
-		IntegrationID: integrationID,
-		ExternalID:    fmt.Sprintf("ext-%s", integrationID),
-		TemplateURL:   s3TemplateBaseURL,
-		RoleName:      fmt.Sprintf("CrossAccountAccessRole-%s", integrationID),
-		Provider:      provider,
+		CloudformationURL: cfnURL,
+		IntegrationID:     integrationID,
 	}
-
-	// Generate CloudFormation URL.
-	cfnURL := generateCloudFormationURL(&integration, defaultPermissionLevel, s.trustedPrincipalArn)
 
 	return integration, cfnURL, nil
 }
 
-func (*IntegrationService) AssumeRoleAndCreateTemporaryAdmin(ctx *gofr.Context, req *models.AssumeRoleRequest) (map[string]string, error) {
+func (*IntegrationService) AssumeRoleAndCreateAdmin(ctx *gofr.Context, req *models.AssumeRole) (map[string]string, error) {
 	if req.IntegrationID == "" || req.AccountID == "" {
 		return nil, errMissingIntegrationOrAccountID
-	}
-
-	// Validate provider
-	if req.Provider != awsProvider {
-		return nil, errUnsupportedProvider
 	}
 
 	// Generate user_name and group_name
@@ -77,29 +71,15 @@ func (*IntegrationService) AssumeRoleAndCreateTemporaryAdmin(ctx *gofr.Context, 
 	}
 
 	const suffixLength = 6
+	suffix := randomSuffix(suffixLength)
+	userName := "Zop-Admin-" + suffix
+	groupName := "ZopAdminGroup-" + suffix
 
-	userName := req.UserName
-	if userName == "" {
-		suffix := randomSuffix(suffixLength)
-		userName = "Zop-Admin-" + suffix
-	}
+	externalID := fmt.Sprintf("ext-%s", req.IntegrationID)
+	roleName := fmt.Sprintf("CrossAccountAccessRole-%s", req.IntegrationID)
+	roleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", req.AccountID, roleName)
 
-	groupName := req.GroupName
-	if groupName == "" {
-		suffix := randomSuffix(suffixLength)
-		groupName = "ZopAdminGroup-" + suffix
-	}
-
-	// Construct integration object from request
-	integration := models.Integration{
-		IntegrationID: req.IntegrationID,
-		ExternalID:    fmt.Sprintf("ext-%s", req.IntegrationID),
-		RoleName:      fmt.Sprintf("CrossAccountAccessRole-%s", req.IntegrationID),
-	}
-
-	roleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", req.AccountID, integration.RoleName)
-
-	result, err := AssumeRole(roleARN, integration.ExternalID, "session-"+integration.IntegrationID)
+	result, err := AssumeRole(roleARN, externalID, "session-"+req.IntegrationID)
 	if err != nil {
 		return nil, err
 	}

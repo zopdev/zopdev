@@ -21,7 +21,7 @@ func New(svc service) *Handler {
 
 // CreateIntegration handles GET request to get integration form data or account list.
 // It validates the provider and returns integration details with CloudFormation URL.
-func (h *Handler) CreateIntegration(ctx *gofr.Context) (any, error) {
+func (h *Handler) GetIntegration(ctx *gofr.Context) (any, error) {
 	provider := strings.ToLower(strings.TrimSpace(ctx.PathParam("provider")))
 	if provider == "" {
 		return nil, http.ErrorMissingParam{Params: []string{"provider"}}
@@ -37,34 +37,23 @@ func (h *Handler) CreateIntegration(ctx *gofr.Context) (any, error) {
 		return nil, err
 	}
 
-	return map[string]any{
-		"data":               integration,
-		"cloudformation_url": cfnURL,
-	}, nil
+	response := models.Integration{
+		CloudformationURL: cfnURL,
+		IntegrationID:     integration.IntegrationID,
+	}
+
+	return response, nil
 }
 
 // AssumeRole handles POST request to create integration.
 // It validates the provider and request body, then creates a temporary admin user.
-func (h *Handler) AssumeRole(ctx *gofr.Context) (any, error) {
-	provider := strings.ToLower(strings.TrimSpace(ctx.PathParam("provider")))
-	if provider == "" {
-		return nil, http.ErrorMissingParam{Params: []string{"provider"}}
-	}
-
-	// Validate provider
-	if !isValidProvider(provider) {
-		return nil, http.ErrorInvalidParam{Params: []string{"provider"}}
-	}
-
-	var req models.AssumeRoleRequest
+func (h *Handler) Connect(ctx *gofr.Context) (any, error) {
+	var req models.AssumeRole
 	if err := ctx.Bind(&req); err != nil {
 		return nil, err
 	}
 
-	// Set provider in request
-	req.Provider = provider
-
-	return h.service.AssumeRoleAndCreateTemporaryAdmin(ctx, &req)
+	return h.service.AssumeRoleAndCreateAdmin(ctx, &req)
 }
 
 // isValidProvider checks if the provider is supported.
