@@ -115,7 +115,7 @@ func validateAWSProviderDetails(_ *gofr.Context, account *store.CloudAccount) er
 		return http.ErrorMissingParam{Params: []string{"AWSecretAccessKey"}}
 	}
 
-	account.Name, err = getAWSAccountID(awsCred)
+	account.ProviderID, err = getAWSAccountID(awsCred)
 	if err != nil {
 		return err
 	}
