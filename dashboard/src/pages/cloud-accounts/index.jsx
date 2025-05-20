@@ -5,7 +5,7 @@ import ErrorComponent from '@/components/atom/ErrorComponent';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader';
 import PageHeading from '@/components/atom/PageHeading';
 import CloudAccountCard from '@/components/molecules/Cards/CloudAccountCard';
-import { useGetCloudAccounts } from '@/queries/CloudAccount';
+import { useGetCloudAccounts } from '@/queries/cloud-account';
 import { PlusCircleIcon } from '@heroicons/react/20/solid';
 
 const CloudAccountPage = () => {
