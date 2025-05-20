@@ -1,6 +1,8 @@
 package service
 
 import (
+	"strings"
+
 	"github.com/pkg/errors"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
@@ -9,6 +11,8 @@ import (
 	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
+
+var errUnsupportedResourceType = errors.New("unsupported resource type")
 
 type Service struct {
 	gcp GCPClient
@@ -25,40 +29,39 @@ func (s *Service) GetResources(ctx *gofr.Context, id int64, resources []string) 
 	}
 
 	if len(resources) == 0 {
-		return s.getAllInstances(ctx, ca.Credentials)
+		return s.getAllInstances(ctx, ca)
 	}
 
-	var (
-		instances []models.Instance
-		er        error
-	)
+	var instances []models.Instance
 
 	for _, resource := range resources {
 		switch resource {
 		case string(SQL):
 			sql, erRes := s.getAllSQLInstances(ctx, Request{
-				CloudType: CloudProvider(ca.Provider),
+				CloudType: CloudProvider(strings.ToUpper(ca.Provider)),
 				Creds:     ca.Credentials,
 			})
 			if erRes != nil {
-				er = errors.Wrap(er, erRes.Error())
+				return nil, erRes
 			}
 
 			instances = append(instances, sql...)
 		default:
-			// Return all computed instances till now
-			er = errors.Wrap(er, "Unsupported resource type: "+resource)
+			return nil, errUnsupportedResourceType
 		}
 	}
 
-	return instances, er
+	return instances, nil
 }
 
-func (s *Service) getAllInstances(ctx *gofr.Context, cred any) ([]models.Instance, error) {
+func (s *Service) getAllInstances(ctx *gofr.Context, ca *client.CloudAccount) ([]models.Instance, error) {
 	var instances []models.Instance
 
 	// Get all SQL instances
-	sql, err := s.getGCPSQLInstances(ctx, cred)
+	sql, err := s.getAllSQLInstances(ctx, Request{
+		CloudType: CloudProvider(strings.ToUpper(ca.Provider)),
+		Creds:     ca.Credentials,
+	})
 	if err != nil {
 		return nil, err
 	}
