@@ -28,5 +28,10 @@ func (h *Handler) GetResources(ctx *gofr.Context) (any, error) {
 
 	resourceType := ctx.Params("type")
 
-	return h.svc.GetResources(ctx, accID, resourceType)
+	res, err := h.svc.GetResources(ctx, accID, resourceType)
+	if err != nil {
+		return nil, err
+	}
+
+	return res, nil
 }
