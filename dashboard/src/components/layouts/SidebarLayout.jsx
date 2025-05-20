@@ -1,8 +1,9 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 import Sidebar from '@/components/organisms/Sidebar';
 import TopBar from '@/components/organisms/TopBar';
 
 export default function SidebarLayout() {
+  const { cloudId } = useParams();
   return (
     <div>
       <TopBar />
@@ -11,13 +12,8 @@ export default function SidebarLayout() {
           <Sidebar
             menu={[
               {
-                link: 'applications/123/environment',
-                text: 'Environment',
-                icon: <></>,
-              },
-              {
-                link: 'applications/123/configDiff',
-                text: 'Config Diff',
+                link: `cloud-accounts/${cloudId}/resources`,
+                text: 'Resources',
                 icon: <></>,
               },
             ]}
