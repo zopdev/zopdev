@@ -1,6 +1,8 @@
 import PageHeading from '@/components/atom/PageHeading';
+import SwitchButton from '@/components/atom/Switch';
 import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
+import { useState } from 'react';
 
 const headers = [
   { key: 'name', label: 'Name', align: 'left', width: '200px' },
@@ -10,36 +12,43 @@ const headers = [
   { key: 'region', label: 'Region', align: 'left', width: '120px' },
 ];
 
-const data = [
-  {
-    id: 1,
-    name: 'name',
-    schedule: 'schedule',
-    state: 'Running',
-    instance_type: 'instance_type',
-    region: 'region',
-  },
-
-  {
-    id: 1,
-    name: 'name',
-    schedule: 'schedule',
-    state: 'Running',
-    instance_type: 'instance_type',
-    region: 'region',
-  },
-
-  {
-    id: 1,
-    name: 'name',
-    schedule: 'schedule',
-    state: 'Running',
-    instance_type: 'instance_type',
-    region: 'region',
-  },
-];
-
 const CloudResourcesPage = () => {
+  const [on, setOn] = useState(false);
+  const data = [
+    {
+      id: 1,
+      name: 'name',
+      schedule: 'schedule',
+      state: 'Running',
+      instance_type: 'instance_type',
+      region: 'region',
+    },
+
+    {
+      id: 1,
+      name: 'name',
+      schedule: 'schedule',
+      state: 'Running',
+      instance_type: 'instance_type',
+      region: 'region',
+    },
+
+    {
+      id: 1,
+      name: 'name',
+      schedule: 'schedule',
+      state: 'Running',
+      instance_type: 'instance_type',
+      region: (
+        <SwitchButton
+          isEnabled={on}
+          onChange={(e) => setOn(!on)}
+          titleList={{ true: 'Running', false: 'Suspended' }}
+          name={'status'}
+        />
+      ),
+    },
+  ];
   const handleRowClick = (row) => {
     console.log('Row clicked:', row);
   };
@@ -58,8 +67,8 @@ const CloudResourcesPage = () => {
       <PageHeading title={'Resources'} />
       <Table
         headers={headers}
-        //data={data}
-        data={[]}
+        data={data}
+        // data={[]}
         handleRowClick={handleRowClick}
         enableRowClick={false}
         stickyHeader={true}
