@@ -1,3 +1,5 @@
+import PageHeading from '@/components/atom/PageHeading';
+import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
 
 const headers = [
@@ -41,14 +43,28 @@ const CloudResourcesPage = () => {
   const handleRowClick = (row) => {
     console.log('Row clicked:', row);
   };
+
+  const breadcrumbList = [
+    { name: 'Cloud Accounts', link: '/cloud-accounts' },
+    {
+      name: 'Resources',
+      link: `#`,
+      disable: true,
+    },
+  ];
   return (
-    <div className="p-4">
+    <div>
+      <BreadCrumb breadcrumbList={breadcrumbList} />
+      <PageHeading title={'Resources'} />
       <Table
         headers={headers}
-        data={data}
+        //data={data}
+        data={[]}
         handleRowClick={handleRowClick}
         enableRowClick={false}
         stickyHeader={true}
+        emptyStateTitle="No Resources Found"
+        // emptyStateDescription="Looks like your cloud account has no active resources right now"
       />
     </div>
   );
