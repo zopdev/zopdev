@@ -35,12 +35,12 @@ func TestClient_NewGoogleCredentials(t *testing.T) {
 func TestClient_NewSQLInstanceLister(t *testing.T) {
 	ctx := context.Background()
 	c := New()
-	sql, err := c.NewSQLInstanceLister(ctx)
+	sql, err := c.NewSQLClient(ctx)
 
 	require.NoError(t, err)
 	assert.NotNil(t, sql)
 
-	sql, err = c.NewSQLInstanceLister(ctx, option.WithoutAuthentication(), option.WithCredentialsFile("test.json"))
+	sql, err = c.NewSQLClient(ctx, option.WithoutAuthentication(), option.WithCredentialsFile("test.json"))
 
 	assert.Nil(t, sql)
 	require.Error(t, err)

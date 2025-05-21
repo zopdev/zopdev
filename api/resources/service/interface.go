@@ -11,5 +11,5 @@ import (
 
 type GCPClient interface {
 	NewGoogleCredentials(ctx context.Context, cred any, scopes ...string) (*google.Credentials, error)
-	NewSQLInstanceLister(ctx context.Context, opts ...option.ClientOption) (gcp.SQLClient, error)
+	NewSQLClient(ctx context.Context, opts ...option.ClientOption) (gcp.SQLClient, error)
 }

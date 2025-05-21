@@ -63,22 +63,22 @@ func (mr *MockGCPClientMockRecorder) NewGoogleCredentials(ctx, cred any, scopes 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewGoogleCredentials", reflect.TypeOf((*MockGCPClient)(nil).NewGoogleCredentials), varargs...)
 }
 
-// NewSQLInstanceLister mocks base method.
-func (m *MockGCPClient) NewSQLInstanceLister(ctx context.Context, opts ...option.ClientOption) (gcp.SQLClient, error) {
+// NewSQLClient mocks base method.
+func (m *MockGCPClient) NewSQLClient(ctx context.Context, opts ...option.ClientOption) (gcp.SQLClient, error) {
 	m.ctrl.T.Helper()
 	varargs := []any{ctx}
 	for _, a := range opts {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "NewSQLInstanceLister", varargs...)
+	ret := m.ctrl.Call(m, "NewSQLClient", varargs...)
 	ret0, _ := ret[0].(gcp.SQLClient)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// NewSQLInstanceLister indicates an expected call of NewSQLInstanceLister.
-func (mr *MockGCPClientMockRecorder) NewSQLInstanceLister(ctx any, opts ...any) *gomock.Call {
+// NewSQLClient indicates an expected call of NewSQLClient.
+func (mr *MockGCPClientMockRecorder) NewSQLClient(ctx any, opts ...any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewSQLInstanceLister", reflect.TypeOf((*MockGCPClient)(nil).NewSQLInstanceLister), varargs...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewSQLClient", reflect.TypeOf((*MockGCPClient)(nil).NewSQLClient), varargs...)
 }

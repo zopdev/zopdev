@@ -3,7 +3,6 @@ package service
 import (
 	"bytes"
 	"context"
-	"errors"
 	"io"
 	"net/http"
 	"testing"
@@ -19,21 +18,6 @@ import (
 
 	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
-
-var errMock = errors.New("mock error")
-
-type mockInstanceLister struct {
-	isError   bool
-	instances []models.Instance
-}
-
-func (m *mockInstanceLister) GetAllInstances(_ *gofr.Context, _ string) ([]models.Instance, error) {
-	if m.isError {
-		return nil, errMock
-	}
-
-	return m.instances, nil
-}
 
 func InitializeTests(t *testing.T) (*gofr.Context, *gomock.Controller, *container.Mocks, *MockGCPClient) {
 	t.Helper()
@@ -54,7 +38,7 @@ func TestService_GetResources(t *testing.T) {
 	defer ctrl.Finish()
 
 	s := New(mGCP)
-	req := Request{
+	req := CloudDetails{
 		CloudType: GCP,
 		Creds: map[string]any{
 			"project_id": "test-project",
@@ -65,7 +49,7 @@ func TestService_GetResources(t *testing.T) {
 	mockResp := []models.Instance{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
-	mockLister := &mockInstanceLister{
+	mockLister := &mockSQLClient{
 		isError:   false,
 		instances: mockResp,
 	}
@@ -96,7 +80,7 @@ func TestService_GetResources(t *testing.T) {
 					Return(resp, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
-				mGCP.EXPECT().NewSQLInstanceLister(ctx, option.WithCredentials(mockCreds)).
+				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockLister, nil)
 			},
 		},
@@ -118,7 +102,7 @@ func TestService_GetResources(t *testing.T) {
 					Return(resp, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
-				mGCP.EXPECT().NewSQLInstanceLister(ctx, option.WithCredentials(mockCreds)).
+				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockLister, nil)
 			},
 		},
@@ -141,7 +125,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 	defer ctrl.Finish()
 
 	s := New(mGCP)
-	req := Request{
+	req := CloudDetails{
 		CloudType: GCP,
 		Creds: map[string]any{
 			"project_id": "test-project",
@@ -210,7 +194,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 			name:      "unsupported resource",
 			id:        123,
 			resources: []string{"unsupported"},
-			expErr:    errUnsupportedResourceType,
+			expErr:    gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}},
 			mockCalls: func() {
 				resp := &http.Response{
 					StatusCode: http.StatusOK,
@@ -240,7 +224,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 
 func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	ctx := &gofr.Context{}
-	req := Request{CloudType: "AWS"}
+	req := CloudDetails{CloudType: "AWS"}
 
 	s := New(nil)
 	instances, err := s.getAllSQLInstances(ctx, req)
@@ -254,7 +238,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	req := Request{
+	req := CloudDetails{
 		CloudType: GCP,
 		Creds: map[string]any{
 			"project_id": "test-project",
@@ -270,14 +254,14 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 	mockResp := []models.Instance{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
-	mockLister := &mockInstanceLister{
+	mockLister := &mockSQLClient{
 		isError:   false,
 		instances: mockResp,
 	}
 
 	testCases := []struct {
 		name      string
-		req       Request
+		req       CloudDetails
 		expResp   []models.Instance
 		expErr    error
 		mockCalls func()
@@ -290,7 +274,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 			mockCalls: func() {
 				mockGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
-				mockGCP.EXPECT().NewSQLInstanceLister(ctx, option.WithCredentials(mockCreds)).
+				mockGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockLister, nil)
 			},
 		},
@@ -310,7 +294,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 			mockCalls: func() {
 				mockGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
-				mockGCP.EXPECT().NewSQLInstanceLister(ctx, option.WithCredentials(mockCreds)).
+				mockGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(nil, errMock)
 			},
 		},
@@ -323,7 +307,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 
 				mockGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
-				mockGCP.EXPECT().NewSQLInstanceLister(ctx, option.WithCredentials(mockCreds)).
+				mockGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockLister, nil)
 			},
 		},

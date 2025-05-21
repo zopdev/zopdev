@@ -10,6 +10,7 @@ import (
 
 type SQLClient interface {
 	InstanceLister
+	Idler
 }
 
 type MetricsClient interface {
@@ -22,4 +23,9 @@ type InstanceLister interface {
 
 type TimeSeriesLister interface {
 	GetTimeSeries(ctx *gofr.Context, start, end time.Time, projectID, filter string) ([]models.Metric, error)
+}
+
+type Idler interface {
+	StartInstance(ctx *gofr.Context, projectID, instanceName string) error
+	StopInstance(ctx *gofr.Context, projectID, instanceName string) error
 }
