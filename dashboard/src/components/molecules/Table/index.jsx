@@ -10,6 +10,7 @@ const Table = ({
   stickyHeader = false,
   emptyStateTitle,
   emptyStateDescription,
+  renderRow,
 }) => {
   return (
     <>
@@ -29,6 +30,7 @@ const Table = ({
           data={data}
           handleRowClick={handleRowClick}
           enableRowClick={enableRowClick}
+          renderRow={renderRow}
         />
       </table>
       {data?.length === 0 && (

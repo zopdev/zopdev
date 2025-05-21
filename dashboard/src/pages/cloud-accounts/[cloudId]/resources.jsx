@@ -15,31 +15,37 @@ const headers = [
   { key: 'region', label: 'Region', align: 'left', width: '120px' },
 ];
 
+const CloudResourceRow = (resource) => {
+  const handleToggle = (state) => {
+    console.log(state);
+  };
+
+  return {
+    id: resource?.instance_name,
+    name: resource?.instance_name,
+    schedule: 'schedule',
+    state: (
+      <div className="min-w-36">
+        <SwitchButton
+          labelPosition="right"
+          isEnabled={false}
+          disabled={false}
+          onChange={handleToggle}
+          titleList={{ true: 'Running', false: 'Suspended' }}
+          name="status"
+        />
+      </div>
+    ),
+    instance_type: resource?.instance_type,
+    region: resource?.region,
+  };
+};
+
 const CloudResourcesPage = () => {
   const { cloudId } = useParams();
   const cloudResources = useGetCloudResources(cloudId);
 
-  const data =
-    cloudResources?.data?.data?.map((item, idx) => {
-      return {
-        id: 1,
-        name: item?.instance_name,
-        schedule: 'schedule',
-        state: (
-          <div className="min-w-36">
-            <SwitchButton
-              labelPosition={'right'}
-              isEnabled={true}
-              // onChange={(e) => setOn(!on)}
-              titleList={{ true: 'Running', false: 'Suspended' }}
-              name={'status'}
-            />
-          </div>
-        ),
-        instance_type: item?.instance_type,
-        region: item?.region,
-      };
-    }) || [];
+  const data = cloudResources?.data?.data || [];
 
   const handleRowClick = (row) => {
     console.log('Row clicked:', row);
@@ -65,7 +71,7 @@ const CloudResourcesPage = () => {
           data={data}
           handleRowClick={handleRowClick}
           enableRowClick={false}
-          stickyHeader={true}
+          renderRow={CloudResourceRow}
           emptyStateTitle="No Resources Found"
           // emptyStateDescription="Looks like your cloud account has no active resources right now"
         />
