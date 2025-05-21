@@ -5,6 +5,7 @@ import SwitchButton from '@/components/atom/Switch';
 import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
 import { useGetCloudResources } from '@/queries/cloud-resources';
+import { useParams } from 'react-router-dom';
 
 const headers = [
   { key: 'name', label: 'Name', align: 'left', width: '200px' },
@@ -15,25 +16,29 @@ const headers = [
 ];
 
 const CloudResourcesPage = () => {
-  const cloudResources = useGetCloudResources('2');
+  const { cloudId } = useParams();
+  const cloudResources = useGetCloudResources(cloudId);
 
-  const data = cloudResources?.data?.data?.map((item, idx) => {
-    return {
-      id: 1,
-      name: item?.instance_name,
-      schedule: 'schedule',
-      state: (
-        <SwitchButton
-          isEnabled={true}
-          // onChange={(e) => setOn(!on)}
-          titleList={{ true: 'Running', false: 'Suspended' }}
-          name={'status'}
-        />
-      ),
-      instance_type: item?.instance_type,
-      region: item?.region,
-    };
-  });
+  const data =
+    cloudResources?.data?.data?.map((item, idx) => {
+      return {
+        id: 1,
+        name: item?.instance_name,
+        schedule: 'schedule',
+        state: (
+          <div className="min-w-36">
+            <SwitchButton
+              isEnabled={true}
+              // onChange={(e) => setOn(!on)}
+              titleList={{ true: 'Running', false: 'Suspended' }}
+              name={'status'}
+            />
+          </div>
+        ),
+        instance_type: item?.instance_type,
+        region: item?.region,
+      };
+    }) || [];
 
   const handleRowClick = (row) => {
     console.log('Row clicked:', row);
