@@ -4,8 +4,8 @@ const TableBody = ({ data, headers, handleRowClick, enableRowClick }) => {
       {data?.map((row, rowIndex) => (
         <tr
           key={row.id || rowIndex}
-          className={`border-b border-gray-200 group ${
-            enableRowClick ? 'hover:bg-gray-50 cursor-pointer' : ''
+          className={`border-b border-gray-200 group even:bg-gray-50  ${
+            enableRowClick ? 'hover:bg-gray-100 cursor-pointer' : ''
           }`}
           onClick={() => enableRowClick && handleRowClick(row)}
         >
