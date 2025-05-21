@@ -1,7 +1,10 @@
+import ErrorComponent from '@/components/atom/ErrorComponent';
+import LinearProgress from '@/components/atom/Loaders/LinerProgress';
 import PageHeading from '@/components/atom/PageHeading';
 import SwitchButton from '@/components/atom/Switch';
 import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
+import { useGetCloudResources } from '@/queries/cloud-resources';
 import { useState } from 'react';
 
 const headers = [
@@ -14,6 +17,9 @@ const headers = [
 
 const CloudResourcesPage = () => {
   const [on, setOn] = useState(false);
+
+  const cloudResources = useGetCloudResources('2');
+
   const data = [
     {
       id: 1,
@@ -62,20 +68,26 @@ const CloudResourcesPage = () => {
     },
   ];
   return (
-    <div>
+    <>
       <BreadCrumb breadcrumbList={breadcrumbList} />
       <PageHeading title={'Resources'} />
-      <Table
-        headers={headers}
-        data={data}
-        // data={[]}
-        handleRowClick={handleRowClick}
-        enableRowClick={false}
-        stickyHeader={true}
-        emptyStateTitle="No Resources Found"
-        // emptyStateDescription="Looks like your cloud account has no active resources right now"
-      />
-    </div>
+      <LinearProgress isLoading={cloudResources?.isLoading} />
+      {!cloudResources?.isLoading && (
+        <Table
+          headers={headers}
+          data={data}
+          // data={[]}
+          handleRowClick={handleRowClick}
+          enableRowClick={false}
+          stickyHeader={true}
+          emptyStateTitle="No Resources Found"
+          // emptyStateDescription="Looks like your cloud account has no active resources right now"
+        />
+      )}
+      {cloudResources?.isError && (
+        <ErrorComponent errorText={cloudResources?.error?.message || 'Something went wrong'} />
+      )}
+    </>
   );
 };
 
