@@ -5,7 +5,15 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
-export default function SwitchButton({ isEnabled, onChange, title, titleList, disabled, name }) {
+export default function SwitchButton({
+  isEnabled,
+  onChange,
+  title,
+  titleList,
+  disabled,
+  name,
+  labelPosition,
+}) {
   const [enabled, setEnabled] = useState(
     isEnabled === 'true' ? true : isEnabled === 'false' ? false : !!isEnabled,
   );
@@ -24,7 +32,13 @@ export default function SwitchButton({ isEnabled, onChange, title, titleList, di
   const labelTitle = titleList?.[enabled] ?? title;
 
   return (
-    <Field as="div" className="flex items-center space-x-3">
+    <Field
+      as="div"
+      className={classNames(
+        'flex items-center space-x-3',
+        labelPosition === 'right' && 'flex-row-reverse  justify-end',
+      )}
+    >
       <Label
         as="span"
         htmlFor={switchId}

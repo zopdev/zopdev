@@ -28,6 +28,7 @@ const CloudResourcesPage = () => {
         state: (
           <div className="min-w-36">
             <SwitchButton
+              labelPosition={'right'}
               isEnabled={true}
               // onChange={(e) => setOn(!on)}
               titleList={{ true: 'Running', false: 'Suspended' }}
