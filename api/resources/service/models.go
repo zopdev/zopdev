@@ -3,6 +3,8 @@ package service
 type (
 	CloudProvider string
 	ResourceType  string
+
+	ResourceState string
 )
 
 const (
@@ -15,6 +17,11 @@ const (
 
 	SQL ResourceType = "sql"
 	VM  ResourceType = "vm"
+
+	// Resource State constants.
+
+	START   ResourceState = "START"
+	SUSPEND ResourceState = "SUSPEND"
 )
 
 type CloudDetails struct {
@@ -23,7 +30,8 @@ type CloudDetails struct {
 }
 
 type ResourceDetails struct {
-	CloudAccID int64        `json:"cloudAccID"`
-	Name       string       `json:"name"`
-	Type       ResourceType `json:"type"`
+	CloudAccID int64         `json:"cloudAccID"`
+	Name       string        `json:"name"`
+	Type       ResourceType  `json:"type"`
+	State      ResourceState `json:"state"`
 }

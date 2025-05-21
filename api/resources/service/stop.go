@@ -10,8 +10,8 @@ import (
 	"github.com/zopdev/zopdev/api/audit/client"
 )
 
-// Start - starts the resource based on the resource type and cloud account.
-func (s *Service) start(ctx *gofr.Context, resDetails ResourceDetails) error {
+// Stop - suspends the resource based on the resource type and cloud account.
+func (s *Service) stop(ctx *gofr.Context, resDetails ResourceDetails) error {
 	ca, err := client.GetCloudCredentials(ctx, resDetails.CloudAccID)
 	if err != nil {
 		return err
@@ -19,18 +19,18 @@ func (s *Service) start(ctx *gofr.Context, resDetails ResourceDetails) error {
 
 	switch resDetails.Type {
 	case SQL:
-		return s.startSQL(ctx, ca, resDetails)
+		return s.stopSQL(ctx, ca, resDetails)
 	default:
 		return gofrHttp.ErrorInvalidParam{Params: []string{"type"}}
 	}
 }
 
-func (s *Service) startSQL(ctx *gofr.Context, ca *client.CloudAccount, resDetails ResourceDetails) error {
+func (s *Service) stopSQL(ctx *gofr.Context, ca *client.CloudAccount, resDetails ResourceDetails) error {
 	var err error
 
 	switch strings.ToUpper(ca.Provider) {
 	case string(GCP):
-		err = s.startGCPSQL(ctx, ca.Credentials, resDetails)
+		err = s.stopGCPSQL(ctx, ca.Credentials, resDetails)
 	}
 
 	if err != nil {
@@ -40,7 +40,7 @@ func (s *Service) startSQL(ctx *gofr.Context, ca *client.CloudAccount, resDetail
 	return nil
 }
 
-func (s *Service) startGCPSQL(ctx *gofr.Context, cred any, resDetails ResourceDetails) error {
+func (s *Service) stopGCPSQL(ctx *gofr.Context, cred any, resDetails ResourceDetails) error {
 	creds, err := s.gcp.NewGoogleCredentials(ctx, cred, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		return err
@@ -51,5 +51,5 @@ func (s *Service) startGCPSQL(ctx *gofr.Context, cred any, resDetails ResourceDe
 		return err
 	}
 
-	return sqlClient.StartInstance(ctx, creds.ProjectID, resDetails.Name)
+	return sqlClient.StopInstance(ctx, creds.ProjectID, resDetails.Name)
 }

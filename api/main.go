@@ -109,5 +109,6 @@ func registerCloudResourceRoutes(app *gofr.App) {
 	resSvc := resourceService.New(gcpClient)
 	resHld := resrouceHandler.New(resSvc)
 
-	app.GET("/cloud-account/{id}/resources", resHld.GetResources)
+	app.GET("/resources", resHld.GetResources)
+	app.POST("/resources/state", resHld.ChangeState)
 }

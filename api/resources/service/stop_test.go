@@ -13,7 +13,7 @@ import (
 	"google.golang.org/api/option"
 )
 
-func TestService_Start_Success(t *testing.T) {
+func TestService_Stop(t *testing.T) {
 	ctx, ctrl, mock, mGCP := InitializeTests(t)
 	defer ctrl.Finish()
 
@@ -28,7 +28,7 @@ func TestService_Start_Success(t *testing.T) {
 		mockCalls func()
 	}{
 		{
-			name:  "Successfully start SQL instance",
+			name:  "Successfully stop SQL instance",
 			input: ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL},
 			mockCalls: func() {
 				resp := &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewReader([]byte(
@@ -126,7 +126,7 @@ func TestService_Start_Success(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockCalls()
 
-			err := s.start(ctx, tc.input)
+			err := s.stop(ctx, tc.input)
 
 			assert.Equal(t, tc.expErr, err)
 		})
