@@ -5,7 +5,6 @@ import SwitchButton from '@/components/atom/Switch';
 import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
 import { useGetCloudResources } from '@/queries/cloud-resources';
-import { useState } from 'react';
 
 const headers = [
   { key: 'name', label: 'Name', align: 'left', width: '200px' },
@@ -16,45 +15,26 @@ const headers = [
 ];
 
 const CloudResourcesPage = () => {
-  const [on, setOn] = useState(false);
-
   const cloudResources = useGetCloudResources('2');
 
-  const data = [
-    {
+  const data = cloudResources?.data?.data?.map((item, idx) => {
+    return {
       id: 1,
-      name: 'name',
+      name: item?.instance_name,
       schedule: 'schedule',
-      state: 'Running',
-      instance_type: 'instance_type',
-      region: 'region',
-    },
-
-    {
-      id: 1,
-      name: 'name',
-      schedule: 'schedule',
-      state: 'Running',
-      instance_type: 'instance_type',
-      region: 'region',
-    },
-
-    {
-      id: 1,
-      name: 'name',
-      schedule: 'schedule',
-      state: 'Running',
-      instance_type: 'instance_type',
-      region: (
+      state: (
         <SwitchButton
-          isEnabled={on}
-          onChange={(e) => setOn(!on)}
+          isEnabled={true}
+          // onChange={(e) => setOn(!on)}
           titleList={{ true: 'Running', false: 'Suspended' }}
           name={'status'}
         />
       ),
-    },
-  ];
+      instance_type: item?.instance_type,
+      region: item?.region,
+    };
+  });
+
   const handleRowClick = (row) => {
     console.log('Row clicked:', row);
   };
@@ -67,16 +47,16 @@ const CloudResourcesPage = () => {
       disable: true,
     },
   ];
+
   return (
     <>
       <BreadCrumb breadcrumbList={breadcrumbList} />
       <PageHeading title={'Resources'} />
       <LinearProgress isLoading={cloudResources?.isLoading} />
-      {!cloudResources?.isLoading && (
+      {!cloudResources?.isLoading && !cloudResources?.isError && (
         <Table
           headers={headers}
           data={data}
-          // data={[]}
           handleRowClick={handleRowClick}
           enableRowClick={false}
           stickyHeader={true}
