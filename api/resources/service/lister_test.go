@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
-	"gofr.dev/pkg/gofr/container"
 	gofrHttp "gofr.dev/pkg/gofr/http"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
@@ -16,25 +15,11 @@ import (
 	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
-func InitializeTests(t *testing.T) (*gofr.Context, *gomock.Controller, *container.Mocks, *MockGCPClient) {
-	t.Helper()
-
-	ctrl := gomock.NewController(t)
-	mockContainer, mock := container.NewMockContainer(t, container.WithMockHTTPService("cloud-account"))
-
-	ctx := &gofr.Context{
-		Container: mockContainer,
-	}
-	mGCP := NewMockGCPClient(ctrl)
-
-	return ctx, ctrl, mock, mGCP
-}
-
 func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	ctx := &gofr.Context{}
 	req := CloudDetails{CloudType: "AWS"}
 
-	s := New(nil)
+	s := New(nil, nil)
 	instances, err := s.getAllSQLInstances(ctx, req)
 
 	assert.Nil(t, instances)
@@ -121,7 +106,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 		},
 	}
 
-	s := New(mockGCP)
+	s := New(mockGCP, nil)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {

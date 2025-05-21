@@ -13,8 +13,10 @@ import (
 	context "context"
 	reflect "reflect"
 
+	client "github.com/zopdev/zopdev/api/resources/client"
 	gcp "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	gomock "go.uber.org/mock/gomock"
+	gofr "gofr.dev/pkg/gofr"
 	google "golang.org/x/oauth2/google"
 	option "google.golang.org/api/option"
 )
@@ -81,4 +83,43 @@ func (mr *MockGCPClientMockRecorder) NewSQLClient(ctx any, opts ...any) *gomock.
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]any{ctx}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewSQLClient", reflect.TypeOf((*MockGCPClient)(nil).NewSQLClient), varargs...)
+}
+
+// MockHTTPClient is a mock of HTTPClient interface.
+type MockHTTPClient struct {
+	ctrl     *gomock.Controller
+	recorder *MockHTTPClientMockRecorder
+	isgomock struct{}
+}
+
+// MockHTTPClientMockRecorder is the mock recorder for MockHTTPClient.
+type MockHTTPClientMockRecorder struct {
+	mock *MockHTTPClient
+}
+
+// NewMockHTTPClient creates a new mock instance.
+func NewMockHTTPClient(ctrl *gomock.Controller) *MockHTTPClient {
+	mock := &MockHTTPClient{ctrl: ctrl}
+	mock.recorder = &MockHTTPClientMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockHTTPClient) EXPECT() *MockHTTPClientMockRecorder {
+	return m.recorder
+}
+
+// GetCloudCredentials mocks base method.
+func (m *MockHTTPClient) GetCloudCredentials(ctx *gofr.Context, cloudAccID int64) (*client.CloudAccount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetCloudCredentials", ctx, cloudAccID)
+	ret0, _ := ret[0].(*client.CloudAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetCloudCredentials indicates an expected call of GetCloudCredentials.
+func (mr *MockHTTPClientMockRecorder) GetCloudCredentials(ctx, cloudAccID any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCloudCredentials", reflect.TypeOf((*MockHTTPClient)(nil).GetCloudCredentials), ctx, cloudAccID)
 }

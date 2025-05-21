@@ -6,20 +6,20 @@ import (
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
 
-	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
 type Service struct {
-	gcp GCPClient
+	gcp  GCPClient
+	http HTTPClient
 }
 
-func New(gcp GCPClient) *Service {
-	return &Service{gcp: gcp}
+func New(gcp GCPClient, http HTTPClient) *Service {
+	return &Service{gcp: gcp, http: http}
 }
 
 func (s *Service) GetResources(ctx *gofr.Context, id int64, resources []string) ([]models.Instance, error) {
-	ca, err := client.GetCloudCredentials(ctx, id)
+	ca, err := s.http.GetCloudCredentials(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -51,12 +51,15 @@ func (s *Service) GetResources(ctx *gofr.Context, id int64, resources []string) 
 }
 
 func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) error {
-	switch resDetails.State {
-	case START:
-		return s.start(ctx, resDetails)
-	case SUSPEND:
-		return s.stop(ctx, resDetails)
+	ca, err := s.http.GetCloudCredentials(ctx, resDetails.CloudAccID)
+	if err != nil {
+		return err
+	}
+
+	switch resDetails.Type {
+	case SQL:
+		return s.changeSQLState(ctx, ca, resDetails)
 	default:
-		return gofrHttp.ErrorInvalidParam{Params: []string{"state"}}
+		return gofrHttp.ErrorInvalidParam{Params: []string{"req.Type"}}
 	}
 }

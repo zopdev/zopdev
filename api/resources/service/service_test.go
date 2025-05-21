@@ -1,9 +1,8 @@
 package service
 
 import (
-	"bytes"
-	"io"
-	"net/http"
+	"context"
+	"gofr.dev/pkg/gofr"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,14 +11,22 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
+	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/providers/models"
 )
 
 func TestService_GetResources(t *testing.T) {
-	ctx, ctrl, mock, mGCP := InitializeTests(t)
+	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	s := New(mGCP)
+	mClient := NewMockHTTPClient(ctrl)
+	mGCP := NewMockGCPClient(ctrl)
+	ctx := &gofr.Context{Context: context.Background()}
+	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
+		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
+	mockCreds := &google.Credentials{ProjectID: "test-project"}
+	s := New(mGCP, mClient)
+
 	req := CloudDetails{
 		CloudType: GCP,
 		Creds: map[string]any{
@@ -27,7 +34,6 @@ func TestService_GetResources(t *testing.T) {
 			"region":     "us-central1",
 		},
 	}
-	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockResp := []models.Instance{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
@@ -50,16 +56,7 @@ func TestService_GetResources(t *testing.T) {
 			resources: []string{},
 			expResp:   mockResp,
 			mockCalls: func() {
-				resp := &http.Response{
-					StatusCode: http.StatusOK,
-					Body: io.NopCloser(
-						bytes.NewReader([]byte(
-							`{"data": {"id": 123, "provider" : "GCP", "credentials" : {"project_id": "test-project", "region": "us-central1"}}}`),
-						)),
-				}
-
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(resp, nil)
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
@@ -72,16 +69,7 @@ func TestService_GetResources(t *testing.T) {
 			resources: []string{string(SQL)},
 			expResp:   mockResp,
 			mockCalls: func() {
-				resp := &http.Response{
-					StatusCode: http.StatusOK,
-					Body: io.NopCloser(
-						bytes.NewReader([]byte(
-							`{"data": {"id": 123, "provider" : "GCP", "credentials" : {"project_id": "test-project", "region": "us-central1"}}}`),
-						)),
-				}
-
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(resp, nil)
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
@@ -103,10 +91,15 @@ func TestService_GetResources(t *testing.T) {
 }
 
 func TestService_GetResources_Errors(t *testing.T) {
-	ctx, ctrl, mock, mGCP := InitializeTests(t)
+	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	s := New(mGCP)
+	mClient := NewMockHTTPClient(ctrl)
+	mGCP := NewMockGCPClient(ctrl)
+	ctx := &gofr.Context{Context: context.Background()}
+	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
+		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
+	s := New(mGCP, mClient)
 	req := CloudDetails{
 		CloudType: GCP,
 		Creds: map[string]any{
@@ -114,6 +107,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 			"region":     "us-central1",
 		},
 	}
+
 	testCases := []struct {
 		name      string
 		id        int64
@@ -128,16 +122,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 			resources: []string{string(SQL)},
 			expErr:    errMock,
 			mockCalls: func() {
-				resp := &http.Response{
-					StatusCode: http.StatusOK,
-					Body: io.NopCloser(
-						bytes.NewReader([]byte(
-							`{"data": {"id": 123, "provider" : "GCP", "credentials" : {"project_id": "test-project", "region": "us-central1"}}}`),
-						)),
-				}
-
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(resp, nil)
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(nil, errMock)
 			},
@@ -147,8 +132,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 			id:     123,
 			expErr: errMock,
 			mockCalls: func() {
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(nil, errMock)
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(nil, errMock)
 			},
 		},
 		{
@@ -157,17 +141,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 			resources: []string{},
 			expErr:    errMock,
 			mockCalls: func() {
-				resp := &http.Response{
-					StatusCode: http.StatusOK,
-					Body: io.NopCloser(
-						bytes.NewReader([]byte(
-							`{"data": {"id": 123, "provider" : "GCP", "credentials" : {"project_id": "test-project", "region": "us-central1"}}}`),
-						)),
-				}
-
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(resp, nil)
-
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
 					Return(nil, errMock)
 			},
@@ -178,16 +152,7 @@ func TestService_GetResources_Errors(t *testing.T) {
 			resources: []string{"unsupported"},
 			expErr:    gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}},
 			mockCalls: func() {
-				resp := &http.Response{
-					StatusCode: http.StatusOK,
-					Body: io.NopCloser(
-						bytes.NewReader([]byte(
-							`{"data": {"id": 123, "provider" : "GCP", "credentials" : {"project_id": "test-project", "region": "us-central1"}}}`),
-						)),
-				}
-
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(resp, nil)
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 			},
 		},
 	}
@@ -205,12 +170,17 @@ func TestService_GetResources_Errors(t *testing.T) {
 }
 
 func TestService_ChangeState(t *testing.T) {
-	ctx, ctrl, mock, mGCP := InitializeTests(t)
+	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
-	s := New(mGCP)
+	mClient := NewMockHTTPClient(ctrl)
+	mGCP := NewMockGCPClient(ctrl)
+	ctx := &gofr.Context{Context: context.Background()}
+	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
+		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockStopper := &mockSQLClient{}
+	s := New(mGCP, mClient)
 
 	testCases := []struct {
 		name      string
@@ -222,13 +192,8 @@ func TestService_ChangeState(t *testing.T) {
 			name:  "Success - Start",
 			input: ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
 			mockCalls: func() {
-				resp := &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewReader([]byte(
-					`{"data": {"id": 123, "provider" : "GCP", 
-		"credentials" : {"project_id": "test-project", "region": "us-central1"}}}`))),
-				}
-
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(resp, nil)
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).
+					Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, gomock.Any(), "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
@@ -236,16 +201,10 @@ func TestService_ChangeState(t *testing.T) {
 			},
 		},
 		{
-			name:  "Success - Stop",
+			name:  "Success - Suspend",
 			input: ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL, State: SUSPEND},
 			mockCalls: func() {
-				resp := &http.Response{StatusCode: http.StatusOK, Body: io.NopCloser(bytes.NewReader([]byte(
-					`{"data": {"id": 123, "provider" : "GCP", 
-		"credentials" : {"project_id": "test-project", "region": "us-central1"}}}`))),
-				}
-
-				mock.HTTPService.EXPECT().Get(ctx, "cloud-accounts/123/credentials", nil).
-					Return(resp, nil)
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, gomock.Any(), "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
@@ -253,10 +212,21 @@ func TestService_ChangeState(t *testing.T) {
 			},
 		},
 		{
-			name:      "Error - Invalid State",
-			input:     ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL, State: "invalid"},
-			expErr:    gofrHttp.ErrorInvalidParam{Params: []string{"state"}},
-			mockCalls: func() {},
+			name:   "Error - GetCloudCredentials",
+			input:  ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
+			expErr: errMock,
+			mockCalls: func() {
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).
+					Return(nil, errMock)
+			},
+		},
+		{
+			name:   "Error - Invalid Type",
+			input:  ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: "invalid"},
+			expErr: gofrHttp.ErrorInvalidParam{Params: []string{"req.Type"}},
+			mockCalls: func() {
+				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
+			},
 		},
 	}
 
