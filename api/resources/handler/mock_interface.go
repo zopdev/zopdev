@@ -13,6 +13,7 @@ import (
 	reflect "reflect"
 
 	models "github.com/zopdev/zopdev/api/resources/providers/models"
+	service "github.com/zopdev/zopdev/api/resources/service"
 	gomock "go.uber.org/mock/gomock"
 	gofr "gofr.dev/pkg/gofr"
 )
@@ -39,6 +40,20 @@ func NewMockService(ctrl *gomock.Controller) *MockService {
 // EXPECT returns an object that allows the caller to indicate expected use.
 func (m *MockService) EXPECT() *MockServiceMockRecorder {
 	return m.recorder
+}
+
+// ChangeState mocks base method.
+func (m *MockService) ChangeState(ctx *gofr.Context, resDetails service.ResourceDetails) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ChangeState", ctx, resDetails)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ChangeState indicates an expected call of ChangeState.
+func (mr *MockServiceMockRecorder) ChangeState(ctx, resDetails any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeState", reflect.TypeOf((*MockService)(nil).ChangeState), ctx, resDetails)
 }
 
 // GetResources mocks base method.

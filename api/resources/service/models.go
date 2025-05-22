@@ -3,6 +3,8 @@ package service
 type (
 	CloudProvider string
 	ResourceType  string
+
+	ResourceState string
 )
 
 const (
@@ -13,12 +15,22 @@ const (
 	// Resource Types that are currently supported in zopdev.
 	// TODO: add more resource types.
 
-	ALL ResourceType = "all"
-	SQL ResourceType = "sql"
-	VM  ResourceType = "vm"
+	SQL ResourceType = "SQL"
+
+	// Resource State constants.
+
+	START   ResourceState = "START"
+	SUSPEND ResourceState = "SUSPEND"
 )
 
-type Request struct {
+type CloudDetails struct {
 	CloudType CloudProvider `json:"cloudType,omitempty"`
 	Creds     any           `json:"creds"`
+}
+
+type ResourceDetails struct {
+	CloudAccID int64         `json:"cloudAccID"`
+	Name       string        `json:"name"`
+	Type       ResourceType  `json:"type"`
+	State      ResourceState `json:"state"`
 }

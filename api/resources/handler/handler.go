@@ -5,6 +5,8 @@ import (
 
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
+
+	"github.com/zopdev/zopdev/api/resources/service"
 )
 
 type Handler struct {
@@ -16,7 +18,7 @@ func New(svc Service) *Handler {
 }
 
 func (h *Handler) GetResources(ctx *gofr.Context) (any, error) {
-	id := ctx.PathParam("id")
+	id := ctx.Param("cloudAccId")
 	if id == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}
@@ -34,4 +36,20 @@ func (h *Handler) GetResources(ctx *gofr.Context) (any, error) {
 	}
 
 	return res, nil
+}
+
+func (h *Handler) ChangeState(ctx *gofr.Context) (any, error) {
+	var resDetails service.ResourceDetails
+
+	err := ctx.Bind(&resDetails)
+	if err != nil {
+		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"request body"}}
+	}
+
+	err = h.svc.ChangeState(ctx, resDetails)
+	if err != nil {
+		return nil, err
+	}
+
+	return resDetails, nil
 }

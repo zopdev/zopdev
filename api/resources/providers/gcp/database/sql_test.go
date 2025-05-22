@@ -40,8 +40,14 @@ func getServer(t *testing.T, resp any, isError bool) *httptest.Server {
 func Test_GetAllInstances(t *testing.T) {
 	resp := &sqladmin.InstancesListResponse{
 		Items: []*sqladmin.DatabaseInstance{
-			{Name: "test-instance", Project: "test-project"},
-		},
+			{Name: "test-instance1", Project: "test-project", Settings: &sqladmin.Settings{ActivationPolicy: ALWAYS}},
+			{Name: "test-instance2", Project: "test-project", Settings: &sqladmin.Settings{ActivationPolicy: NEVER}},
+			{Name: "test-instance3", Project: "test-project", Settings: &sqladmin.Settings{ActivationPolicy: "ON_DEMAND"}},
+		}}
+	result := []models.Instance{
+		{Name: "test-instance1", Type: "SQL", ProviderID: "test-project", Status: RUNNING},
+		{Name: "test-instance2", Type: "SQL", ProviderID: "test-project", Status: SUSPENDED},
+		{Name: "test-instance3", Type: "SQL", ProviderID: "test-project", Status: SUSPENDED},
 	}
 
 	srv := getServer(t, resp, false)
@@ -56,7 +62,7 @@ func Test_GetAllInstances(t *testing.T) {
 
 	require.NoError(t, err)
 	require.NotNil(t, admin)
-	assert.Equal(t, []models.Instance{{Name: "test-instance", Type: "SQL", ProviderID: "test-project"}}, admin)
+	assert.Equal(t, result, admin)
 }
 
 func Test_GetAllInstances_Error(t *testing.T) {
@@ -78,4 +84,56 @@ func Test_GetAllInstances_Error(t *testing.T) {
 	require.Error(t, err)
 	require.Nil(t, admin)
 	assert.Equal(t, expected.Error(), err.Error())
+}
+
+func TestClient_StartInstance(t *testing.T) {
+	// Success case
+	srv1 := getServer(t, nil, false)
+	defer srv1.Close()
+
+	instSvc, err := sqladmin.NewService(context.Background(), option.WithoutAuthentication(), option.WithEndpoint(srv1.URL))
+	require.NoError(t, err)
+
+	c := Client{SQL: instSvc.Instances}
+
+	err = c.StartInstance(nil, "test-project", "test-instance")
+	require.NoError(t, err)
+
+	// Error case
+	srv2 := getServer(t, nil, true)
+	defer srv2.Close()
+
+	instSvc, err = sqladmin.NewService(context.Background(), option.WithoutAuthentication(), option.WithEndpoint(srv2.URL))
+	require.NoError(t, err)
+
+	c = Client{SQL: instSvc.Instances}
+
+	err = c.StartInstance(nil, "test-project", "test-instance")
+	require.Error(t, err)
+}
+
+func TestClient_StopInstance(t *testing.T) {
+	// Success case
+	srv1 := getServer(t, nil, false)
+	defer srv1.Close()
+
+	instSvc, err := sqladmin.NewService(context.Background(), option.WithoutAuthentication(), option.WithEndpoint(srv1.URL))
+	require.NoError(t, err)
+
+	c := Client{SQL: instSvc.Instances}
+
+	err = c.StopInstance(nil, "test-project", "test-instance")
+	require.NoError(t, err)
+
+	// Error case
+	srv2 := getServer(t, nil, true)
+	defer srv2.Close()
+
+	instSvc, err = sqladmin.NewService(context.Background(), option.WithoutAuthentication(), option.WithEndpoint(srv2.URL))
+	require.NoError(t, err)
+
+	c = Client{SQL: instSvc.Instances}
+
+	err = c.StopInstance(nil, "test-project", "test-instance")
+	require.Error(t, err)
 }
