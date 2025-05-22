@@ -180,8 +180,8 @@ const Stepper = ({ steps, handleComplete, postData }) => {
             variant="secondary"
             className="flex items-center px-3 py-2 md:px-4 md:py-2 rounded-md bg-secondary-200 text-secondary-700 hover:bg-secondary-300"
             onClick={goToPreviousStep}
+            startEndornment={<ChevronLeftIcon className="w-3 h-3 mr-1" />}
           >
-            <ChevronLeftIcon className="w-3 h-3 mr-1" />
             {'Back'}
           </Button>
         ) : (
@@ -197,9 +197,11 @@ const Stepper = ({ steps, handleComplete, postData }) => {
           }`}
           disabled={!isCurrentStepComplete()}
           onClick={goToNextStep}
+          endEndornment={
+            currentStep !== steps?.length - 1 && <ChevronRightIcon className="w-4 h-4 ml-1" />
+          }
         >
           {currentStep === steps?.length - 1 ? 'Finish' : 'Next'}
-          {currentStep !== steps?.length - 1 && <ChevronRightIcon className="w-4 h-4 ml-1" />}
         </Button>
       </div>
     </div>

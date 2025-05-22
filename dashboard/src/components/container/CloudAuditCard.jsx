@@ -12,9 +12,10 @@ import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
-import { useGetAuditDetails, usePostAuditData } from '@/queries/CloudAccount/index.js';
+import { useGetAuditDetails, usePostAuditData } from '@/queries/cloud-account/index.js';
 import Button from '@/components/atom/Button/index.jsx';
 import { refreshInterval } from '@/utils/constant.js';
+import { formatTime } from '@/utils/helper';
 
 const ICONS = {
   cloud: CloudIcon,
@@ -352,8 +353,8 @@ function CloudAccountAuditCard({ account }) {
           {lastEvaluatedAt && (
             <div className="mt-1 pt-3 text-xs flex text-secondary-900 justify-between items-center">
               <div className="md:flex">
-                <span className="text-secondary-400">Last Run on&nbsp;</span>
-                <p>{new Date(lastEvaluatedAt).toLocaleString()}</p>
+                <span className="text-secondary-400">Last Run at&nbsp;</span>
+                <p>{formatTime(lastEvaluatedAt)}</p>
               </div>
               <Button
                 loading={reRunAudit?.isPending}

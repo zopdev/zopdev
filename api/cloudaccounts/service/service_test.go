@@ -19,7 +19,8 @@ var (
 	errTest = errors.New("service error")
 )
 
-func TestService_AddCloudAccount(t *testing.T) {
+// TODO: add tests for AWS as well once the structure is fixed as the tests would need to be rewritten.
+func TestService_AddGCPCloudAccount(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -28,7 +29,7 @@ func TestService_AddCloudAccount(t *testing.T) {
 
 	ctx := &gofr.Context{}
 
-	cloudAccount := &store.CloudAccount{
+	gcpCloudAccount := &store.CloudAccount{
 		Name:        "Test Account",
 		Provider:    "GCP",
 		ProviderID:  "test-project-id",
@@ -48,10 +49,10 @@ func TestService_AddCloudAccount(t *testing.T) {
 					GetCloudAccountByProvider(ctx, "GCP", "test-project-id").
 					Return(nil, nil)
 				mockStore.EXPECT().
-					InsertCloudAccount(ctx, cloudAccount).
-					Return(cloudAccount, nil)
+					InsertCloudAccount(ctx, gcpCloudAccount).
+					Return(gcpCloudAccount, nil)
 			},
-			input:         cloudAccount,
+			input:         gcpCloudAccount,
 			expectedError: nil,
 		},
 		{
@@ -59,9 +60,9 @@ func TestService_AddCloudAccount(t *testing.T) {
 			mockBehavior: func() {
 				mockStore.EXPECT().
 					GetCloudAccountByProvider(ctx, "GCP", "test-project-id").
-					Return(cloudAccount, nil)
+					Return(gcpCloudAccount, nil)
 			},
-			input:         cloudAccount,
+			input:         gcpCloudAccount,
 			expectedError: http.ErrorEntityAlreadyExist{},
 		},
 		{
@@ -71,7 +72,7 @@ func TestService_AddCloudAccount(t *testing.T) {
 					GetCloudAccountByProvider(ctx, "GCP", "test-project-id").
 					Return(nil, errTest)
 			},
-			input:         cloudAccount,
+			input:         gcpCloudAccount,
 			expectedError: errTest,
 		},
 		{
@@ -91,10 +92,10 @@ func TestService_AddCloudAccount(t *testing.T) {
 					GetCloudAccountByProvider(ctx, "GCP", "test-project-id").
 					Return(nil, nil)
 				mockStore.EXPECT().
-					InsertCloudAccount(ctx, cloudAccount).
+					InsertCloudAccount(ctx, gcpCloudAccount).
 					Return(nil, errTest)
 			},
-			input:         cloudAccount,
+			input:         gcpCloudAccount,
 			expectedError: errTest,
 		},
 	}

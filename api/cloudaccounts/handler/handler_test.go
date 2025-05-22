@@ -57,13 +57,6 @@ func TestHandler_AddCloudAccount(t *testing.T) {
 			expectedError:  http.ErrorMissingParam{Params: []string{"name", "provider"}},
 		},
 		{
-			name:           "invalid provider",
-			requestBody:    `{"name":"Test Account","provider":"aws","credentials":{}}`,
-			mockBehavior:   func() {},
-			expectedStatus: netHTTP.StatusBadRequest,
-			expectedError:  http.ErrorInvalidParam{Params: []string{"provider"}},
-		},
-		{
 			name:        "service error",
 			requestBody: `{"name":"Test Account","provider":"gcp","credentials":{"project_id":"test-project-id"}}`,
 			mockBehavior: func() {
