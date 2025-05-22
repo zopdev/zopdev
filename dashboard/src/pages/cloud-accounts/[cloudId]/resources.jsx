@@ -32,11 +32,11 @@ const CloudResourceRow = (resource) => {
   };
 
   useEffect(() => {
-    if (resourceStateChanger?.isError) {
-      toast.failed(resourceStateChanger.error?.message);
-      setCurrentState(!currentState);
+    if (resourceStateChanger.isError) {
+      toast.failed(resourceStateChanger?.error?.message);
+      setCurrentState((prev) => !prev);
     }
-  }, [resourceStateChanger]);
+  }, [resourceStateChanger.isError, resourceStateChanger.error]);
 
   return {
     id: resource?.instance_name,
