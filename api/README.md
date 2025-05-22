@@ -51,10 +51,10 @@ Ensure you have the following installed on your system before proceeding:
    Build and run the Docker container:
 
    ```bash
-   docker run -d -p 8000:8000 --name zop-api zopdev/api:v0.2.1
+   docker run -d -p 8000:8000 --name zop-api zopdev/api:v0.3.0
 
    # To run the UI in a separate container:
-   docker run -d -p 3000:8000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.1
+   docker run -d -p 3000:8000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.3.0
    ```
 
 ## Contributing
