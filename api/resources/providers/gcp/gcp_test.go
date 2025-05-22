@@ -2,6 +2,8 @@ package gcp
 
 import (
 	"context"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -33,9 +35,13 @@ func TestClient_NewGoogleCredentials(t *testing.T) {
 }
 
 func TestClient_NewSQLInstanceLister(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+	}))
+
 	ctx := context.Background()
 	c := New()
-	sql, err := c.NewSQLClient(ctx)
+	sql, err := c.NewSQLClient(ctx, option.WithEndpoint(srv.URL), option.WithoutAuthentication())
 
 	require.NoError(t, err)
 	assert.NotNil(t, sql)
@@ -49,8 +55,11 @@ func TestClient_NewSQLInstanceLister(t *testing.T) {
 
 func TestClient_NewMetricsClient(t *testing.T) {
 	ctx := context.Background()
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+	}))
 	c := New()
-	met, err := c.NewMetricsClient(ctx)
+	met, err := c.NewMetricsClient(ctx, option.WithEndpoint(srv.URL), option.WithoutAuthentication())
 
 	require.NoError(t, err)
 	assert.NotNil(t, met)
