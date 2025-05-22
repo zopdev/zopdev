@@ -5,6 +5,7 @@ import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline/index.js';
 import AppLogo from '@/assets/svg/AppLogo.jsx';
 import CloudAccountSVG from '@/assets/svg/CloudAccountSvg.jsx';
 import AppLogoWithText from '../../assets/images/applogoWithText.svg';
+import DashboardIcon from '@/assets/svg/sidebar/DashboardIcon';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -30,6 +31,14 @@ export function TopBar() {
     {
       name: 'Dashboard',
       routeName: '/',
+      hover: true,
+      selected: true,
+      isLoading: false,
+      icon: DashboardIcon,
+    },
+    {
+      name: 'Cloud Accounts',
+      routeName: '/cloud-accounts',
       hover: true,
       selected: true,
       isLoading: false,
