@@ -3,14 +3,14 @@ import DashBoardCard from '@/components/molecules/Cards/DashBoardCard.jsx';
 import DashboardSection from '@/components/organisms/DashBoardSection.jsx';
 import { useNavigate } from 'react-router-dom';
 import CloudAccountAuditCards from '@/components/container/CloudAuditCard.jsx';
-import { useGetCloudAccounts } from '@/queries/CloudAccount/index.js';
+import { useGetCloudAccounts } from '@/queries/cloud-account/index.js';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
 import React from 'react';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
 import Button from '@/components/atom/Button/index.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
 
-const Dashboard = () => {
+const DashboardPage = () => {
   const getData = useGetCloudAccounts();
 
   const navigate = useNavigate();
@@ -112,4 +112,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default DashboardPage;

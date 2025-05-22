@@ -12,7 +12,7 @@ import ResourceStatus from '@/components/atom/ResourceStatus/index.jsx';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper.jsx';
 import { toast } from '@/components/molecules/Toast/index.jsx';
 import ErrorComponent from '@/components/atom/ErrorComponent/index.jsx';
-import { useGetAuditDetails, usePostAuditData } from '@/queries/CloudAccount/index.js';
+import { useGetAuditDetails, usePostAuditData } from '@/queries/cloud-account/index.js';
 import Button from '@/components/atom/Button/index.jsx';
 import { refreshInterval } from '@/utils/constant.js';
 
