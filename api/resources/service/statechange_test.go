@@ -53,6 +53,38 @@ func TestService_changeSQLState(t *testing.T) {
 					Return(mockStopper, nil)
 			},
 		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mockCalls()
+
+			err := s.changeSQLState(ctx, ca, tc.input)
+
+			assert.Equal(t, tc.expErr, err)
+		})
+	}
+}
+
+func TestService_changeSQLState_Errors(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mGCP := NewMockGCPClient(ctrl)
+	ctx := &gofr.Context{Context: context.Background()}
+	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
+		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
+	mockCreds := &google.Credentials{ProjectID: "test-project"}
+	mockStopper := &mockSQLClient{}
+	s := New(mGCP, nil)
+
+	testCases := []struct {
+		name      string
+		input     ResourceDetails
+		cloudAcc  *client.CloudAccount
+		expErr    error
+		mockCalls func()
+	}{
 		{
 			name:   "Error getting google credentials",
 			input:  ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL},

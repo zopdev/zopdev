@@ -15,8 +15,7 @@ const (
 	// Resource Types that are currently supported in zopdev.
 	// TODO: add more resource types.
 
-	SQL ResourceType = "sql"
-	VM  ResourceType = "vm"
+	SQL ResourceType = "SQL"
 
 	// Resource State constants.
 

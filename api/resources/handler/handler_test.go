@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -154,7 +155,7 @@ func TestHandler_ChangeState(t *testing.T) {
 			if tc.expErr != nil {
 				assert.Equal(t, tc.expErr, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				assert.Equal(t, resDetails, resp)
 			}
 		})

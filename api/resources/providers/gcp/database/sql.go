@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	// RUNNING instance state for zopdev
+	// RUNNING instance state for zopdev.
 	RUNNING = "RUNNING"
-	// SUSPENDED instance state for zopdev
+	// SUSPENDED instance state for zopdev.
 	SUSPENDED = "SUSPENDED"
 
-	// The following constants are to identify and change the state of the instance
+	// The following constants are to identify and change the state of the instance.
 
 	// ALWAYS - The instance is always running.
 	ALWAYS = "ALWAYS"

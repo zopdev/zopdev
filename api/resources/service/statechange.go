@@ -13,16 +13,11 @@ import (
 func (s *Service) changeSQLState(ctx *gofr.Context, ca *client.CloudAccount, resDetails ResourceDetails) error {
 	var err error
 
-	switch strings.ToUpper(ca.Provider) {
-	case string(GCP):
+	if strings.EqualFold(strings.ToUpper(ca.Provider), string(GCP)) {
 		err = s.changeGCPSQL(ctx, ca.Credentials, resDetails)
 	}
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 func (s *Service) changeGCPSQL(ctx *gofr.Context, cred any, resDetails ResourceDetails) error {
