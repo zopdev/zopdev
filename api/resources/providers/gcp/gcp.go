@@ -39,7 +39,7 @@ func (*Client) NewGoogleCredentials(ctx context.Context, cred any, scopes ...str
 	return creds, nil
 }
 
-func (*Client) NewSQLInstanceLister(ctx context.Context, opts ...option.ClientOption) (SQLClient, error) {
+func (*Client) NewSQLClient(ctx context.Context, opts ...option.ClientOption) (SQLClient, error) {
 	admin, err := sqladmin.NewService(ctx, opts...)
 	if err != nil {
 		return nil, ErrInitializingClient

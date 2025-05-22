@@ -23,7 +23,7 @@ func Test_GetCloudCredentials_Success(t *testing.T) {
 	ctx := &gofr.Context{
 		Container: cont,
 	}
-
+	c := New()
 	cloudAccID := int64(12345)
 	body := []byte(`{"data": {"id": 12345, "name": "Test Cloud Account"}}`)
 
@@ -33,7 +33,7 @@ func Test_GetCloudCredentials_Success(t *testing.T) {
 	mocks.HTTPService.EXPECT().Get(ctx, "cloud-accounts/12345/credentials", nil).
 		Return(resp, nil)
 
-	credentials, err := GetCloudCredentials(ctx, cloudAccID)
+	credentials, err := c.GetCloudCredentials(ctx, cloudAccID)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
 	}
@@ -54,6 +54,7 @@ func Test_GetCloudCredentials_Error(t *testing.T) {
 	ctx := &gofr.Context{
 		Container: cont,
 	}
+	c := New()
 
 	testCases := []struct {
 		name          string
@@ -91,7 +92,7 @@ func Test_GetCloudCredentials_Error(t *testing.T) {
 			mocks.HTTPService.EXPECT().Get(ctx, fmt.Sprintf("cloud-accounts/%d/credentials", tc.cloudAccID), nil).
 				Return(resp, tc.serviceError)
 
-			credentials, err := GetCloudCredentials(ctx, tc.cloudAccID)
+			credentials, err := c.GetCloudCredentials(ctx, tc.cloudAccID)
 			if err == nil {
 				t.Errorf("Expected error %v, got nil", tc.expectedError)
 			}

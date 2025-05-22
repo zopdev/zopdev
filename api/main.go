@@ -24,6 +24,7 @@ import (
 
 	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
 
+	resourceClient "github.com/zopdev/zopdev/api/resources/client"
 	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
 	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	resourceService "github.com/zopdev/zopdev/api/resources/service"
@@ -105,9 +106,11 @@ func registerAuditAPIRoutes(app *gofr.App) {
 }
 
 func registerCloudResourceRoutes(app *gofr.App) {
+	client := resourceClient.New()
 	gcpClient := gcpResource.New()
-	resSvc := resourceService.New(gcpClient)
+	resSvc := resourceService.New(gcpClient, client)
 	resHld := resrouceHandler.New(resSvc)
 
-	app.GET("/cloud-account/{id}/resources", resHld.GetResources)
+	app.GET("/resources", resHld.GetResources)
+	app.POST("/resources/state", resHld.ChangeState)
 }
