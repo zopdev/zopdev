@@ -8,11 +8,6 @@ export function useGetCloudAccounts(reqParams, options = {}) {
       const url = `/cloud-accounts`;
       return await fetchData(url);
     },
-    staleTime: 0,
-    cacheTime: 0,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    retry: false,
     ...options,
   });
 }
@@ -24,11 +19,6 @@ export function useGetAuditDetails(reqParams, options = {}) {
       const url = `/audit/cloud-accounts/${reqParams?.id}/results`;
       return await fetchData(url);
     },
-    staleTime: 0,
-    cacheTime: 0,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    retry: false,
     ...options,
   });
 }

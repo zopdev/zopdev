@@ -1,21 +1,27 @@
-export function transformResourceAuditPayload(inputPayload) {
-  try {
-    if (!inputPayload || !inputPayload['0'] || !inputPayload['0'].credentials) {
-      throw new Error('Invalid input payload structure');
-    }
-    let parsedCredentials;
-    try {
-      parsedCredentials = JSON.parse(inputPayload['0'].credentials);
-    } catch (error) {
-      throw new Error('Failed to parse credentials JSON: ' + error.message);
-    }
-    return {
-      name: inputPayload['0'].name,
-      provider: 'gcp',
-      credentials: parsedCredentials,
-    };
-  } catch (error) {
-    console.error('Transformation error:', error);
-    return { error: error.message };
-  }
+import { ParseJSON } from '@/utils/common';
+
+export function transformResourceAuditPayload({ 0: CloudDetails }) {
+  const { name, provider, ...rest } = CloudDetails;
+
+  const credentials = {
+    aws: {
+      aws_access_key_id: rest.aws_access_key_id,
+      aws_secret_access_key: rest.aws_secret_access_key,
+    },
+    azure: {
+      appId: rest.appId,
+      password: rest.password,
+      tenantId: rest.tenantId,
+      //   subscriptionId: values.subscriptionId,
+    },
+    gcp: provider === 'gcp' ? ParseJSON(rest.credentials) : {},
+  };
+
+  const finalValues = {
+    name,
+    provider,
+    credentials: credentials[provider],
+  };
+
+  return finalValues;
 }

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 
-export default function NotFound() {
+export default function NotFoundPage() {
   return (
     <div className="bg-white">
       <main className="mx-auto w-full max-w-7xl px-6 pb-16 pt-10 sm:pb-24 lg:px-8 min-h-screen flex justify-center items-center flex-col">

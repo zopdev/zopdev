@@ -24,6 +24,11 @@ import (
 
 	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
 
+	resourceClient "github.com/zopdev/zopdev/api/resources/client"
+	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
+	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
+	resourceService "github.com/zopdev/zopdev/api/resources/service"
+
 	"github.com/zopdev/zopdev/api/migrations"
 	"gofr.dev/pkg/gofr"
 )
@@ -55,10 +60,6 @@ func main() {
 	applicationService := appService.New(applicationStore, environmentService)
 	applicationHandler := appHandler.New(applicationService)
 
-	adStore := auditStore.New()
-	adSvc := auditService.New(adStore)
-	adHandler := auditHandler.New(adSvc)
-
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
@@ -67,12 +68,6 @@ func main() {
 	app.GET("/cloud-accounts/{id}/deployment-space/namespaces", cloudAccountHandler.ListNamespaces)
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
 	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
-
-	app.POST("/audit/cloud-accounts/{id}/all", adHandler.RunAll)
-	app.POST("/audit/cloud-accounts/{id}/category/{category}", adHandler.RunByCategory)
-	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunByID)
-	app.GET("/audit/cloud-accounts/{id}/results", adHandler.GetAllResults)
-	app.GET("/audit/cloud-accounts/{id}/results/{ruleId}", adHandler.GetResultByID)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
@@ -92,5 +87,30 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
 
+	registerAuditAPIRoutes(app)
+	registerCloudResourceRoutes(app)
+
 	app.Run()
+}
+
+func registerAuditAPIRoutes(app *gofr.App) {
+	adStore := auditStore.New()
+	adSvc := auditService.New(adStore)
+	adHandler := auditHandler.New(adSvc)
+
+	app.POST("/audit/cloud-accounts/{id}/all", adHandler.RunAll)
+	app.POST("/audit/cloud-accounts/{id}/category/{category}", adHandler.RunByCategory)
+	app.POST("/audit/cloud-accounts/{id}/rule/{ruleId}", adHandler.RunByID)
+	app.GET("/audit/cloud-accounts/{id}/results", adHandler.GetAllResults)
+	app.GET("/audit/cloud-accounts/{id}/results/{ruleId}", adHandler.GetResultByID)
+}
+
+func registerCloudResourceRoutes(app *gofr.App) {
+	client := resourceClient.New()
+	gcpClient := gcpResource.New()
+	resSvc := resourceService.New(gcpClient, client)
+	resHld := resrouceHandler.New(resSvc)
+
+	app.GET("/resources", resHld.GetResources)
+	app.POST("/resources/state", resHld.ChangeState)
 }

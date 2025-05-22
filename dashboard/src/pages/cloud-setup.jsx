@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import CreateCloud from '@/components/organisms/CreateCloud.jsx';
 import DynamicFormRadioWithIcon from '@/components/atom/Button/RadioButtonWithIcon/index.jsx';
 import Stepper from '@/components/organisms/Stepper.jsx';
-import { usePostAuditData } from '@/queries/CloudAccount/index.js';
+import { usePostAuditData } from '@/queries/cloud-account/index.js';
 import { transformResourceAuditPayload } from '@/utils/transformer.js';
 
 const ResourceAudit = ({ data, updateData, setIsComplete }) => {
@@ -128,7 +128,7 @@ const ResourceAudit = ({ data, updateData, setIsComplete }) => {
 //   );
 // };
 
-const Audit = () => {
+const CloudSetupPage = () => {
   const postData = usePostAuditData();
 
   const handleComplete = (data) => {
@@ -160,4 +160,4 @@ const Audit = () => {
   );
 };
 
-export default Audit;
+export default CloudSetupPage;
