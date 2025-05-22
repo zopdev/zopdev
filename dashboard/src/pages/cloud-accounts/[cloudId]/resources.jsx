@@ -6,7 +6,7 @@ import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
 import { toast } from '@/components/molecules/Toast';
 import { useGetCloudResources, usePostResourceState } from '@/queries/cloud-resources';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const headers = [
@@ -17,10 +17,12 @@ const headers = [
 ];
 
 const CloudResourceRow = (resource) => {
+  const [currentState, setCurrentState] = useState(resource?.status === 'RUNNING' ? true : false);
   const { cloudId } = useParams();
   const resourceStateChanger = usePostResourceState();
 
   const handleToggle = (state) => {
+    setCurrentState(state);
     resourceStateChanger.mutate({
       cloudAccId: parseInt(cloudId),
       name: resource?.instance_name,
@@ -30,7 +32,10 @@ const CloudResourceRow = (resource) => {
   };
 
   useEffect(() => {
-    if (resourceStateChanger?.isError) toast.failed(resourceStateChanger.error?.message);
+    if (resourceStateChanger?.isError) {
+      toast.failed(resourceStateChanger.error?.message);
+      setCurrentState(!currentState);
+    }
   }, [resourceStateChanger]);
 
   return {
@@ -40,7 +45,7 @@ const CloudResourceRow = (resource) => {
       <div className="min-w-36">
         <SwitchButton
           labelPosition="right"
-          isEnabled={resource?.status === 'RUNNING' ? true : false}
+          value={currentState}
           disabled={resourceStateChanger?.isPending}
           onChange={handleToggle}
           titleList={{ true: 'Running', false: 'Suspended' }}

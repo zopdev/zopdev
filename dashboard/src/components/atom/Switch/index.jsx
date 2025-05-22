@@ -1,12 +1,12 @@
 import { Field, Label, Switch } from '@headlessui/react';
-import { useState, useId } from 'react';
+import { useId } from 'react';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
 }
 
 export default function SwitchButton({
-  isEnabled,
+  value,
   onChange,
   title,
   titleList,
@@ -14,35 +14,25 @@ export default function SwitchButton({
   name,
   labelPosition,
 }) {
-  const [enabled, setEnabled] = useState(
-    isEnabled === 'true' ? true : isEnabled === 'false' ? false : !!isEnabled,
-  );
   const switchId = useId();
+  const labelTitle = titleList?.[value] ?? title;
 
-  const handleChange = (value) => {
-    if (disabled) return;
-    setEnabled(value);
-    onChange?.(value);
+  const handleToggle = () => {
+    if (!disabled) onChange?.(!value);
   };
-
-  const toggleSwitch = () => {
-    handleChange(!enabled);
-  };
-
-  const labelTitle = titleList?.[enabled] ?? title;
 
   return (
     <Field
       as="div"
       className={classNames(
         'flex items-center space-x-3',
-        labelPosition === 'right' && 'flex-row-reverse  justify-end',
+        labelPosition === 'right' && 'flex-row-reverse justify-end',
       )}
     >
       <Label
         as="span"
         htmlFor={switchId}
-        onClick={toggleSwitch}
+        onClick={handleToggle}
         className={classNames(
           'text-sm text-gray-600 cursor-pointer',
           disabled && 'opacity-50 cursor-default',
@@ -54,10 +44,10 @@ export default function SwitchButton({
         data-name={name}
         datatype="boolean"
         id={switchId}
-        checked={enabled}
-        onChange={handleChange}
+        checked={value}
+        onChange={onChange}
         className={classNames(
-          enabled ? (disabled ? 'bg-primary-500' : 'bg-primary-600') : 'bg-gray-300',
+          value ? (disabled ? 'bg-primary-500' : 'bg-primary-600') : 'bg-gray-300',
           'relative inline-flex h-6 w-11 flex-shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none',
           disabled ? 'opacity-50 cursor-auto' : 'cursor-pointer',
         )}
@@ -65,13 +55,13 @@ export default function SwitchButton({
       >
         <span
           className={classNames(
-            enabled ? 'translate-x-5' : 'translate-x-0',
+            value ? 'translate-x-5' : 'translate-x-0',
             'pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
           )}
         >
           <span
             className={classNames(
-              enabled ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in',
+              value ? 'opacity-0 duration-100 ease-out' : 'opacity-100 duration-200 ease-in',
               'absolute inset-0 flex h-full w-full items-center justify-center transition-opacity',
             )}
             aria-hidden="true"
@@ -88,7 +78,7 @@ export default function SwitchButton({
           </span>
           <span
             className={classNames(
-              enabled ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out',
+              value ? 'opacity-100 duration-200 ease-in' : 'opacity-0 duration-100 ease-out',
               'absolute inset-0 flex h-full w-full items-center justify-center transition-opacity',
             )}
             aria-hidden="true"
