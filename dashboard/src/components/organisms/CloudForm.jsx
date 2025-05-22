@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import Button from '@/components/atom/Button';
-import Label from '@/components/atom/Loaders';
 import Input from '@/components/atom/Input';
 import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper';
 import Textarea from '@/components/atom/Textarea';
@@ -9,6 +8,7 @@ import { InformationCircleIcon } from '@heroicons/react/24/outline';
 import CloudAccountCreationGuide from '@/components/molecules/SetupGuides/CloudAccountSetupGuide';
 import AwsAccountCreationGuide from '@/components/molecules/SetupGuides/AwsAccountCreationGuid';
 import NameValidation from '@/components/molecules/Validations/NameValidation';
+import Label from '@/components/atom/Label';
 
 const isValidJSON = (str) => {
   try {

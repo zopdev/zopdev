@@ -35,7 +35,7 @@ const CloudAccountPage = () => {
         })}
       </div>
 
-      {cloudAccounts?.data?.length === 0 && (
+      {cloudAccounts?.data?.data?.length === 0 && (
         <EmptyComponent
           imageComponent={<BlankCloudAccountSvg />}
           redirectLink={'/cloud-setup'}
