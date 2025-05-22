@@ -46,7 +46,7 @@ export default function Sidebar({ menu }) {
                 )}
                 ref={index === activeIndex ? selectedTabRef : null}
               >
-                {/* <item.icon className="mr-2 h-5 w-5" color="currentColor" /> */}
+                <item.icon className="mr-2 h-5 w-5" color="currentColor" />
                 <span className="whitespace-nowrap">{item.text}</span>
               </Link>
             ) : null,
@@ -89,7 +89,7 @@ export default function Sidebar({ menu }) {
                           'group flex gap-x-3 rounded-md p-2 text-sm font-medium leading-6 cursor-pointer w-48 mb-4',
                         )}
                       >
-                        {/* <item.icon
+                        <item.icon
                           className={classNames(
                             index === activeIndex
                               ? 'text-primary-600'
@@ -97,7 +97,7 @@ export default function Sidebar({ menu }) {
                             'h-6 w-6 shrink-0',
                           )}
                           color="currentColor"
-                        /> */}
+                        />
                         {item.text}
                       </div>
                     </Link>
