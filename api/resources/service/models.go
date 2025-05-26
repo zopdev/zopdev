@@ -16,6 +16,7 @@ const (
 	// TODO: add more resource types.
 
 	SQL ResourceType = "SQL"
+	VM  ResourceType = "VM"
 
 	// Resource State constants.
 

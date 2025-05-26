@@ -14,6 +14,7 @@ import (
 type GCPClient interface {
 	NewGoogleCredentials(ctx context.Context, cred any, scopes ...string) (*google.Credentials, error)
 	NewSQLClient(ctx context.Context, opts ...option.ClientOption) (gcp.SQLClient, error)
+	NewComputeClient(ctx *gofr.Context, opts ...option.ClientOption) (gcp.VMClient, error)
 }
 
 type HTTPClient interface {
