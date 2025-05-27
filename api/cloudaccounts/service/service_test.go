@@ -104,7 +104,7 @@ func TestService_AddGCPCloudAccount(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockBehavior()
 
-			service := New(mockStore, mockProvider)
+			service := New(mockStore, mockProvider, "")
 			_, err := service.AddCloudAccount(ctx, tc.input)
 
 			if tc.expectedError != nil {
@@ -165,7 +165,7 @@ func TestService_FetchAllCloudAccounts(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockBehavior()
 
-			service := New(mockStore, mockProvider)
+			service := New(mockStore, mockProvider, "")
 			_, err := service.FetchAllCloudAccounts(ctx)
 
 			if tc.expectedError != nil {

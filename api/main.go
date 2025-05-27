@@ -4,6 +4,7 @@ import (
 	appHandler "github.com/zopdev/zopdev/api/applications/handler"
 	appService "github.com/zopdev/zopdev/api/applications/service"
 	appStore "github.com/zopdev/zopdev/api/applications/store"
+
 	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
@@ -41,8 +42,10 @@ func main() {
 
 	gkeSvc := gcp.New()
 
+	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
+
 	cloudAccountStore := caStore.New()
-	cloudAccountService := caService.New(cloudAccountStore, gkeSvc)
+	cloudAccountService := caService.New(cloudAccountStore, gkeSvc, awsAccountID)
 	cloudAccountHandler := caHandler.New(cloudAccountService)
 
 	deploymentStore := deployStore.New()
@@ -68,6 +71,10 @@ func main() {
 	app.GET("/cloud-accounts/{id}/deployment-space/namespaces", cloudAccountHandler.ListNamespaces)
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
 	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
+
+	// Endpoints for one-click setup
+	app.GET("/cloud-accounts/{provider}/connection/info", cloudAccountHandler.GetCloudAccountConnectionInfo)
+	app.POST("/cloud-accounts/{provider}/connection", cloudAccountHandler.CreateCloudAccountConnection)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
