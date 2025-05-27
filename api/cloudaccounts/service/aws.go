@@ -47,7 +47,7 @@ func createAdminUserWithGroup(ctx context.Context,
 	// Attach AdministratorAccess policy to group.
 	_, err = iamClient.AttachGroupPolicy(ctx, &iam.AttachGroupPolicyInput{
 		GroupName: aws.String(groupName),
-		PolicyArn: aws.String("arn:aws:iam::aws:policy/AdministratorAccess"),
+		PolicyArn: aws.String("arn:providerAWS:iam::providerAWS:policy/AdministratorAccess"),
 	})
 	if err != nil {
 		return "", "", errFailedToAttachAdminPolicyToGroup
@@ -117,8 +117,8 @@ func generateCloudFormationURL(integrationID, externalID, _, permissionLevel, tr
 	return cfnURL
 }
 
-// AssumeRole assumes an IAM role using AWS STS.
-func AssumeRole(roleArn, externalID, sessionName string) (*sts.AssumeRoleOutput, error) {
+// assumeRole assumes an IAM role using AWS STS.
+func assumeRole(roleArn, externalID, sessionName string) (*sts.AssumeRoleOutput, error) {
 	cfg, err := config.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		return nil, err

@@ -9,9 +9,6 @@ import (
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
 
-	awsintegrationHandler "github.com/zopdev/zopdev/api/integration/handler"
-	awsintegrationService "github.com/zopdev/zopdev/api/integration/service"
-
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
 	caStore "github.com/zopdev/zopdev/api/cloudaccounts/store"
@@ -37,9 +34,6 @@ import (
 	"gofr.dev/pkg/gofr"
 )
 
-// TODO fix the number of statements according to the linters
-//
-//nolint:funlen // too many statements but acceptable for main for now
 func main() {
 	app := gofr.New()
 
@@ -48,8 +42,10 @@ func main() {
 
 	gkeSvc := gcp.New()
 
+	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
+
 	cloudAccountStore := caStore.New()
-	cloudAccountService := caService.New(cloudAccountStore, gkeSvc)
+	cloudAccountService := caService.New(cloudAccountStore, gkeSvc, awsAccountID)
 	cloudAccountHandler := caHandler.New(cloudAccountService)
 
 	deploymentStore := deployStore.New()
@@ -67,11 +63,6 @@ func main() {
 	applicationService := appService.New(applicationStore, environmentService)
 	applicationHandler := appHandler.New(applicationService)
 
-	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
-
-	integrationService := awsintegrationService.New(awsAccountID)
-	integrationHandler := awsintegrationHandler.New(integrationService)
-
 	app.AddHTTPService("cloud-account", "http://localhost:8000")
 
 	app.POST("/cloud-accounts", cloudAccountHandler.AddCloudAccount)
@@ -80,6 +71,10 @@ func main() {
 	app.GET("/cloud-accounts/{id}/deployment-space/namespaces", cloudAccountHandler.ListNamespaces)
 	app.GET("/cloud-accounts/{id}/deployment-space/options", cloudAccountHandler.ListDeploymentSpaceOptions)
 	app.GET("/cloud-accounts/{id}/credentials", cloudAccountHandler.GetCredentials)
+
+	// Endpoints for one-click setup
+	app.GET("/cloud-accounts/{provider}/connection/info", cloudAccountHandler.GetCloudAccountConnectionInfo)
+	app.POST("/cloud-accounts/{provider}/connection", cloudAccountHandler.CreateCloudAccountConnection)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
@@ -98,9 +93,6 @@ func main() {
 	app.GET("/environments/{id}/deploymentspace/pod", deploymentHandler.ListPods)
 	app.GET("/environments/{id}/deploymentspace/cronjob/{name}", deploymentHandler.GetCronJob)
 	app.GET("/environments/{id}/deploymentspace/cronjob", deploymentHandler.ListCronJobs)
-
-	app.GET("/{provider}/connect", integrationHandler.GetIntegration)
-	app.POST("/{provider}/connect", integrationHandler.Connect)
 
 	registerAuditAPIRoutes(app)
 	registerCloudResourceRoutes(app)
