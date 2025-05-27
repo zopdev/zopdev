@@ -7,6 +7,7 @@ import (
 	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
+	"gofr.dev/pkg/gofr"
 
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
@@ -28,9 +29,9 @@ import (
 	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
 	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	resourceService "github.com/zopdev/zopdev/api/resources/service"
+	resourceStore "github.com/zopdev/zopdev/api/resources/store"
 
 	"github.com/zopdev/zopdev/api/migrations"
-	"gofr.dev/pkg/gofr"
 )
 
 func main() {
@@ -108,9 +109,11 @@ func registerAuditAPIRoutes(app *gofr.App) {
 func registerCloudResourceRoutes(app *gofr.App) {
 	client := resourceClient.New()
 	gcpClient := gcpResource.New()
-	resSvc := resourceService.New(gcpClient, client)
+	resStore := resourceStore.New()
+	resSvc := resourceService.New(gcpClient, client, resStore)
 	resHld := resrouceHandler.New(resSvc)
 
 	app.GET("/resources", resHld.GetResources)
 	app.POST("/resources/state", resHld.ChangeState)
+	app.POST("/resources/sync", resHld.SyncResources)
 }
