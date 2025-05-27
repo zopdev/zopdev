@@ -21,6 +21,10 @@ func (c *ComputeClient) GetAllVMInstances(ctx *gofr.Context, projectID string) (
 
 	for _, scopedList := range aggList.Items {
 		for _, item := range scopedList.Instances {
+			if isGKEManaged(item) {
+				continue
+			}
+
 			zoneParts := strings.Split(item.Zone, "/")
 			zone := zoneParts[len(zoneParts)-1]
 			region := zone[:len(zone)-2]
@@ -37,6 +41,30 @@ func (c *ComputeClient) GetAllVMInstances(ctx *gofr.Context, projectID string) (
 	}
 
 	return instances, nil
+}
+
+func isGKEManaged(instance *compute.Instance) bool {
+	if strings.HasPrefix(instance.Name, "gke-") {
+		return true
+	}
+
+	for key := range instance.Labels {
+		if key == "goog-gke-nodepool" || key == "k8s-io-cluster" || key == "gke.io/cluster-name" {
+			return true
+		}
+	}
+
+	if instance.Metadata != nil {
+		for _, item := range instance.Metadata.Items {
+			if item.Key == "created-by" && item.Value != nil &&
+				strings.Contains(*item.Value, "instanceGroupManagers") &&
+				strings.Contains(*item.Value, "gke-") {
+				return true
+			}
+		}
+	}
+
+	return false
 }
 
 func (c *ComputeClient) StartInstanceVM(_ *gofr.Context, projectID, zone, instanceName string) error {
