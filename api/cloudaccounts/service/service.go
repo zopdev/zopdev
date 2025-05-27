@@ -155,7 +155,7 @@ func fetchOCIProviderDetails(ctx *gofr.Context, cloudAccount *store.CloudAccount
 	body, err := json.Marshal(cloudAccount.Credentials)
 	if err != nil {
 		ctx.Error(err.Error())
-		return http.ErrorInvalidParam{}
+		return http.ErrorInvalidParam{Params: []string{"credentials"}}
 	}
 
 	err = json.Unmarshal(body, &ociCred)
