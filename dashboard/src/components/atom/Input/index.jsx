@@ -17,9 +17,21 @@ const Input = ({
   ...props
 }) => {
   const [internalError, setInternalError] = useState(error);
+  const [internalErrorText, setInternalErrorText] = useState(errorText);
   useEffect(() => {
     setInternalError(error);
   }, [error]);
+  const handleValidation = (value) => {
+    if (required && value === '') {
+      setInternalError(true);
+      setInternalErrorText('This field is required');
+    } else if (testExp && !new RegExp(testExp).test(value)) {
+      setInternalError(true);
+      setInternalErrorText(errorText);
+    } else {
+      setInternalError(error);
+    }
+  };
 
   return (
     <>
@@ -45,16 +57,15 @@ const Input = ({
             } else {
               setInternalError(error);
             }
+            handleValidation(e.target.value);
             if (props.onChange) props.onChange(e);
           }}
         />
         {endAdornment && <div className="absolute right-3 text-secondary-400">{endAdornment}</div>}
       </div>
-      {helperText != null && (
-        <p className={` text-xs text-red-500 ${helperTextClass}`}>{helperText} &nbsp; </p>
-      )}
-      {internalError && errorText && (
-        <p className={` text-xs text-red-500 ${errorTextClass}`}>{errorText} &nbsp; </p>
+      {helperText && <p className={` text-xs text-red-500 ${helperTextClass}`}>{helperText}</p>}
+      {internalError && internalErrorText && (
+        <p className={` text-xs text-red-500 ${errorTextClass}`}>{internalErrorText}</p>
       )}
     </>
   );

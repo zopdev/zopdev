@@ -19,3 +19,18 @@ export const enforceCharLimit = (value, limit) => {
 
   return value;
 };
+
+export function ParseJSON(str) {
+  try {
+    if (typeof str !== 'string') {
+      throw new Error('input is not string');
+    }
+    if (typeof str === 'string' && !isNaN(str)) {
+      throw new Error('Invalid JSON: Numeric string');
+    }
+    const result = JSON.parse(str);
+    return result;
+  } catch {
+    return {};
+  }
+}

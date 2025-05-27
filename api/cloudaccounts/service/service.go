@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
 	"strings"
 	"time"
 
 	awsSDK "github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"gofr.dev/pkg/gofr"
 	"gofr.dev/pkg/gofr/http"
 
@@ -31,7 +31,6 @@ func New(clStore store.CloudAccountStore, deploySpace provider.Provider) CloudAc
 
 // AddCloudAccount adds a new cloud account to the store if it doesn't already exist.
 func (s *Service) AddCloudAccount(ctx *gofr.Context, cloudAccount *store.CloudAccount) (*store.CloudAccount, error) {
-	//nolint:gocritic //addition of more providers
 	// TODO : validation is only checking if the values are present - we also need to check if the values are valid
 	// and able to connect to a cloud account, we would need to keep that code in a separate package where all gcp, aws code is present.
 	switch strings.ToUpper(cloudAccount.Provider) {
@@ -98,6 +97,7 @@ func validateAWSProviderDetails(_ *gofr.Context, account *store.CloudAccount) er
 	var awsCred awsCredentials
 
 	awsCredBody, _ := json.Marshal(account.Credentials)
+
 	err := json.Unmarshal(awsCredBody, &awsCred)
 	if err != nil {
 		return err
@@ -115,7 +115,7 @@ func validateAWSProviderDetails(_ *gofr.Context, account *store.CloudAccount) er
 		return http.ErrorMissingParam{Params: []string{"AWSecretAccessKey"}}
 	}
 
-	account.Name, err = getAWSAccountID(awsCred)
+	account.ProviderID, err = getAWSAccountID(awsCred)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func (s *Service) FetchDeploymentSpace(ctx *gofr.Context, cloudAccountID int64) 
 		return nil, err
 	}
 
-	credentials, err := s.store.GetCredentials(ctx, cloudAccount.ID)
+	creds, err := s.store.GetCredentials(ctx, cloudAccount.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +162,7 @@ func (s *Service) FetchDeploymentSpace(ctx *gofr.Context, cloudAccountID int64) 
 		ProviderDetails: cloudAccount.ProviderDetails,
 	}
 
-	clusters, err := s.deploymentSpace.ListAllClusters(ctx, &deploymentSpaceAccount, credentials)
+	clusters, err := s.deploymentSpace.ListAllClusters(ctx, &deploymentSpaceAccount, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -176,7 +176,7 @@ func (s *Service) ListNamespaces(ctx *gofr.Context, id int64, clusterName, clust
 		return nil, err
 	}
 
-	credentials, err := s.store.GetCredentials(ctx, cloudAccount.ID)
+	creds, err := s.store.GetCredentials(ctx, cloudAccount.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +194,7 @@ func (s *Service) ListNamespaces(ctx *gofr.Context, id int64, clusterName, clust
 		Region: clusterRegion,
 	}
 
-	res, err := s.deploymentSpace.ListNamespace(ctx, &cluster, &deploymentSpaceAccount, credentials)
+	res, err := s.deploymentSpace.ListNamespace(ctx, &cluster, &deploymentSpaceAccount, creds)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +215,7 @@ func (*Service) FetchDeploymentSpaceOptions(_ *gofr.Context, id int64) ([]Deploy
 }
 
 func (s *Service) FetchCredentials(ctx *gofr.Context, cloudAccountID int64) (interface{}, error) {
-	credentials, err := s.store.GetCredentials(ctx, cloudAccountID)
+	creds, err := s.store.GetCredentials(ctx, cloudAccountID)
 	if err != nil {
 		return nil, err
 	}
@@ -225,7 +225,7 @@ func (s *Service) FetchCredentials(ctx *gofr.Context, cloudAccountID int64) (int
 		return nil, err
 	}
 
-	cloudAcc.Credentials = credentials
+	cloudAcc.Credentials = creds
 
 	return cloudAcc, nil
 }

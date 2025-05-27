@@ -83,8 +83,8 @@ The application will start on [http://localhost:3000](http://localhost:3000) by 
 If you'd like to run the frontend in a Docker container:
 
 ```bash
-docker build -t zopdev/dashboard:v0.2.1 .
-docker run -d -p 3000:8000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.2.1
+docker build -t zopdev/dashboard:v0.3.0 .
+docker run -d -p 3000:8000 -e API_BASE_URL='http://localhost:8000' --name zop-ui zopdev/dashboard:v0.3.0
 ```
 
 ## 🤝 Contributing

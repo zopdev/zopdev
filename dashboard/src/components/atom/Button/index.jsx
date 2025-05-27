@@ -1,14 +1,13 @@
 import { Link } from 'react-router-dom';
 import React from 'react';
 
-const CustomButton = ({
+const Button = ({
   variant = 'primary',
   children,
   className: customClasses,
   href,
   size = 'md',
   loading = false,
-  icon,
   startEndornment,
   endEndornment,
   fullWidth = false,
@@ -54,9 +53,9 @@ const CustomButton = ({
         </div>
       ) : (
         <>
-          {icon && startEndornment && <span className="inline-flex">{icon}</span>}
+          {startEndornment && <span className="inline-flex">{startEndornment}</span>}
           <span className={'flex justify-center items-center gap-x-2'}>{children}</span>
-          {icon && endEndornment && <span className="inline-flex">{icon}</span>}
+          {endEndornment && <span className="inline-flex">{endEndornment}</span>}
         </>
       )}
     </>
@@ -90,4 +89,4 @@ const CustomButton = ({
   );
 };
 
-export default CustomButton;
+export default Button;
