@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"github.com/zopdev/zopdev/api/resources/store"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,7 @@ func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	ctx := &gofr.Context{}
 	req := CloudDetails{CloudType: "AWS"}
 
-	s := New(nil, nil)
+	s := New(nil, nil, nil)
 	instances, err := s.getAllSQLInstances(ctx, req)
 
 	assert.Nil(t, instances)
@@ -106,7 +107,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 		},
 	}
 
-	s := New(mockGCP, nil)
+	s := New(mockGCP, nil, nil)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -118,4 +119,21 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 			assert.Equal(t, tc.expErr, err)
 		})
 	}
+}
+
+func TestService_bSearch(t *testing.T) {
+	res := []store.Resource{
+		{ID: 1, UID: "zopdev-test/mysql01"},
+		{ID: 2, UID: "zopdev-test/mysql02"},
+		{ID: 3, UID: "zopdev-test/pgs1l01"},
+	}
+
+	idx, found := bSearch(res, "zopdev-test/mysql02")
+
+	assert.True(t, found)
+	assert.Equal(t, 1, idx)
+
+	idx, found = bSearch(res, "zopdev-test/mysql03")
+	assert.False(t, found)
+	assert.Equal(t, -1, idx)
 }

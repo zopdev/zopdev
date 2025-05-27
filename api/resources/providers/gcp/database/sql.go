@@ -40,6 +40,7 @@ func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.In
 			ProviderID:   item.Project,
 			Region:       item.Region,
 			CreationTime: item.CreateTime,
+			UID:          projectID + "/" + item.Name,
 			Status:       getState(item.Settings.ActivationPolicy),
 		})
 	}

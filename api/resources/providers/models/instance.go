@@ -7,6 +7,7 @@ type Instance struct {
 	Region       string         `json:"region"`
 	CreationTime string         `json:"creation_time"`
 	Status       string         `json:"status"`
+	UID          string         `json:"uid"`
 	Settings     map[string]any `json:"settings"`
 }
 
