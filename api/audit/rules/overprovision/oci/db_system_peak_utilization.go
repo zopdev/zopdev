@@ -1,7 +1,6 @@
 package oci
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -92,7 +91,7 @@ func listDBSystems(ctx *gofr.Context, client *database.DatabaseClient, compartme
 	return response.Items, nil
 }
 
-func getResult(ctx context.Context, creds *Credentials, dbSystems []database.DbSystemSummary,
+func getResult(ctx *gofr.Context, creds *Credentials, dbSystems []database.DbSystemSummary,
 	monitoringClient *monitoring.MonitoringClient) ([]store.Items, error) {
 	results := make([]store.Items, 0)
 	endTime := time.Now()
@@ -115,6 +114,7 @@ func getResult(ctx context.Context, creds *Credentials, dbSystems []database.DbS
 
 			response, err := monitoringClient.SummarizeMetricsData(ctx, request)
 			if err != nil {
+				ctx.Errorf("unable to summarize metrics: %v", err)
 				return errReadingMetrics
 			}
 
