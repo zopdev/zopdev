@@ -3,7 +3,6 @@ package oci
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"strings"
 	"sync"
@@ -12,32 +11,28 @@ import (
 	"github.com/oracle/oci-go-sdk/v65/common"
 	"github.com/oracle/oci-go-sdk/v65/database"
 	"github.com/oracle/oci-go-sdk/v65/monitoring"
+
 	"gofr.dev/pkg/gofr"
+
 	"golang.org/x/sync/errgroup"
 
 	"github.com/zopdev/zopdev/api/audit/store"
 )
 
-var (
-	errInvalidOCICreds  = errors.New("invalid OCI credentials")
-	errCreateDBClient   = errors.New("failed to create Database client")
-	errListDBSystems    = errors.New("failed to list DB systems")
-	errMonitoringClient = errors.New("failed to create Monitoring client")
-	errReadingMetrics   = errors.New("error reading metrics for DB system")
-)
-
 const (
-	danger    = "danger"
-	warning   = "warning"
-	compliant = "compliant"
+	danger    = "danger"    // CPU usage is too high or too low; system may be under-provisioned or overloaded.
+	warning   = "warning"   // CPU usage is  within tolerable limits.
+	compliant = "compliant" // CPU usage is within expected operational range.
 
-	lowerBound   = 20
-	warningBound = 70
-	upperBound   = 90
-	percentage   = 100
+	// CPU utilization thresholds (in percentage).
+	lowerBound   = 20  // Below this is considered non-compliant due to over-provisioning (under-utilized).
+	warningBound = 70  // Between lowerBound and warningBound is considered compliant.
+	upperBound   = 90  // Between warningBound and upperBound is warning; above this is danger.
+	percentage   = 100 // Represents the full scale (100%) of CPU usage.
 
-	metricNamespace = "oci_database"
-	metricName      = "CpuUtilization"
+	// Metrics configuration for OCI database monitoring.
+	metricNamespace = "oci_database"   // Namespace for the metric in Oracle Cloud Infrastructure.
+	metricName      = "CpuUtilization" // Name of the metric being monitored.
 )
 
 // CheckDBSystemProvisionedUsage checks the provisioned usage of DB systems
@@ -63,30 +58,34 @@ func CheckDBSystemProvisionedUsage(ctx *gofr.Context, creds any) ([]store.Items,
 
 	dbClient, err := database.NewDatabaseClientWithConfigurationProvider(configProvider)
 	if err != nil {
+		ctx.Errorf("unable to create Database client: %v", err)
 		return nil, errCreateDBClient
 	}
 
 	// List DB Systems
 	dbSystems, err := listDBSystems(ctx, &dbClient, ociCreds.Compartment)
 	if err != nil {
+		ctx.Errorf("unable to list DB systems: %v", err)
 		return nil, err
 	}
 
 	monitoringClient, err := monitoring.NewMonitoringClientWithConfigurationProvider(configProvider)
 	if err != nil {
+		ctx.Errorf("unable to create monitoring client: %v", err)
 		return nil, errMonitoringClient
 	}
 
 	return getResult(ctx, ociCreds, dbSystems, &monitoringClient)
 }
 
-func listDBSystems(ctx context.Context, client *database.DatabaseClient, compartmentID string) ([]database.DbSystemSummary, error) {
+func listDBSystems(ctx *gofr.Context, client *database.DatabaseClient, compartmentID string) ([]database.DbSystemSummary, error) {
 	request := database.ListDbSystemsRequest{
 		CompartmentId: &compartmentID,
 	}
 
 	response, err := client.ListDbSystems(ctx, request)
 	if err != nil {
+		ctx.Errorf("unable to list DB systems: %v", err)
 		return nil, errListDBSystems
 	}
 
@@ -146,7 +145,7 @@ func getResult(ctx context.Context, creds *Credentials, dbSystems []database.DbS
 	}
 
 	if err := errGrp.Wait(); err != nil {
-		return nil, err
+		return results, err
 	}
 
 	return results, nil
