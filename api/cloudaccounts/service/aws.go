@@ -10,8 +10,10 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/credentials"
+	"github.com/aws/aws-sdk-go-v2/service/cloudformation"
 	"github.com/aws/aws-sdk-go-v2/service/iam"
 	"github.com/aws/aws-sdk-go-v2/service/sts"
+	"gofr.dev/pkg/gofr"
 )
 
 var (
@@ -47,7 +49,7 @@ func createAdminUserWithGroup(ctx context.Context,
 	// Attach AdministratorAccess policy to group.
 	_, err = iamClient.AttachGroupPolicy(ctx, &iam.AttachGroupPolicyInput{
 		GroupName: aws.String(groupName),
-		PolicyArn: aws.String("arn:providerAWS:iam::providerAWS:policy/AdministratorAccess"),
+		PolicyArn: aws.String("arn:aws:iam::aws:policy/AdministratorAccess"),
 	})
 	if err != nil {
 		return "", "", errFailedToAttachAdminPolicyToGroup
@@ -119,7 +121,9 @@ func generateCloudFormationURL(integrationID, externalID, _, permissionLevel, tr
 
 // assumeRole assumes an IAM role using AWS STS.
 func assumeRole(roleArn, externalID, sessionName string) (*sts.AssumeRoleOutput, error) {
-	cfg, err := config.LoadDefaultConfig(context.TODO())
+	cfg, err := config.LoadDefaultConfig(context.TODO(),
+		config.WithRegion("us-east-1"),
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -133,4 +137,29 @@ func assumeRole(roleArn, externalID, sessionName string) (*sts.AssumeRoleOutput,
 	}
 
 	return client.AssumeRole(context.TODO(), input)
+}
+
+// GetStackStatus fetches the status of a CloudFormation stack.
+func (s *Service) GetStackStatus(ctx *gofr.Context, stackName string) (string, error) {
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to load AWS config: %w", err)
+	}
+
+	cf := cloudformation.NewFromConfig(cfg)
+	out, err := cf.DescribeStacks(ctx, &cloudformation.DescribeStacksInput{
+		StackName: &stackName,
+	})
+	if err != nil {
+		if strings.Contains(err.Error(), "does not exist") {
+			return "STACK_DOES_NOT_EXIST", nil
+		}
+		return "", fmt.Errorf("failed to describe stack: %w", err)
+	}
+
+	if len(out.Stacks) == 0 {
+		return "STACK_DOES_NOT_EXIST", nil
+	}
+
+	return string(out.Stacks[0].StackStatus), nil
 }

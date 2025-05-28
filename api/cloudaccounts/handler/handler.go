@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -26,6 +27,7 @@ type CloudAccountService interface {
 
 	CreateCloudAccountConnection(ctx *gofr.Context, req *service.RoleRequest) (*store.CloudAccount, error)
 	GetCloudAccountConnectionInfo(_ *gofr.Context, provider string) (service.AWSIntegrationINFO, error)
+	GetStackStatus(ctx *gofr.Context, stackName string) (string, error)
 }
 
 type Handler struct {
@@ -209,4 +211,18 @@ func isValidProviderForAutomaticIntegration(provider string) bool {
 	}
 
 	return supportedProviders[provider]
+}
+
+// GetStackStatus returns the status of a CloudFormation stack.
+func (h *Handler) GetStackStatus(ctx *gofr.Context) (interface{}, error) {
+	integrationID := ctx.PathParam("integrationId")
+	if integrationID == "" {
+		return nil, http.ErrorMissingParam{Params: []string{"integrationId"}}
+	}
+	stackName := fmt.Sprintf("Zopdev-%s", integrationID)
+	status, err := h.service.GetStackStatus(ctx, stackName)
+	if err != nil {
+		return nil, err
+	}
+	return map[string]string{"status": status}, nil
 }

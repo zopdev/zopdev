@@ -27,12 +27,21 @@ var (
 	errDeploymentSpaceAlreadyConfigured = errors.New("deployment space already exists")
 )
 
+type CloudAccountService interface {
+	FetchDeploymentSpace(ctx *gofr.Context, cloudAccountID int64) (interface{}, error)
+	ListNamespaces(ctx *gofr.Context, id int64, clusterName, clusterRegion string) (interface{}, error)
+	FetchDeploymentSpaceOptions(ctx *gofr.Context, id int64) ([]service.DeploymentSpaceOptions, error)
+	FetchCredentials(ctx *gofr.Context, cloudAccountID int64) (interface{}, error)
+
+	GetCloudAccountConnectionInfo(_ *gofr.Context, provider string) (service.AWSIntegrationINFO, error)
+}
+
 // Service implements the DeploymentSpaceService interface.
 // It uses a combination of deployment space and cluster stores to manage deployment space operations.
 type Service struct {
 	store               store.DeploymentSpaceStore
 	clusterService      deploymentspace.DeploymentEntity
-	cloudAccountService service.CloudAccountService
+	cloudAccountService CloudAccountService
 	providerService     provider.Provider
 }
 
@@ -47,7 +56,7 @@ type Service struct {
 //
 //	DeploymentSpaceService - An instance of the DeploymentSpaceService interface.
 func New(str store.DeploymentSpaceStore, clusterSvc deploymentspace.DeploymentEntity,
-	caService service.CloudAccountService, providerSvc provider.Provider) DeploymentSpaceService {
+	caService CloudAccountService, providerSvc provider.Provider) DeploymentSpaceService {
 	return &Service{
 		store:               str,
 		clusterService:      clusterSvc,

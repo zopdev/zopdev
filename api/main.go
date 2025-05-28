@@ -42,10 +42,10 @@ func main() {
 
 	gkeSvc := gcp.New()
 
-	awsAccountID := app.Config.Get("AWS_ACCOUNT_ID")
+	trustedPrincipalARN := app.Config.Get("AWS_TRUSTED_PRINCIPAL_ARN")
 
 	cloudAccountStore := caStore.New()
-	cloudAccountService := caService.New(cloudAccountStore, gkeSvc, awsAccountID)
+	cloudAccountService := caService.New(cloudAccountStore, gkeSvc, trustedPrincipalARN)
 	cloudAccountHandler := caHandler.New(cloudAccountService)
 
 	deploymentStore := deployStore.New()
@@ -75,6 +75,7 @@ func main() {
 	// Endpoints for one-click setup
 	app.GET("/cloud-accounts/{provider}/connection/info", cloudAccountHandler.GetCloudAccountConnectionInfo)
 	app.POST("/cloud-accounts/{provider}/connection", cloudAccountHandler.CreateCloudAccountConnection)
+	app.GET("/cloud-accounts/{provider}/stack-status/{integrationId}", cloudAccountHandler.GetStackStatus)
 
 	app.POST("/applications", applicationHandler.AddApplication)
 	app.GET("/applications", applicationHandler.ListApplications)
