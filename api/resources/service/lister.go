@@ -83,5 +83,5 @@ func (s *Service) getGCPVMInstances(ctx *gofr.Context, cred any) ([]models.Insta
 		return nil, err
 	}
 
-	return vmClient.GetAllVMInstances(ctx, creds.ProjectID)
+	return vmClient.GetAllInstances(ctx, creds.ProjectID)
 }

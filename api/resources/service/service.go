@@ -50,6 +50,7 @@ func (s *Service) GetResources(ctx *gofr.Context, id int64, resources []string) 
 			if erRes != nil {
 				return nil, erRes
 			}
+
 			instances = append(instances, vms...)
 		default:
 			return nil, gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}}

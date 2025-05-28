@@ -11,7 +11,7 @@ type ComputeClient struct {
 	ComputeService *compute.Service
 }
 
-func (c *ComputeClient) GetAllVMInstances(ctx *gofr.Context, projectID string) ([]models.Instance, error) {
+func (c *ComputeClient) GetAllInstances(_ *gofr.Context, projectID string) ([]models.Instance, error) {
 	var instances []models.Instance
 
 	aggList, err := c.ComputeService.Instances.AggregatedList(projectID).Do()
@@ -27,13 +27,13 @@ func (c *ComputeClient) GetAllVMInstances(ctx *gofr.Context, projectID string) (
 
 			zoneParts := strings.Split(item.Zone, "/")
 			zone := zoneParts[len(zoneParts)-1]
-			region := zone[:len(zone)-2]
+			//region := zone[:len(zone)-2]
 
 			instances = append(instances, models.Instance{
 				Name:         item.Name,
 				Type:         "VM",
 				ProviderID:   projectID,
-				Region:       region,
+				Region:       zone,
 				CreationTime: item.CreationTimestamp,
 				Status:       item.Status,
 			})
@@ -72,6 +72,7 @@ func (c *ComputeClient) StartInstanceVM(_ *gofr.Context, projectID, zone, instan
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -80,5 +81,6 @@ func (c *ComputeClient) StopInstanceVM(_ *gofr.Context, projectID, zone, instanc
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

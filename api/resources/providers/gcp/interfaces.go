@@ -14,8 +14,7 @@ type SQLClient interface {
 }
 
 type VMClient interface {
-	InstanceListerVM
-	IdlerVM
+	InstanceLister
 }
 
 type MetricsClient interface {
@@ -26,10 +25,6 @@ type InstanceLister interface {
 	GetAllInstances(ctx *gofr.Context, projectID string) ([]models.Instance, error)
 }
 
-type InstanceListerVM interface {
-	GetAllVMInstances(ctx *gofr.Context, projectID string) ([]models.Instance, error)
-}
-
 type TimeSeriesLister interface {
 	GetTimeSeries(ctx *gofr.Context, start, end time.Time, projectID, filter string) ([]models.Metric, error)
 }
@@ -37,9 +32,4 @@ type TimeSeriesLister interface {
 type Idler interface {
 	StartInstance(ctx *gofr.Context, projectID, instanceName string) error
 	StopInstance(ctx *gofr.Context, projectID, instanceName string) error
-}
-
-type IdlerVM interface {
-	StartInstanceVM(ctx *gofr.Context, projectID, zone, instanceName string) error
-	StopInstanceVM(ctx *gofr.Context, projectID, zone, instanceName string) error
 }

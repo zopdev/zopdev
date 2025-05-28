@@ -45,6 +45,26 @@ func (m *MockGCPClient) EXPECT() *MockGCPClientMockRecorder {
 	return m.recorder
 }
 
+// NewComputeClient mocks base method.
+func (m *MockGCPClient) NewComputeClient(ctx *gofr.Context, opts ...option.ClientOption) (gcp.VMClient, error) {
+	m.ctrl.T.Helper()
+	varargs := []any{ctx}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "NewComputeClient", varargs...)
+	ret0, _ := ret[0].(gcp.VMClient)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// NewComputeClient indicates an expected call of NewComputeClient.
+func (mr *MockGCPClientMockRecorder) NewComputeClient(ctx any, opts ...any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]any{ctx}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "NewComputeClient", reflect.TypeOf((*MockGCPClient)(nil).NewComputeClient), varargs...)
+}
+
 // NewGoogleCredentials mocks base method.
 func (m *MockGCPClient) NewGoogleCredentials(ctx context.Context, cred any, scopes ...string) (*google.Credentials, error) {
 	m.ctrl.T.Helper()
