@@ -21,6 +21,9 @@ const (
 
 	START   ResourceState = "START"
 	SUSPEND ResourceState = "SUSPEND"
+
+	RUNNING = "RUNNING"
+	STOPPED = "STOPPED"
 )
 
 type CloudDetails struct {
@@ -29,6 +32,7 @@ type CloudDetails struct {
 }
 
 type ResourceDetails struct {
+	ID         int64         `json:"id"`
 	CloudAccID int64         `json:"cloudAccID"`
 	Name       string        `json:"name"`
 	Type       ResourceType  `json:"type"`

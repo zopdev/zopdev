@@ -8,8 +8,8 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/zopdev/zopdev/api/resources/client"
+	"github.com/zopdev/zopdev/api/resources/models"
 	"github.com/zopdev/zopdev/api/resources/providers/gcp"
-	"github.com/zopdev/zopdev/api/resources/store"
 )
 
 type GCPClient interface {
@@ -22,8 +22,8 @@ type HTTPClient interface {
 }
 
 type Store interface {
-	InsertResource(ctx *gofr.Context, resources store.Resource) error
-	GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]store.Resource, error)
-	UpdateResource(ctx *gofr.Context, res store.Resource) error
+	InsertResource(ctx *gofr.Context, resources *models.Instance) error
+	GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Instance, error)
+	UpdateResource(ctx *gofr.Context, res *models.Instance) error
 	RemoveResource(ctx *gofr.Context, id int64) error
 }

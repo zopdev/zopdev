@@ -14,8 +14,8 @@ import (
 	reflect "reflect"
 
 	client "github.com/zopdev/zopdev/api/resources/client"
+	models "github.com/zopdev/zopdev/api/resources/models"
 	gcp "github.com/zopdev/zopdev/api/resources/providers/gcp"
-	store "github.com/zopdev/zopdev/api/resources/store"
 	gomock "go.uber.org/mock/gomock"
 	gofr "gofr.dev/pkg/gofr"
 	google "golang.org/x/oauth2/google"
@@ -150,10 +150,10 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 }
 
 // GetResources mocks base method.
-func (m *MockStore) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]store.Resource, error) {
+func (m *MockStore) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Instance, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetResources", ctx, cloudAccountID, resourceType)
-	ret0, _ := ret[0].([]store.Resource)
+	ret0, _ := ret[0].([]models.Instance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -165,7 +165,7 @@ func (mr *MockStoreMockRecorder) GetResources(ctx, cloudAccountID, resourceType 
 }
 
 // InsertResource mocks base method.
-func (m *MockStore) InsertResource(ctx *gofr.Context, resources store.Resource) error {
+func (m *MockStore) InsertResource(ctx *gofr.Context, resources *models.Instance) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertResource", ctx, resources)
 	ret0, _ := ret[0].(error)
@@ -193,7 +193,7 @@ func (mr *MockStoreMockRecorder) RemoveResource(ctx, id any) *gomock.Call {
 }
 
 // UpdateResource mocks base method.
-func (m *MockStore) UpdateResource(ctx *gofr.Context, res store.Resource) error {
+func (m *MockStore) UpdateResource(ctx *gofr.Context, res *models.Instance) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "UpdateResource", ctx, res)
 	ret0, _ := ret[0].(error)

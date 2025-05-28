@@ -13,7 +13,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/sqladmin/v1"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 func getServer(t *testing.T, resp any, isError bool) *httptest.Server {
@@ -45,9 +45,9 @@ func Test_GetAllInstances(t *testing.T) {
 			{Name: "test-instance3", Project: "test-project", Settings: &sqladmin.Settings{ActivationPolicy: "ON_DEMAND"}},
 		}}
 	result := []models.Instance{
-		{Name: "test-instance1", Type: "SQL", ProviderID: "test-project", Status: RUNNING},
-		{Name: "test-instance2", Type: "SQL", ProviderID: "test-project", Status: SUSPENDED},
-		{Name: "test-instance3", Type: "SQL", ProviderID: "test-project", Status: SUSPENDED},
+		{Name: "test-instance1", Type: "SQL", Status: RUNNING},
+		{Name: "test-instance2", Type: "SQL", Status: SUSPENDED},
+		{Name: "test-instance3", Type: "SQL", Status: SUSPENDED},
 	}
 
 	srv := getServer(t, resp, false)

@@ -4,7 +4,7 @@ import (
 	"gofr.dev/pkg/gofr"
 	"google.golang.org/api/sqladmin/v1"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 const (
@@ -37,7 +37,6 @@ func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.In
 		instances = append(instances, models.Instance{
 			Name:         item.Name,
 			Type:         "SQL",
-			ProviderID:   item.Project,
 			Region:       item.Region,
 			CreationTime: item.CreateTime,
 			UID:          projectID + "/" + item.Name,

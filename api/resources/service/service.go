@@ -1,11 +1,10 @@
 package service
 
 import (
-	"github.com/zopdev/zopdev/api/resources/client"
-	"github.com/zopdev/zopdev/api/resources/providers/models"
-	"github.com/zopdev/zopdev/api/resources/store"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
+
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 type Service struct {
@@ -18,7 +17,7 @@ func New(gcp GCPClient, http HTTPClient, store Store) *Service {
 	return &Service{gcp: gcp, http: http, store: store}
 }
 
-func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]store.Resource, error) {
+func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Instance, error) {
 	res, err := s.store.GetResources(ctx, id, resourceType)
 	if err != nil {
 		return nil, err
@@ -35,13 +34,34 @@ func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) err
 
 	switch resDetails.Type {
 	case SQL:
-		return s.changeSQLState(ctx, ca, resDetails)
+		err = s.changeSQLState(ctx, ca, resDetails)
+		if err != nil {
+			ctx.Errorf("failed to change SQL state: %v", err)
+		}
+
+		err = s.store.UpdateResource(ctx, &models.Instance{ID: resDetails.ID, Status: getStatus(resDetails.State)})
+		if err != nil {
+			ctx.Errorf("failed to update resource status: %v", err)
+		}
+
+		return nil
 	default:
 		return gofrHttp.ErrorInvalidParam{Params: []string{"req.Type"}}
 	}
 }
 
-func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]store.Resource, error) {
+func getStatus(action ResourceState) string {
+	switch action {
+	case START:
+		return RUNNING
+	case SUSPEND:
+		return STOPPED
+	default:
+		return ""
+	}
+}
+
+func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance, error) {
 	ca, err := s.http.GetCloudCredentials(ctx, id)
 	if err != nil {
 		return nil, err
@@ -61,18 +81,18 @@ func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]store.Resource, 
 
 	visited := make([]bool, len(res))
 
-	for _, i := range ins {
-		idx, found := bSearch(res, i.UID)
+	for i := range ins {
+		idx, found := bSearch(res, ins[i].UID)
 		if !found {
 			// This is true when the resource is present in the cloud but not in the store.
-			err = s.store.InsertResource(ctx, getStoreResource(&i, ca))
+			err = s.store.InsertResource(ctx, &ins[i])
 			if err != nil {
 				ctx.Errorf("failed to insert resource: %v", err)
 			}
 		} else {
 			// else update the existing resource and mark the resource as visited.
 			visited[idx] = true
-			err = s.store.UpdateResource(ctx, getStoreResource(&i, ca))
+			err = s.store.UpdateResource(ctx, &ins[i])
 
 			if err != nil {
 				ctx.Errorf("failed to update resource: %v", err)
@@ -80,22 +100,27 @@ func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]store.Resource, 
 		}
 	}
 
+	s.removeStale(ctx, visited, res)
+
+	return s.GetAll(ctx, id, nil)
+}
+
+func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.Instance) {
 	for i, v := range visited {
 		if v {
 			continue
 		}
 
 		// Remove a resource if it is not visited, i.e., The resource is no longer present on the cloud.
-		err = s.store.RemoveResource(ctx, res[i].ID)
+		err := s.store.RemoveResource(ctx, res[i].ID)
 		if err != nil {
 			ctx.Errorf("failed to remove resource: %v", err)
 		}
 	}
-
-	return s.GetAll(ctx, id, nil)
 }
 
-func bSearch(res []store.Resource, uid string) (int, bool) {
+// bSearch performs a binary search on the sorted slice of models.Instance.
+func bSearch(res []models.Instance, uid string) (int, bool) {
 	l, r := 0, len(res)-1
 
 	for l <= r {
@@ -112,15 +137,4 @@ func bSearch(res []store.Resource, uid string) (int, bool) {
 	}
 
 	return -1, false
-}
-
-func getStoreResource(res *models.Instance, ca *client.CloudAccount) store.Resource {
-	return store.Resource{
-		UID:            res.UID,
-		Name:           res.Name,
-		Type:           store.ResourceType(res.Type),
-		State:          res.Status,
-		CloudAccountID: ca.ID,
-		CloudProvider:  ca.Provider,
-	}
 }

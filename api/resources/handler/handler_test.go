@@ -5,17 +5,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 	"github.com/zopdev/zopdev/api/resources/service"
 )
 
@@ -46,7 +46,7 @@ func TestHandler_GetResources(t *testing.T) {
 			typeQuery:    "cloudAccId=1&type=sql",
 			expectedResp: mockResp,
 			mockCall: func() {
-				mockSvc.EXPECT().GetResources(ctx, int64(1), []string{"sql"}).
+				mockSvc.EXPECT().GetAll(ctx, int64(1), []string{"sql"}).
 					Return(mockResp, nil)
 			},
 		},
@@ -55,7 +55,7 @@ func TestHandler_GetResources(t *testing.T) {
 			typeQuery:    "cloudAccId=1&type=sql&type=redis",
 			expectedResp: mockResp,
 			mockCall: func() {
-				mockSvc.EXPECT().GetResources(ctx, int64(1), []string{"sql", "redis"}).
+				mockSvc.EXPECT().GetAll(ctx, int64(1), []string{"sql", "redis"}).
 					Return(mockResp, nil)
 			},
 		},
@@ -64,7 +64,7 @@ func TestHandler_GetResources(t *testing.T) {
 			typeQuery:   "cloudAccId=1&type=sql",
 			expectedErr: errMock,
 			mockCall: func() {
-				mockSvc.EXPECT().GetResources(ctx, int64(1), []string{"sql"}).
+				mockSvc.EXPECT().GetAll(ctx, int64(1), []string{"sql"}).
 					Return(nil, errMock)
 			},
 		},
@@ -101,6 +101,68 @@ func TestHandler_GetResources(t *testing.T) {
 }
 
 func TestHandler_ChangeState(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSvc := NewMockService(ctrl)
+	ctx := &gofr.Context{
+		Context: context.Background(),
+	}
+	resDetails := service.ResourceDetails{CloudAccID: 123, Name: "sql-instance-1", Type: "sql", State: service.START}
+	h := New(mockSvc)
+
+	testCases := []struct {
+		name     string
+		reqBody  string
+		expErr   error
+		mockCall func()
+	}{
+		{
+			name:    "Success",
+			reqBody: `{"cloudAccID": 123, "name": "sql-instance-1", "type": "sql", "state": "START"}`,
+			mockCall: func() {
+				mockSvc.EXPECT().ChangeState(ctx, resDetails).Return(nil)
+			},
+		},
+		{
+			name:    "Error from service",
+			reqBody: `{"cloudAccID": 123, "name": "sql-instance-1", "type": "sql", "state" : "START"}`,
+			expErr:  errMock,
+			mockCall: func() {
+				mockSvc.EXPECT().ChangeState(ctx, resDetails).Return(errMock)
+			},
+		},
+		{
+			name:     "Invalid request body",
+			reqBody:  `"cloudAccID": 123, "name": "sql-instance-1"}`,
+			expErr:   gofrHttp.ErrorInvalidParam{Params: []string{"request body"}},
+			mockCall: func() {},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mockCall()
+
+			req := httptest.NewRequest(http.MethodPost, "/cloud-account/1/resources/start",
+				bytes.NewBufferString(tc.reqBody))
+			req.Header.Set("content-type", "application/json")
+
+			ctx.Request = gofrHttp.NewRequest(req)
+
+			resp, err := h.ChangeState(ctx)
+
+			if tc.expErr != nil {
+				assert.Equal(t, tc.expErr, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, resDetails, resp)
+			}
+		})
+	}
+}
+
+func TestHandler_SyncResources(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 

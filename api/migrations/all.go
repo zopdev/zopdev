@@ -12,7 +12,8 @@ func All() map[int64]migration.Migrate {
 		20241211121223: createAPPlicationTable(),
 		20241211121308: createEnvironmentTable(),
 		20241211121841: createDeploymentSpaceTable(),
-		20241212162207: createTableAuditResults(),
+		20241212162207: createClusterTable(),
+		20250506162207: createTableAuditResults(),
 		20250526163931: addResourcesTable(),
 	}
 }

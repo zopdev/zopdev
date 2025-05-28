@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"github.com/zopdev/zopdev/api/resources/store"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -13,7 +12,7 @@ import (
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
@@ -122,7 +121,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 }
 
 func TestService_bSearch(t *testing.T) {
-	res := []store.Resource{
+	res := []models.Instance{
 		{ID: 1, UID: "zopdev-test/mysql01"},
 		{ID: 2, UID: "zopdev-test/mysql02"},
 		{ID: 3, UID: "zopdev-test/pgs1l01"},

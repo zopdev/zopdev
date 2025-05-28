@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/option"
 
 	"github.com/zopdev/zopdev/api/resources/client"
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 func (s *Service) getAllInstances(ctx *gofr.Context, ca *client.CloudAccount) ([]models.Instance, error) {
