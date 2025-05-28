@@ -83,6 +83,8 @@ func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance,
 
 	for i := range ins {
 		idx, found := bSearch(res, ins[i].UID)
+		ins[i].CloudAccount = models.CloudAccount{ID: id, Type: ca.Provider}
+
 		if !found {
 			// This is true when the resource is present in the cloud but not in the store.
 			err = s.store.InsertResource(ctx, &ins[i])

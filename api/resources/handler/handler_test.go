@@ -170,35 +170,45 @@ func TestHandler_SyncResources(t *testing.T) {
 	ctx := &gofr.Context{
 		Context: context.Background(),
 	}
-	resDetails := service.ResourceDetails{CloudAccID: 123, Name: "sql-instance-1", Type: "sql", State: service.START}
+	mockResp := []models.Instance{
+		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
+	}
 	h := New(mockSvc)
 
 	testCases := []struct {
-		name     string
-		reqBody  string
-		expErr   error
-		mockCall func()
+		name        string
+		query       string
+		expectedErr error
+		expectedRes any
+		mockCall    func()
 	}{
 		{
-			name:    "Success",
-			reqBody: `{"cloudAccID": 123, "name": "sql-instance-1", "type": "sql", "state": "START"}`,
+			name:        "Success",
+			query:       "cloudAccId=1",
+			expectedRes: mockResp,
 			mockCall: func() {
-				mockSvc.EXPECT().ChangeState(ctx, resDetails).Return(nil)
+				mockSvc.EXPECT().SyncResources(ctx, int64(1)).Return(mockResp, nil)
 			},
 		},
 		{
-			name:    "Error from service",
-			reqBody: `{"cloudAccID": 123, "name": "sql-instance-1", "type": "sql", "state" : "START"}`,
-			expErr:  errMock,
+			name:        "Service error",
+			query:       "cloudAccId=1",
+			expectedErr: errMock,
 			mockCall: func() {
-				mockSvc.EXPECT().ChangeState(ctx, resDetails).Return(errMock)
+				mockSvc.EXPECT().SyncResources(ctx, int64(1)).Return(nil, errMock)
 			},
 		},
 		{
-			name:     "Invalid request body",
-			reqBody:  `"cloudAccID": 123, "name": "sql-instance-1"}`,
-			expErr:   gofrHttp.ErrorInvalidParam{Params: []string{"request body"}},
-			mockCall: func() {},
+			name:        "Invalid id",
+			query:       "cloudAccId=abc",
+			expectedErr: gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
+			mockCall:    func() {},
+		},
+		{
+			name:        "Missing id",
+			query:       "",
+			expectedErr: gofrHttp.ErrorMissingParam{Params: []string{"id"}},
+			mockCall:    func() {},
 		},
 	}
 
@@ -206,20 +216,14 @@ func TestHandler_SyncResources(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			tc.mockCall()
 
-			req := httptest.NewRequest(http.MethodPost, "/cloud-account/1/resources/start",
-				bytes.NewBufferString(tc.reqBody))
+			req := httptest.NewRequest(http.MethodPost, "/cloud-account/resources/sync?"+tc.query, http.NoBody)
 			req.Header.Set("content-type", "application/json")
-
 			ctx.Request = gofrHttp.NewRequest(req)
 
-			resp, err := h.ChangeState(ctx)
+			resp, err := h.SyncResources(ctx)
 
-			if tc.expErr != nil {
-				assert.Equal(t, tc.expErr, err)
-			} else {
-				require.NoError(t, err)
-				assert.Equal(t, resDetails, resp)
-			}
+			assert.Equal(t, tc.expectedErr, err)
+			assert.Equal(t, tc.expectedRes, resp)
 		})
 	}
 }

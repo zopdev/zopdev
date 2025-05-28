@@ -43,21 +43,19 @@ func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType
 		inClause = ` AND resource_type IN (`
 
 		for _, res := range resourceType {
-			if inClause != `` {
-				inClause += `, `
-			}
-
-			inClause += `?`
+			inClause += `?, `
 
 			args = append(args, res)
 		}
+
+		inClause = inClause[:len(inClause)-2] // Remove the last comma
 
 		inClause += `)`
 	}
 
 	rows, err := ctx.SQL.QueryContext(ctx, `SELECT id, resource_uid, name, state, cloud_account_id, 
        cloud_provider, resource_type, created_at, updated_at 
-		FROM resources WHERE cloud_account_id = ?`+inClause+`ORDER BY resource_uid`, args...)
+		FROM resources WHERE cloud_account_id = ?`+inClause+` ORDER BY resource_uid`, args...)
 	if err != nil {
 		return nil, err
 	}
@@ -78,8 +76,8 @@ func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType
 }
 
 func (*Store) UpdateResource(ctx *gofr.Context, res *models.Instance) error {
-	_, err := ctx.SQL.ExecContext(ctx, `UPDATE resources SET resource_type = ?, state = ? WHERE id = ?`,
-		res.Type, res.Status, res.ID)
+	_, err := ctx.SQL.ExecContext(ctx, `UPDATE resources SET state = ? WHERE id = ?`,
+		res.Status, res.ID)
 	if err != nil {
 		return err
 	}

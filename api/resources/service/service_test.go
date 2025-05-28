@@ -80,11 +80,11 @@ func TestService_SyncResources(t *testing.T) {
 						{ID: 2, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 							Name: "sql-instance-3", Type: string(SQL), UID: "zopdev/sql-instance-3"},
 					}, nil)
-				mStore.EXPECT().UpdateResource(ctx, models.Instance{
+				mStore.EXPECT().UpdateResource(ctx, &models.Instance{
 					CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 					Name:         "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1", Status: "RUNNING",
 				}).Return(nil)
-				mStore.EXPECT().InsertResource(ctx, models.Instance{
+				mStore.EXPECT().InsertResource(ctx, &models.Instance{
 					CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 					Name:         "sql-instance-2", Type: string(SQL), UID: "zopdev/sql-instance-2", Status: "SUSPENDED",
 				}).Return(nil)
@@ -184,13 +184,14 @@ func TestService_ChangeState(t *testing.T) {
 	defer ctrl.Finish()
 
 	mClient := NewMockHTTPClient(ctrl)
+	mStore := NewMockStore(ctrl)
 	mGCP := NewMockGCPClient(ctrl)
 	ctx := &gofr.Context{Context: context.Background()}
 	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockStopper := &mockSQLClient{}
-	s := New(mGCP, mClient, nil)
+	s := New(mGCP, mClient, mStore)
 
 	testCases := []struct {
 		name      string
@@ -200,7 +201,7 @@ func TestService_ChangeState(t *testing.T) {
 	}{
 		{
 			name:  "Success - Start",
-			input: ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
+			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
 			mockCalls: func() {
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).
 					Return(ca, nil)
@@ -208,17 +209,19 @@ func TestService_ChangeState(t *testing.T) {
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockStopper, nil)
+				mStore.EXPECT().UpdateResource(ctx, &models.Instance{ID: 1, Status: RUNNING})
 			},
 		},
 		{
 			name:  "Success - Suspend",
-			input: ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL, State: SUSPEND},
+			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: SUSPEND},
 			mockCalls: func() {
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, gomock.Any(), "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockStopper, nil)
+				mStore.EXPECT().UpdateResource(ctx, &models.Instance{ID: 1, Status: STOPPED})
 			},
 		},
 		{
