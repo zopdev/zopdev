@@ -80,10 +80,7 @@ func TestService_SyncResources(t *testing.T) {
 						{ID: 2, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 							Name: "sql-instance-3", Type: string(SQL), UID: "zopdev/sql-instance-3"},
 					}, nil)
-				mStore.EXPECT().UpdateResource(ctx, &models.Instance{
-					CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
-					Name:         "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1", Status: "RUNNING",
-				}).Return(nil)
+				mStore.EXPECT().UpdateStatus(ctx, RUNNING, int64(1)).Return(nil)
 				mStore.EXPECT().InsertResource(ctx, &models.Instance{
 					CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 					Name:         "sql-instance-2", Type: string(SQL), UID: "zopdev/sql-instance-2", Status: "SUSPENDED",
@@ -203,41 +200,68 @@ func TestService_ChangeState(t *testing.T) {
 			name:  "Success - Start",
 			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
 			mockCalls: func() {
+				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
+					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: STOPPED}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).
 					Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, gomock.Any(), "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockStopper, nil)
-				mStore.EXPECT().UpdateResource(ctx, &models.Instance{ID: 1, Status: RUNNING})
+				mStore.EXPECT().UpdateStatus(ctx, RUNNING, int64(1)).
+					Return(nil)
 			},
 		},
 		{
 			name:  "Success - Suspend",
 			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: SUSPEND},
 			mockCalls: func() {
+				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
+					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, gomock.Any(), "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockStopper, nil)
-				mStore.EXPECT().UpdateResource(ctx, &models.Instance{ID: 1, Status: STOPPED})
+				mStore.EXPECT().UpdateStatus(ctx, STOPPED, int64(1)).
+					Return(nil)
+			},
+		},
+		{
+			name:  "Success - Resource already in desired state",
+			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
+			mockCalls: func() {
+				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
+					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
+			},
+		},
+		{
+			name:   "Error - GetResourceByID",
+			input:  ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
+			expErr: errMock,
+			mockCalls: func() {
+				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
+					Return(nil, errMock)
 			},
 		},
 		{
 			name:   "Error - GetCloudCredentials",
-			input:  ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
+			input:  ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
 			expErr: errMock,
 			mockCalls: func() {
+				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
+					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: STOPPED}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).
 					Return(nil, errMock)
 			},
 		},
 		{
 			name:   "Error - Invalid Type",
-			input:  ResourceDetails{CloudAccID: 123, Name: "test-instance", Type: "invalid"},
+			input:  ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: "invalid"},
 			expErr: gofrHttp.ErrorInvalidParam{Params: []string{"req.Type"}},
 			mockCalls: func() {
+				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
+					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 			},
 		},

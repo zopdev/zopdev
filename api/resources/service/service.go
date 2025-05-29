@@ -27,6 +27,16 @@ func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]
 }
 
 func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) error {
+	res, err := s.store.GetResourceByID(ctx, resDetails.ID)
+	if err != nil {
+		return err
+	}
+
+	// We need not change the state if the resource is already in the desired state.
+	if res.Status == getStatus(resDetails.State) {
+		return nil
+	}
+
 	ca, err := s.http.GetCloudCredentials(ctx, resDetails.CloudAccID)
 	if err != nil {
 		return err
@@ -39,7 +49,7 @@ func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) err
 			ctx.Errorf("failed to change SQL state: %v", err)
 		}
 
-		err = s.store.UpdateResource(ctx, &models.Instance{ID: resDetails.ID, Status: getStatus(resDetails.State)})
+		err = s.store.UpdateStatus(ctx, getStatus(resDetails.State), resDetails.ID)
 		if err != nil {
 			ctx.Errorf("failed to update resource status: %v", err)
 		}
@@ -94,7 +104,8 @@ func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance,
 		} else {
 			// else update the existing resource and mark the resource as visited.
 			visited[idx] = true
-			err = s.store.UpdateResource(ctx, &ins[i])
+			ins[i].ID = res[idx].ID
+			err = s.store.UpdateStatus(ctx, ins[i].Status, ins[i].ID)
 
 			if err != nil {
 				ctx.Errorf("failed to update resource: %v", err)

@@ -164,6 +164,21 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
+// GetResourceByID mocks base method.
+func (m *MockStore) GetResourceByID(ctx *gofr.Context, id int64) (*models.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetResourceByID", ctx, id)
+	ret0, _ := ret[0].(*models.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResourceByID indicates an expected call of GetResourceByID.
+func (mr *MockStoreMockRecorder) GetResourceByID(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResourceByID", reflect.TypeOf((*MockStore)(nil).GetResourceByID), ctx, id)
+}
+
 // GetResources mocks base method.
 func (m *MockStore) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Instance, error) {
 	m.ctrl.T.Helper()
@@ -207,16 +222,16 @@ func (mr *MockStoreMockRecorder) RemoveResource(ctx, id any) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveResource", reflect.TypeOf((*MockStore)(nil).RemoveResource), ctx, id)
 }
 
-// UpdateResource mocks base method.
-func (m *MockStore) UpdateResource(ctx *gofr.Context, res *models.Instance) error {
+// UpdateStatus mocks base method.
+func (m *MockStore) UpdateStatus(ctx *gofr.Context, status string, id int64) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateResource", ctx, res)
+	ret := m.ctrl.Call(m, "UpdateStatus", ctx, status, id)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// UpdateResource indicates an expected call of UpdateResource.
-func (mr *MockStoreMockRecorder) UpdateResource(ctx, res any) *gomock.Call {
+// UpdateStatus indicates an expected call of UpdateStatus.
+func (mr *MockStoreMockRecorder) UpdateStatus(ctx, status, id any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateResource", reflect.TypeOf((*MockStore)(nil).UpdateResource), ctx, res)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStatus", reflect.TypeOf((*MockStore)(nil).UpdateStatus), ctx, status, id)
 }
