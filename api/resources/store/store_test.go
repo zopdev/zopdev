@@ -30,7 +30,8 @@ func TestStore_InsertResource(t *testing.T) {
 			"region": "us-central1",
 			"zone":   "us-central1-a",
 		},
-		Type: "SQL",
+		Type:   "SQL",
+		Region: "us-central1",
 	}
 	ctx := &gofr.Context{Container: mockContainer, Context: context.Background()}
 	store := New()
@@ -46,8 +47,10 @@ func TestStore_InsertResource(t *testing.T) {
 			input: mockInput,
 			mockCalls: func() {
 				mocks.SQL.Sqlmock.ExpectExec(
-					`INSERT INTO resources (resource_uid, name, state, cloud_account_id, cloud_provider, resource_type, settings) VALUES (?, ?, ?, ?, ?, ?, ?)`).
-					WithArgs(mockInput.UID, mockInput.Name, mockInput.Status, mockInput.CloudAccount.ID, mockInput.CloudAccount.Type, mockInput.Type, mockInput.Settings).
+					`INSERT INTO resources (resource_uid, name, state, cloud_account_id, cloud_provider, resource_type, 
+settings, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).
+					WithArgs(mockInput.UID, mockInput.Name, mockInput.Status, mockInput.CloudAccount.ID,
+						mockInput.CloudAccount.Type, mockInput.Type, mockInput.Settings, mockInput.Region).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 			},
 		},
@@ -57,8 +60,10 @@ func TestStore_InsertResource(t *testing.T) {
 			expErr: assert.AnError,
 			mockCalls: func() {
 				mocks.SQL.Sqlmock.ExpectExec(
-					`INSERT INTO resources (resource_uid, name, state, cloud_account_id, cloud_provider, resource_type, settings) VALUES (?, ?, ?, ?, ?, ?, ?)`).
-					WithArgs(mockInput.UID, mockInput.Name, mockInput.Status, mockInput.CloudAccount.ID, mockInput.CloudAccount.Type, mockInput.Type, mockInput.Settings).
+					`INSERT INTO resources (resource_uid, name, state, cloud_account_id, cloud_provider, resource_type,  
+settings, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).
+					WithArgs(mockInput.UID, mockInput.Name, mockInput.Status, mockInput.CloudAccount.ID,
+						mockInput.CloudAccount.Type, mockInput.Type, mockInput.Settings, mockInput.Region).
 					WillReturnError(assert.AnError)
 			},
 		},
@@ -83,7 +88,7 @@ func TestStore_GetResources(t *testing.T) {
 	mockTime := time.Now()
 	settings := models.Settings{"region": "us-central1", "zone": "us-central1-a"}
 	query := `SELECT id, resource_uid, name, state, cloud_account_id, 
-       cloud_provider, resource_type, created_at, updated_at, settings
+       cloud_provider, resource_type, created_at, updated_at, settings, region
 		FROM resources WHERE cloud_account_id = ? AND resource_type IN (?, ?) ORDER BY resource_uid`
 	ctx := &gofr.Context{Container: mockContainer, Context: context.Background()}
 	store := New()
@@ -103,19 +108,19 @@ func TestStore_GetResources(t *testing.T) {
 			mockCalls: func() {
 				mocks.SQL.Sqlmock.ExpectQuery(query).WithArgs(123, "SQL", "VM").
 					WillReturnRows(sqlmock.NewRows([]string{"id", "resource_uid", "name", "state",
-						"cloud_account_id", "cloud_provider", "resource_type", "created_at", "updated_at", "settings"}).
+						"cloud_account_id", "cloud_provider", "resource_type", "created_at", "updated_at", "settings", "region"}).
 						AddRow(1, "zopdev/sql-instance-1", "sql-instance-1", "RUNNING", 123, "GCP",
-							"SQL", mockTime, mockTime, &settings).
+							"SQL", mockTime, mockTime, &settings, "us-central1").
 						AddRow(2, "zopdev/vm-instance-1", "vm-instance-1", "STOPPED", 123, "GCP",
-							"VM", mockTime, mockTime, &settings))
+							"VM", mockTime, mockTime, &settings, "us-central1"))
 			},
 			expResp: []models.Instance{
 				{ID: 1, UID: "zopdev/sql-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"},
 					Type: "SQL", Name: "sql-instance-1", Status: "RUNNING", CreatedAt: mockTime, UpdatedAt: mockTime,
-					Settings: settings},
+					Settings: settings, Region: "us-central1"},
 				{ID: 2, UID: "zopdev/vm-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"},
 					Type: "VM", Name: "vm-instance-1", Status: "STOPPED", CreatedAt: mockTime, UpdatedAt: mockTime,
-					Settings: settings},
+					Settings: settings, Region: "us-central1"},
 			},
 		},
 		{
@@ -124,17 +129,17 @@ func TestStore_GetResources(t *testing.T) {
 			resourceType: []string{"SQL"},
 			expErr:       nil,
 			expResp: []models.Instance{
-				{ID: 1, Name: "sql-instance-1", Type: "SQL", Status: "RUNNING", CreatedAt: mockTime, UpdatedAt: mockTime,
+				{ID: 1, Name: "sql-instance-1", Type: "SQL", Status: "RUNNING", CreatedAt: mockTime, UpdatedAt: mockTime, Region: "us-central1",
 					Settings: settings, UID: "zopdev/sql-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"}},
 			},
 			mockCalls: func() {
 				mocks.SQL.Sqlmock.ExpectQuery(`SELECT id, resource_uid, name, state, cloud_account_id, 
-       cloud_provider, resource_type, created_at, updated_at, settings
+       cloud_provider, resource_type, created_at, updated_at, settings, region
 		FROM resources WHERE cloud_account_id = ? AND resource_type IN (?) ORDER BY resource_uid`).WithArgs(123, "SQL").
-					WillReturnRows(sqlmock.NewRows([]string{"id", "resource_uid", "name", "state",
-						"cloud_account_id", "cloud_provider", "resource_type", "created_at", "updated_at", "settings"}).
+					WillReturnRows(sqlmock.NewRows([]string{"id", "resource_uid", "name", "state", "cloud_account_id",
+						"cloud_provider", "resource_type", "created_at", "updated_at", "settings", "region"}).
 						AddRow(1, "zopdev/sql-instance-1", "sql-instance-1", "RUNNING", 123, "GCP",
-							"SQL", mockTime, mockTime, &settings))
+							"SQL", mockTime, mockTime, &settings, "us-central1"))
 			},
 		},
 		{
@@ -261,7 +266,7 @@ func TestStore_GetResourceByID(t *testing.T) {
 	settings := models.Settings{"region": "us-central1", "zone": "us-central1-a"}
 	ctx := &gofr.Context{Container: mockContainer, Context: context.Background()}
 	query := `SELECT id, resource_uid, name, state, cloud_account_id,
-		cloud_provider, resource_type, created_at, updated_at, settings
+		cloud_provider, resource_type, created_at, updated_at, settings, region
 	FROM resources WHERE id = ?`
 	mockResp := &models.Instance{
 		ID:     1,
@@ -276,6 +281,7 @@ func TestStore_GetResourceByID(t *testing.T) {
 		CreatedAt: mockTime,
 		UpdatedAt: mockTime,
 		Settings:  settings,
+		Region:    "us-central1",
 	}
 	store := New()
 
@@ -293,11 +299,11 @@ func TestStore_GetResourceByID(t *testing.T) {
 			mockCalls: func() {
 				mocks.SQL.ExpectQuery(query).WithArgs(int64(1)).
 					WillReturnRows(sqlmock.NewRows([]string{"id", "resource_uid", "name", "state", "cloud_account_id",
-						"cloud_provider", "resource_type", "created_at", "updated_at", "settings"}).
+						"cloud_provider", "resource_type", "created_at", "updated_at", "settings", "region"}).
 						AddRow(1, "zopdev/sql-instance-1", "sql-instance-1", "RUNNING", 123, "GCP",
-							"SQL", mockTime, mockTime, &settings).
+							"SQL", mockTime, mockTime, &settings, "us-central1").
 						AddRow(2, "zopdev/vm-instance-1", "vm-instance-1", "STOPPED", 123, "GCP",
-							"VM", mockTime, mockTime, &settings))
+							"VM", mockTime, mockTime, &settings, "us-central1"))
 			},
 		},
 		{

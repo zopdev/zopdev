@@ -13,6 +13,7 @@ func addResourcesTable() migration.Migrate {
 										resource_uid VARCHAR(255) NOT NULL UNIQUE,
 										name VARCHAR(255) NOT NULL,
 										state CHAR(10) NOT NULL,
+										region VARCHAR(50) NOT NULL,
 										cloud_account_id BIGINT NOT NULL,
 										cloud_provider VARCHAR(50) NOT NULL,
 										resource_type VARCHAR(50) NOT NULL,

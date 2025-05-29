@@ -16,8 +16,9 @@ func New() *Store { return &Store{} }
 // InsertResource inserts a new resource into the database.
 func (*Store) InsertResource(ctx *gofr.Context, res *models.Instance) error {
 	_, err := ctx.SQL.ExecContext(ctx,
-		`INSERT INTO resources (resource_uid, name, state, cloud_account_id, cloud_provider, resource_type, settings) VALUES (?, ?, ?, ?, ?, ?, ?)`,
-		res.UID, res.Name, res.Status, res.CloudAccount.ID, res.CloudAccount.Type, res.Type, res.Settings)
+		`INSERT INTO resources (resource_uid, name, state, cloud_account_id, cloud_provider, resource_type, 
+settings, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+		res.UID, res.Name, res.Status, res.CloudAccount.ID, res.CloudAccount.Type, res.Type, res.Settings, res.Region)
 	if err != nil {
 		return err
 	}
@@ -30,7 +31,7 @@ func (*Store) GetResourceByID(ctx *gofr.Context, id int64) (*models.Instance, er
 	var res models.Instance
 
 	row := ctx.SQL.QueryRowContext(ctx, `SELECT id, resource_uid, name, state, cloud_account_id, 
-	   cloud_provider, resource_type, created_at, updated_at, settings
+	   cloud_provider, resource_type, created_at, updated_at, settings, region
 		FROM resources WHERE id = ?`, id)
 
 	if row.Err() != nil {
@@ -38,7 +39,8 @@ func (*Store) GetResourceByID(ctx *gofr.Context, id int64) (*models.Instance, er
 	}
 
 	if err := row.Scan(&res.ID, &res.UID, &res.Name, &res.Status,
-		&res.CloudAccount.ID, &res.CloudAccount.Type, &res.Type, &res.CreatedAt, &res.UpdatedAt, &res.Settings); err != nil {
+		&res.CloudAccount.ID, &res.CloudAccount.Type, &res.Type,
+		&res.CreatedAt, &res.UpdatedAt, &res.Settings, &res.Region); err != nil {
 		return nil, err
 	}
 
@@ -74,7 +76,7 @@ func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType
 	}
 
 	rows, err := ctx.SQL.QueryContext(ctx, `SELECT id, resource_uid, name, state, cloud_account_id, 
-       cloud_provider, resource_type, created_at, updated_at, settings
+       cloud_provider, resource_type, created_at, updated_at, settings, region
 		FROM resources WHERE cloud_account_id = ?`+inClause+` ORDER BY resource_uid`, args...)
 	if err != nil || rows.Err() != nil {
 		return nil, err
@@ -85,7 +87,8 @@ func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType
 	for rows.Next() {
 		var res models.Instance
 		if er := rows.Scan(&res.ID, &res.UID, &res.Name, &res.Status,
-			&res.CloudAccount.ID, &res.CloudAccount.Type, &res.Type, &res.CreatedAt, &res.UpdatedAt, &res.Settings); er != nil {
+			&res.CloudAccount.ID, &res.CloudAccount.Type, &res.Type,
+			&res.CreatedAt, &res.UpdatedAt, &res.Settings, &res.Region); er != nil {
 			return nil, er
 		}
 
