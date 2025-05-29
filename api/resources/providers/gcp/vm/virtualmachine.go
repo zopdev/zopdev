@@ -1,10 +1,11 @@
 package vm
 
 import (
-	"github.com/zopdev/zopdev/api/resources/providers/models"
 	"gofr.dev/pkg/gofr"
-	"google.golang.org/api/compute/v1"
 	"strings"
+
+	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"google.golang.org/api/compute/v1"
 )
 
 type ComputeClient struct {
@@ -27,7 +28,6 @@ func (c *ComputeClient) GetAllInstances(_ *gofr.Context, projectID string) ([]mo
 
 			zoneParts := strings.Split(item.Zone, "/")
 			zone := zoneParts[len(zoneParts)-1]
-			//region := zone[:len(zone)-2]
 
 			instances = append(instances, models.Instance{
 				Name:         item.Name,

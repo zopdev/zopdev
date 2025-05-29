@@ -19,6 +19,7 @@ func getComputeServer(t *testing.T, response any) *httptest.Server {
 
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
+
 		if response == nil {
 			http.Error(w, "Internal server error", http.StatusInternalServerError)
 			return
@@ -36,9 +37,28 @@ func getComputeServer(t *testing.T, response any) *httptest.Server {
 
 func TestGetAllVMInstances(t *testing.T) {
 	projectID := "test-project"
+
+	mockResponse := getMockAggregatedInstanceList()
+	expected := getExpectedVMInstances(projectID)
+
+	server := getComputeServer(t, mockResponse)
+	defer server.Close()
+
+	computeSvc, err := compute.NewService(context.TODO(), option.WithoutAuthentication(), option.WithEndpoint(server.URL))
+	require.NoError(t, err)
+
+	client := ComputeClient{ComputeService: computeSvc}
+
+	instances, err := client.GetAllInstances(nil, projectID)
+	require.NoError(t, err)
+
+	assert.Equal(t, expected, instances)
+}
+
+func getMockAggregatedInstanceList() *compute.InstanceAggregatedList {
 	gkeCreatedByValue := "projects/test-project/zones/us-central1-a/instanceGroupManagers/gke-nodepool"
 
-	mockResponse := &compute.InstanceAggregatedList{
+	return &compute.InstanceAggregatedList{
 		Items: map[string]compute.InstancesScopedList{
 			"zones/us-central1": {
 				Instances: []*compute.Instance{
@@ -87,8 +107,10 @@ func TestGetAllVMInstances(t *testing.T) {
 			},
 		},
 	}
+}
 
-	expected := []models.Instance{
+func getExpectedVMInstances(projectID string) []models.Instance {
+	return []models.Instance{
 		{
 			Name:         "normal-vm",
 			Type:         "VM",
@@ -106,19 +128,6 @@ func TestGetAllVMInstances(t *testing.T) {
 			Status:       "RUNNING",
 		},
 	}
-
-	server := getComputeServer(t, mockResponse)
-	defer server.Close()
-
-	computeSvc, err := compute.NewService(nil, option.WithoutAuthentication(), option.WithEndpoint(server.URL))
-	require.NoError(t, err)
-
-	client := ComputeClient{ComputeService: computeSvc}
-
-	instances, err := client.GetAllInstances(nil, projectID)
-	require.NoError(t, err)
-
-	assert.Equal(t, expected, instances)
 }
 
 func Test_GetAllInstances_Error(t *testing.T) {

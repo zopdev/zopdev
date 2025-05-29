@@ -4,10 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/zopdev/zopdev/api/resources/providers/gcp/vm"
 	"gofr.dev/pkg/gofr"
 	"google.golang.org/api/compute/v1"
 
+	"github.com/zopdev/zopdev/api/resources/providers/gcp/vm"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sqladmin/v1"
@@ -24,13 +24,12 @@ var (
 
 type Client struct{}
 
-func (c *Client) NewComputeClient(ctx *gofr.Context, opts ...option.ClientOption) (VMClient, error) {
+func (*Client) NewComputeClient(ctx *gofr.Context, opts ...option.ClientOption) (VMClient, error) {
 	computeService, err := compute.NewService(ctx, opts...)
 	if err != nil {
 		return nil, ErrInitializingClient
 	}
 
-	// Return your custom wrapper around computeService.Instances
 	return &vm.ComputeClient{ComputeService: computeService}, nil
 }
 
