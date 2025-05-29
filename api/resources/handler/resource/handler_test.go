@@ -29,7 +29,7 @@ func TestHandler_GetResources(t *testing.T) {
 	ctx := &gofr.Context{
 		Context: context.Background(),
 	}
-	mockResp := []models.Instance{
+	mockResp := []models.Resource{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
 	h := New(mockSvc)
@@ -170,7 +170,7 @@ func TestHandler_SyncResources(t *testing.T) {
 	ctx := &gofr.Context{
 		Context: context.Background(),
 	}
-	mockResp := []models.Instance{
+	mockResp := []models.Resource{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
 	h := New(mockSvc)

@@ -8,7 +8,7 @@ import (
 )
 
 type Service interface {
-	GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Instance, error)
-	SyncResources(ctx *gofr.Context, id int64) ([]models.Instance, error)
+	GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Resource, error)
+	SyncResources(ctx *gofr.Context, id int64) ([]models.Resource, error)
 	ChangeState(ctx *gofr.Context, resDetails resource.ResourceDetails) error
 }

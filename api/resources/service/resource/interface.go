@@ -23,8 +23,8 @@ type HTTPClient interface {
 }
 
 type Store interface {
-	InsertResource(ctx *gofr.Context, resources *models.Instance) error
-	GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Instance, error)
-	UpdateResource(ctx *gofr.Context, res *models.Instance) error
+	InsertResource(ctx *gofr.Context, resources *models.Resource) error
+	GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Resource, error)
+	UpdateResource(ctx *gofr.Context, res *models.Resource) error
 	RemoveResource(ctx *gofr.Context, id int64) error
 }

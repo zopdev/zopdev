@@ -20,7 +20,7 @@ func TestStore_InsertResource(t *testing.T) {
 
 	mockContainer, mocks := container.NewMockContainer(t)
 
-	mockInput := &models.Instance{
+	mockInput := &models.Resource{
 		UID:          "zopdev/test-instance",
 		Name:         "test-instance",
 		Status:       "RUNNING",
@@ -32,7 +32,7 @@ func TestStore_InsertResource(t *testing.T) {
 
 	testCases := []struct {
 		name      string
-		input     *models.Instance
+		input     *models.Resource
 		expErr    error
 		mockCalls func()
 	}{
@@ -87,7 +87,7 @@ func TestStore_GetResources(t *testing.T) {
 		cloudAccID   int64
 		resourceType []string
 		expErr       error
-		expResp      []models.Instance
+		expResp      []models.Resource
 		mockCalls    func()
 	}{
 		{
@@ -103,7 +103,7 @@ func TestStore_GetResources(t *testing.T) {
 						AddRow(2, "zopdev/vm-instance-1", "vm-instance-1", "STOPPED", 123, "GCP",
 							"VM", mockTime, mockTime))
 			},
-			expResp: []models.Instance{
+			expResp: []models.Resource{
 				{ID: 1, UID: "zopdev/sql-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"},
 					Type: "SQL", Name: "sql-instance-1", Status: "RUNNING", CreatedAt: mockTime, UpdatedAt: mockTime},
 				{ID: 2, UID: "zopdev/vm-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"},
@@ -115,7 +115,7 @@ func TestStore_GetResources(t *testing.T) {
 			cloudAccID:   123,
 			resourceType: []string{"SQL"},
 			expErr:       nil,
-			expResp: []models.Instance{
+			expResp: []models.Resource{
 				{ID: 1, Name: "sql-instance-1", Type: "SQL", Status: "RUNNING", CreatedAt: mockTime, UpdatedAt: mockTime,
 					UID: "zopdev/sql-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"}},
 			},
@@ -163,13 +163,13 @@ func TestStore_UpdateResource(t *testing.T) {
 
 	testCases := []struct {
 		name      string
-		resource  *models.Instance
+		resource  *models.Resource
 		expErr    error
 		mockCalls func()
 	}{
 		{
 			name: "Successful Update",
-			resource: &models.Instance{
+			resource: &models.Resource{
 				ID:           1,
 				Name:         "test-instance",
 				Status:       "RUNNING",
@@ -183,7 +183,7 @@ func TestStore_UpdateResource(t *testing.T) {
 		},
 		{
 			name: "Update Error",
-			resource: &models.Instance{
+			resource: &models.Resource{
 				ID:           2,
 				Name:         "test-instance-2",
 				Status:       "STOPPED",

@@ -27,7 +27,7 @@ func TestService_SyncCron(t *testing.T) {
 		Context:   context.Background(),
 		Container: cnt,
 	}
-	mockResp := []models.Instance{
+	mockResp := []models.Resource{
 		{Name: "sql-instance-1", UID: "zop/sql1"}, {Name: "sql-instance-2", UID: "zop/sql2"},
 	}
 	mockLister := &mockSQLClient{

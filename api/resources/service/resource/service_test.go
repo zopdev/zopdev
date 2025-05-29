@@ -37,11 +37,11 @@ func TestService_SyncResources(t *testing.T) {
 			"region":     "us-central1",
 		},
 	}
-	mockInst := []models.Instance{
+	mockInst := []models.Resource{
 		{Name: "sql-instance-1", UID: "zopdev/sql-instance-1", Type: "SQL", Status: "RUNNING"},
 		{Name: "sql-instance-2", UID: "zopdev/sql-instance-2", Type: "SQL", Status: "SUSPENDED"},
 	}
-	mStrResp := []models.Instance{
+	mStrResp := []models.Resource{
 		{ID: 1, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 			Name: "sql-instance-1", Type: string(SQL),
 			UID: "zopdev/sql-instance-1", Status: "RUNNING"},
@@ -59,7 +59,7 @@ func TestService_SyncResources(t *testing.T) {
 		id        int64
 		resources []string
 		expErr    error
-		expResp   []models.Instance
+		expResp   []models.Resource
 		mockCalls func()
 	}{
 		{
@@ -74,17 +74,17 @@ func TestService_SyncResources(t *testing.T) {
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockLister, nil)
 				mStore.EXPECT().GetResources(ctx, int64(123), nil).
-					Return([]models.Instance{
+					Return([]models.Resource{
 						{ID: 1, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 							Name: "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1"},
 						{ID: 2, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 							Name: "sql-instance-3", Type: string(SQL), UID: "zopdev/sql-instance-3"},
 					}, nil)
-				mStore.EXPECT().UpdateResource(ctx, &models.Instance{
+				mStore.EXPECT().UpdateResource(ctx, &models.Resource{
 					CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 					Name:         "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1", Status: "RUNNING",
 				}).Return(nil)
-				mStore.EXPECT().InsertResource(ctx, &models.Instance{
+				mStore.EXPECT().InsertResource(ctx, &models.Resource{
 					CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 					Name:         "sql-instance-2", Type: string(SQL), UID: "zopdev/sql-instance-2", Status: "SUSPENDED",
 				}).Return(nil)
@@ -132,7 +132,7 @@ func TestService_SyncResources_Errors(t *testing.T) {
 		id        int64
 		resources []string
 		expErr    error
-		expResp   []models.Instance
+		expResp   []models.Resource
 		mockCalls func()
 	}{
 		{
@@ -209,7 +209,7 @@ func TestService_ChangeState(t *testing.T) {
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockStopper, nil)
-				mStore.EXPECT().UpdateResource(ctx, &models.Instance{ID: 1, Status: RUNNING})
+				mStore.EXPECT().UpdateResource(ctx, &models.Resource{ID: 1, Status: RUNNING})
 			},
 		},
 		{
@@ -221,7 +221,7 @@ func TestService_ChangeState(t *testing.T) {
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockStopper, nil)
-				mStore.EXPECT().UpdateResource(ctx, &models.Instance{ID: 1, Status: STOPPED})
+				mStore.EXPECT().UpdateResource(ctx, &models.Resource{ID: 1, Status: STOPPED})
 			},
 		},
 		{

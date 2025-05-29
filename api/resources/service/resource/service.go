@@ -17,7 +17,7 @@ func New(gcp GCPClient, http HTTPClient, store Store) *Service {
 	return &Service{gcp: gcp, http: http, store: store}
 }
 
-func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Instance, error) {
+func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Resource, error) {
 	res, err := s.store.GetResources(ctx, id, resourceType)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) err
 			ctx.Errorf("failed to change SQL state: %v", err)
 		}
 
-		err = s.store.UpdateResource(ctx, &models.Instance{ID: resDetails.ID, Status: getStatus(resDetails.State)})
+		err = s.store.UpdateResource(ctx, &models.Resource{ID: resDetails.ID, Status: getStatus(resDetails.State)})
 		if err != nil {
 			ctx.Errorf("failed to update resource status: %v", err)
 		}
@@ -61,7 +61,7 @@ func getStatus(action ResourceState) string {
 	}
 }
 
-func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance, error) {
+func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Resource, error) {
 	ca, err := s.http.GetCloudCredentials(ctx, id)
 	if err != nil {
 		return nil, err
@@ -107,7 +107,7 @@ func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance,
 	return s.GetAll(ctx, id, nil)
 }
 
-func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.Instance) {
+func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.Resource) {
 	for i, v := range visited {
 		if v {
 			continue
@@ -121,8 +121,8 @@ func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.In
 	}
 }
 
-// bSearch performs a binary search on the sorted slice of models.Instance.
-func bSearch(res []models.Instance, uid string) (int, bool) {
+// bSearch performs a binary search on the sorted slice of models.Resource.
+func bSearch(res []models.Resource, uid string) (int, bool) {
 	l, r := 0, len(res)-1
 
 	for l <= r {

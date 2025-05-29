@@ -57,10 +57,10 @@ func (mr *MockServiceMockRecorder) ChangeState(ctx, resDetails any) *gomock.Call
 }
 
 // GetAll mocks base method.
-func (m *MockService) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Instance, error) {
+func (m *MockService) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Resource, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAll", ctx, id, resourceType)
-	ret0, _ := ret[0].([]models.Instance)
+	ret0, _ := ret[0].([]models.Resource)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -72,10 +72,10 @@ func (mr *MockServiceMockRecorder) GetAll(ctx, id, resourceType any) *gomock.Cal
 }
 
 // SyncResources mocks base method.
-func (m *MockService) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance, error) {
+func (m *MockService) SyncResources(ctx *gofr.Context, id int64) ([]models.Resource, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SyncResources", ctx, id)
-	ret0, _ := ret[0].([]models.Instance)
+	ret0, _ := ret[0].([]models.Resource)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
