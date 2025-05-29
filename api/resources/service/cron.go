@@ -8,6 +8,7 @@ import (
 	"github.com/zopdev/zopdev/api/resources/client"
 )
 
+// SyncCron is a cron job that syncs resources for all cloud accounts.
 func (s *Service) SyncCron(ctx *gofr.Context) {
 	cl, err := s.http.GetAllCloudAccounts(ctx)
 	if err != nil {
@@ -23,6 +24,7 @@ func (s *Service) SyncCron(ctx *gofr.Context) {
 	}
 }
 
+// SyncAll synchronizes resources for all provided cloud accounts concurrently.
 func (s *Service) SyncAll(ctx *gofr.Context, accounts []client.CloudAccount) []error {
 	var (
 		wg  sync.WaitGroup
