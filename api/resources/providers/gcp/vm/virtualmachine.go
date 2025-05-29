@@ -77,21 +77,3 @@ func hasGKECreatedByMetadata(metadata *compute.Metadata) bool {
 
 	return false
 }
-
-func (c *ComputeClient) StartInstanceVM(_ *gofr.Context, projectID, zone, instanceName string) error {
-	_, err := c.ComputeService.Instances.Start(projectID, zone, instanceName).Do()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (c *ComputeClient) StopInstanceVM(_ *gofr.Context, projectID, zone, instanceName string) error {
-	_, err := c.ComputeService.Instances.Stop(projectID, zone, instanceName).Do()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}

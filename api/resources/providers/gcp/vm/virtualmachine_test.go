@@ -56,52 +56,71 @@ func TestGetAllVMInstances(t *testing.T) {
 }
 
 func getMockAggregatedInstanceList() *compute.InstanceAggregatedList {
-	gkeCreatedByValue := "projects/test-project/zones/us-central1-a/instanceGroupManagers/gke-nodepool"
-
 	return &compute.InstanceAggregatedList{
 		Items: map[string]compute.InstancesScopedList{
 			"zones/us-central1": {
-				Instances: []*compute.Instance{
+				Instances: getMockInstances(),
+			},
+		},
+	}
+}
+
+func getMockInstances() []*compute.Instance {
+	gkeCreatedByValue := "projects/test-project/zones/us-central1-a/instanceGroupManagers/gke-nodepool"
+	nonGKECreatedByValue := "projects/test-project/zones/us-central1-a/instanceGroupManagers/custom-instance-group"
+
+	return []*compute.Instance{
+		{
+			Name:              "normal-vm",
+			Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
+			CreationTimestamp: "2025-01-01T00:00:00.000-07:00",
+			Status:            "RUNNING",
+		},
+		{
+			Name:              "managed-vm",
+			Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
+			CreationTimestamp: "2025-01-02T00:00:00.000-07:00",
+			Status:            "RUNNING",
+			Metadata: &compute.Metadata{
+				Items: []*compute.MetadataItems{
 					{
-						Name:              "normal-vm",
-						Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
-						CreationTimestamp: "2025-01-01T00:00:00.000-07:00",
-						Status:            "RUNNING",
+						Key:   "created-by",
+						Value: &gkeCreatedByValue,
 					},
+				},
+			},
+		},
+		{
+			Name:              "non-gke-vm-with-created-by",
+			Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
+			CreationTimestamp: "2025-01-03T00:00:00.000-07:00",
+			Status:            "RUNNING",
+		},
+		{
+			Name:              "vm-with-gke-io-label",
+			Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
+			CreationTimestamp: "2025-07-01T00:00:00.000-07:00",
+			Status:            "RUNNING",
+			Labels: map[string]string{
+				"gke.io/cluster-name": "cluster-example",
+			},
+		},
+		{
+			Name:              "gke-vm",
+			Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1",
+			CreationTimestamp: "2025-03-01T00:00:00.000-07:00",
+			Status:            "RUNNING",
+		},
+		{
+			Name:              "vm-with-non-gke-created-by",
+			Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
+			CreationTimestamp: "2025-07-05T00:00:00.000-07:00",
+			Status:            "RUNNING",
+			Metadata: &compute.Metadata{
+				Items: []*compute.MetadataItems{
 					{
-						Name:              "managed-vm",
-						Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
-						CreationTimestamp: "2025-01-02T00:00:00.000-07:00",
-						Metadata: &compute.Metadata{
-							Items: []*compute.MetadataItems{
-								{
-									Key:   "created-by",
-									Value: &gkeCreatedByValue,
-								},
-							},
-						},
-						Status: "RUNNING",
-					},
-					{
-						Name:              "non-gke-vm-with-created-by",
-						Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
-						CreationTimestamp: "2025-01-03T00:00:00.000-07:00",
-						Status:            "RUNNING",
-					},
-					{
-						Name:              "vm-with-gke-io-label",
-						Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1-a",
-						CreationTimestamp: "2025-07-01T00:00:00.000-07:00",
-						Status:            "RUNNING",
-						Labels: map[string]string{
-							"gke.io/cluster-name": "cluster-example",
-						},
-					},
-					{
-						Name:              "gke-vm",
-						Zone:              "https://www.googleapis.com/compute/v1/projects/test-project/zones/us-central1",
-						CreationTimestamp: "2025-03-01T00:00:00.000-07:00",
-						Status:            "RUNNING",
+						Key:   "created-by",
+						Value: &nonGKECreatedByValue,
 					},
 				},
 			},
@@ -125,6 +144,14 @@ func getExpectedVMInstances(projectID string) []models.Instance {
 			ProviderID:   projectID,
 			Region:       "us-central1-a",
 			CreationTime: "2025-01-03T00:00:00.000-07:00",
+			Status:       "RUNNING",
+		},
+		{
+			Name:         "vm-with-non-gke-created-by",
+			Type:         "VM",
+			ProviderID:   projectID,
+			Region:       "us-central1-a",
+			CreationTime: "2025-07-05T00:00:00.000-07:00",
 			Status:       "RUNNING",
 		},
 	}
