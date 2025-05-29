@@ -1,11 +1,12 @@
 package vm
 
 import (
-	"gofr.dev/pkg/gofr"
 	"strings"
 
 	"github.com/zopdev/zopdev/api/resources/providers/models"
 	"google.golang.org/api/compute/v1"
+
+	"gofr.dev/pkg/gofr"
 )
 
 type ComputeClient struct {
@@ -44,6 +45,10 @@ func (c *ComputeClient) GetAllInstances(_ *gofr.Context, projectID string) ([]mo
 }
 
 func isGKEManaged(instance *compute.Instance) bool {
+	return hasGKENameOrLabels(instance) || hasGKECreatedByMetadata(instance.Metadata)
+}
+
+func hasGKENameOrLabels(instance *compute.Instance) bool {
 	if strings.HasPrefix(instance.Name, "gke-") {
 		return true
 	}
@@ -54,13 +59,19 @@ func isGKEManaged(instance *compute.Instance) bool {
 		}
 	}
 
-	if instance.Metadata != nil {
-		for _, item := range instance.Metadata.Items {
-			if item.Key == "created-by" && item.Value != nil &&
-				strings.Contains(*item.Value, "instanceGroupManagers") &&
-				strings.Contains(*item.Value, "gke-") {
-				return true
-			}
+	return false
+}
+
+func hasGKECreatedByMetadata(metadata *compute.Metadata) bool {
+	if metadata == nil {
+		return false
+	}
+
+	for _, item := range metadata.Items {
+		if item.Key == "created-by" && item.Value != nil &&
+			strings.Contains(*item.Value, "instanceGroupManagers") &&
+			strings.Contains(*item.Value, "gke-") {
+			return true
 		}
 	}
 
