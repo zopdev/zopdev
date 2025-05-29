@@ -14,6 +14,15 @@ type gcpCredentials struct {
 	UniverseDomain          string `json:"universe_domain"`
 }
 
+type ociCredentials struct {
+	TenancyOCID string `json:"tenancy_ocid"`
+	UserOCID    string `json:"user_ocid"`
+	Region      string `json:"region"`
+	Fingerprint string `json:"fingerprint"`
+	PrivateKey  string `json:"private_key"`
+	Compartment string `json:"compartment"`
+}
+
 type awsCredentials struct {
 	AccessKey    string `json:"aws_access_key_id"`
 	AccessSecret string `json:"aws_secret_access_key"`

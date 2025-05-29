@@ -13,6 +13,10 @@ type SQLClient interface {
 	Idler
 }
 
+type VMClient interface {
+	InstanceLister
+}
+
 type MetricsClient interface {
 	TimeSeriesLister
 }

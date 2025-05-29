@@ -5,6 +5,10 @@ import (
 	"encoding/json"
 	"errors"
 
+	"gofr.dev/pkg/gofr"
+	"google.golang.org/api/compute/v1"
+
+	"github.com/zopdev/zopdev/api/resources/providers/gcp/vm"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sqladmin/v1"
@@ -20,6 +24,15 @@ var (
 )
 
 type Client struct{}
+
+func (*Client) NewComputeClient(ctx *gofr.Context, opts ...option.ClientOption) (VMClient, error) {
+	computeService, err := compute.NewService(ctx, opts...)
+	if err != nil {
+		return nil, ErrInitializingClient
+	}
+
+	return &vm.ComputeClient{ComputeService: computeService}, nil
+}
 
 func New() *Client { return &Client{} }
 

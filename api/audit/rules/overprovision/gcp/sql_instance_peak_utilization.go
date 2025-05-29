@@ -10,9 +10,12 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	"cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
+
 	"gofr.dev/pkg/gofr"
+
 	"golang.org/x/oauth2/google"
 	"golang.org/x/sync/errgroup"
+
 	"google.golang.org/api/iterator"
 	"google.golang.org/api/option"
 	sqladmin "google.golang.org/api/sqladmin/v1beta4"
@@ -31,14 +34,16 @@ var (
 )
 
 const (
-	danger    = "danger"
-	warning   = "warning"
-	compliant = "compliant"
+	// Status levels used to classify CPU utilization.
+	danger    = "danger"    // CPU usage is too high or too low; system may be under-provisioned or overloaded.
+	warning   = "warning"   // CPU usage is  within tolerable limits.
+	compliant = "compliant" // CPU usage is within expected operational range.
 
-	lowerBound   = 20
-	warningBound = 70
-	upperBound   = 90
-	percentage   = 100
+	// CPU utilization thresholds (in percentage).
+	lowerBound   = 20  // Below this is considered non-compliant due to over-provisioning (under-utilized).
+	warningBound = 70  // Between lowerBound and warningBound is considered compliant.
+	upperBound   = 90  // Between warningBound and upperBound is warning; above this is danger.
+	percentage   = 100 // Represents the full scale (100%) of CPU usage.
 )
 
 // CheckCloudSQLProvisionedUsage checks the provisioned usage of Cloud SQL instances
@@ -53,16 +58,19 @@ func CheckCloudSQLProvisionedUsage(ctx *gofr.Context, creds any) ([]store.Items,
 
 	sqlService, err := sqladmin.NewService(ctx, option.WithCredentials(cred))
 	if err != nil {
+		ctx.Errorf("failed to create SQL Admin service: %v", err)
 		return nil, errCreateSQLAdminService
 	}
 
 	instancesList, err := sqlService.Instances.List(cred.ProjectID).Do()
 	if err != nil {
+		ctx.Errorf("failed to list instances: %v", err)
 		return nil, errListCloudSQLInstances
 	}
 
 	monitoringClient, err := monitoring.NewMetricClient(ctx, option.WithCredentials(cred))
 	if err != nil {
+		ctx.Errorf("failed to create monitoring client: %v", err)
 		return nil, errCreateMonitoringClient
 	}
 
@@ -102,7 +110,6 @@ func getResult(ctx *gofr.Context, projectID string,
 
 				if er != nil {
 					ctx.Errorf("error reading time series: %v, intance: %s", er, instance.Name)
-
 					return errReadingTimeSeries
 				}
 
@@ -136,7 +143,7 @@ func getResult(ctx *gofr.Context, projectID string,
 	}
 
 	if err := errGrp.Wait(); err != nil {
-		return nil, err
+		return results, err
 	}
 
 	return results, nil

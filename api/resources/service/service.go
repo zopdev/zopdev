@@ -42,6 +42,16 @@ func (s *Service) GetResources(ctx *gofr.Context, id int64, resources []string) 
 			}
 
 			instances = append(instances, sql...)
+		case string(VM):
+			vms, erRes := s.getAllVMInstances(ctx, CloudDetails{
+				CloudType: CloudProvider(strings.ToUpper(ca.Provider)),
+				Creds:     ca.Credentials,
+			})
+			if erRes != nil {
+				return nil, erRes
+			}
+
+			instances = append(instances, vms...)
 		default:
 			return nil, gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}}
 		}
