@@ -1,4 +1,4 @@
-package store
+package resource
 
 import (
 	"gofr.dev/pkg/gofr"

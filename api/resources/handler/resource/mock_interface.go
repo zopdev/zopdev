@@ -7,13 +7,13 @@
 //
 
 // Package handler is a generated GoMock package.
-package handler
+package resource
 
 import (
+	service "github.com/zopdev/zopdev/api/resources/service/resource"
 	reflect "reflect"
 
 	models "github.com/zopdev/zopdev/api/resources/models"
-	service "github.com/zopdev/zopdev/api/resources/service"
 	gomock "go.uber.org/mock/gomock"
 	gofr "gofr.dev/pkg/gofr"
 )

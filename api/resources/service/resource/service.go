@@ -1,4 +1,4 @@
-package service
+package resource
 
 import (
 	"gofr.dev/pkg/gofr"

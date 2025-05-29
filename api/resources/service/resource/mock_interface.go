@@ -7,7 +7,7 @@
 //
 
 // Package service is a generated GoMock package.
-package service
+package resource
 
 import (
 	context "context"

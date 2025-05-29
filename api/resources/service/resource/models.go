@@ -1,4 +1,4 @@
-package service
+package resource
 
 type (
 	CloudProvider string

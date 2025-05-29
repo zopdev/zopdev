@@ -1,32 +1,38 @@
 package main
 
 import (
+	"gofr.dev/pkg/gofr"
+
 	appHandler "github.com/zopdev/zopdev/api/applications/handler"
 	appService "github.com/zopdev/zopdev/api/applications/service"
 	appStore "github.com/zopdev/zopdev/api/applications/store"
+
 	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
+
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
 	caStore "github.com/zopdev/zopdev/api/cloudaccounts/store"
+
 	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
 	clStore "github.com/zopdev/zopdev/api/deploymentspace/cluster/store"
+
 	deployHandler "github.com/zopdev/zopdev/api/deploymentspace/handler"
 	deployService "github.com/zopdev/zopdev/api/deploymentspace/service"
 	deployStore "github.com/zopdev/zopdev/api/deploymentspace/store"
+
 	envHandler "github.com/zopdev/zopdev/api/environments/handler"
 	envService "github.com/zopdev/zopdev/api/environments/service"
 	envStore "github.com/zopdev/zopdev/api/environments/store"
-	"github.com/zopdev/zopdev/api/provider/gcp"
-	resourceClient "github.com/zopdev/zopdev/api/resources/client"
-	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
-	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
-	resourceService "github.com/zopdev/zopdev/api/resources/service"
-	resourceStore "github.com/zopdev/zopdev/api/resources/store"
-	"gofr.dev/pkg/gofr"
-
 	"github.com/zopdev/zopdev/api/migrations"
+	"github.com/zopdev/zopdev/api/provider/gcp"
+
+	resourceClient "github.com/zopdev/zopdev/api/resources/client"
+	resourceHandler "github.com/zopdev/zopdev/api/resources/handler/resource"
+	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
+	resourceService "github.com/zopdev/zopdev/api/resources/service/resource"
+	resourceStore "github.com/zopdev/zopdev/api/resources/store/resource"
 )
 
 func main() {
@@ -106,7 +112,7 @@ func registerCloudResourceRoutes(app *gofr.App) {
 	gcpClient := gcpResource.New()
 	resStore := resourceStore.New()
 	resSvc := resourceService.New(gcpClient, client, resStore)
-	resHld := resrouceHandler.New(resSvc)
+	resHld := resourceHandler.New(resSvc)
 
 	// TODO: Figure out a way to sync resources on startup.
 

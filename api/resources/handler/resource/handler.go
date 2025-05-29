@@ -1,12 +1,11 @@
-package handler
+package resource
 
 import (
+	"github.com/zopdev/zopdev/api/resources/service/resource"
 	"strconv"
 
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
-
-	"github.com/zopdev/zopdev/api/resources/service"
 )
 
 type Handler struct {
@@ -39,7 +38,7 @@ func (h *Handler) GetResources(ctx *gofr.Context) (any, error) {
 }
 
 func (h *Handler) ChangeState(ctx *gofr.Context) (any, error) {
-	var resDetails service.ResourceDetails
+	var resDetails resource.ResourceDetails
 
 	err := ctx.Bind(&resDetails)
 	if err != nil {
