@@ -110,6 +110,21 @@ func (m *MockHTTPClient) EXPECT() *MockHTTPClientMockRecorder {
 	return m.recorder
 }
 
+// GetAllCloudAccounts mocks base method.
+func (m *MockHTTPClient) GetAllCloudAccounts(ctx *gofr.Context) ([]client.CloudAccount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllCloudAccounts", ctx)
+	ret0, _ := ret[0].([]client.CloudAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllCloudAccounts indicates an expected call of GetAllCloudAccounts.
+func (mr *MockHTTPClientMockRecorder) GetAllCloudAccounts(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllCloudAccounts", reflect.TypeOf((*MockHTTPClient)(nil).GetAllCloudAccounts), ctx)
+}
+
 // GetCloudCredentials mocks base method.
 func (m *MockHTTPClient) GetCloudCredentials(ctx *gofr.Context, cloudAccID int64) (*client.CloudAccount, error) {
 	m.ctrl.T.Helper()

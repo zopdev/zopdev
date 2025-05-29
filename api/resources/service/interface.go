@@ -19,6 +19,7 @@ type GCPClient interface {
 
 type HTTPClient interface {
 	GetCloudCredentials(ctx *gofr.Context, cloudAccID int64) (*client.CloudAccount, error)
+	GetAllCloudAccounts(ctx *gofr.Context) ([]client.CloudAccount, error)
 }
 
 type Store interface {

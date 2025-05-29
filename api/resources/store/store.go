@@ -33,7 +33,6 @@ func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType
 		args      = make([]any, 0, maxResTypes)
 	)
 
-	// If the resources are given as a parameter, we can use that to filter.
 	// Form the IN clause, otherwise we fetch all resources for the given cloud account ID.
 	inClause := ``
 

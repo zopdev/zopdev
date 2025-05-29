@@ -7,29 +7,24 @@ import (
 	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
-	"gofr.dev/pkg/gofr"
-
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
 	caStore "github.com/zopdev/zopdev/api/cloudaccounts/store"
+	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
 	clStore "github.com/zopdev/zopdev/api/deploymentspace/cluster/store"
-	"github.com/zopdev/zopdev/api/provider/gcp"
-
-	envHandler "github.com/zopdev/zopdev/api/environments/handler"
-	envService "github.com/zopdev/zopdev/api/environments/service"
-	envStore "github.com/zopdev/zopdev/api/environments/store"
-
 	deployHandler "github.com/zopdev/zopdev/api/deploymentspace/handler"
 	deployService "github.com/zopdev/zopdev/api/deploymentspace/service"
 	deployStore "github.com/zopdev/zopdev/api/deploymentspace/store"
-
-	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
-
+	envHandler "github.com/zopdev/zopdev/api/environments/handler"
+	envService "github.com/zopdev/zopdev/api/environments/service"
+	envStore "github.com/zopdev/zopdev/api/environments/store"
+	"github.com/zopdev/zopdev/api/provider/gcp"
 	resourceClient "github.com/zopdev/zopdev/api/resources/client"
 	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
 	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	resourceService "github.com/zopdev/zopdev/api/resources/service"
 	resourceStore "github.com/zopdev/zopdev/api/resources/store"
+	"gofr.dev/pkg/gofr"
 
 	"github.com/zopdev/zopdev/api/migrations"
 )
@@ -112,6 +107,10 @@ func registerCloudResourceRoutes(app *gofr.App) {
 	resStore := resourceStore.New()
 	resSvc := resourceService.New(gcpClient, client, resStore)
 	resHld := resrouceHandler.New(resSvc)
+
+	// TODO: Figure out a way to sync resources on startup.
+
+	app.AddCronJob("0 * * * *", "resource-sync", resSvc.SyncCron)
 
 	app.GET("/resources", resHld.GetResources)
 	app.POST("/resources/state", resHld.ChangeState)
