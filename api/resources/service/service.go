@@ -9,12 +9,13 @@ import (
 
 type Service struct {
 	gcp   GCPClient
+	aws   AWSClient
 	http  HTTPClient
 	store Store
 }
 
-func New(gcp GCPClient, http HTTPClient, store Store) *Service {
-	return &Service{gcp: gcp, http: http, store: store}
+func New(gcp GCPClient, aws AWSClient, http HTTPClient, store Store) *Service {
+	return &Service{gcp: gcp, aws: aws, http: http, store: store}
 }
 
 func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Instance, error) {
@@ -119,6 +120,20 @@ func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.In
 			ctx.Errorf("failed to remove resource: %v", err)
 		}
 	}
+}
+
+func (s *Service) getALLComputeInstances(ctx *gofr.Context, details CloudDetails) ([]models.Instance, error) {
+	ec2Client, err := s.aws.NewEC2Client(ctx, details.Creds)
+	if err != nil {
+		return nil, err
+	}
+
+	instances, err := ec2Client.GetAllInstances(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return instances, nil
 }
 
 // bSearch performs a binary search on the sorted slice of models.Instance.
