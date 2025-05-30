@@ -17,7 +17,7 @@ func New(svc Service) *Handler {
 }
 
 func (h *Handler) GetResources(ctx *gofr.Context) (any, error) {
-	id := ctx.Param("cloudAccId")
+	id := ctx.PathParam("id")
 	if id == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}
@@ -45,6 +45,18 @@ func (h *Handler) ChangeState(ctx *gofr.Context) (any, error) {
 		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"request body"}}
 	}
 
+	id := ctx.PathParam("id")
+	if id == "" {
+		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
+	}
+
+	accID, err := strconv.ParseInt(id, 10, 64)
+	if err != nil {
+		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
+	}
+
+	resDetails.CloudAccID = accID
+
 	err = h.svc.ChangeState(ctx, resDetails)
 	if err != nil {
 		return nil, err
@@ -54,7 +66,7 @@ func (h *Handler) ChangeState(ctx *gofr.Context) (any, error) {
 }
 
 func (h *Handler) SyncResources(ctx *gofr.Context) (any, error) {
-	id := ctx.Param("cloudAccId")
+	id := ctx.PathParam("id")
 	if id == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}

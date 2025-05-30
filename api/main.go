@@ -118,7 +118,7 @@ func registerCloudResourceRoutes(app *gofr.App) {
 
 	app.AddCronJob("0 * * * *", "resource-sync", resSvc.SyncCron)
 
-	app.GET("/resources", resHld.GetResources)
-	app.POST("/resources/state", resHld.ChangeState)
-	app.POST("/resources/sync", resHld.SyncResources)
+	app.GET("/cloud-account/{id}/resources", resHld.GetResources)
+	app.POST("/cloud-account/{id}/resources/state", resHld.ChangeState)
+	app.POST("/cloud-account/{id}/resources/sync", resHld.SyncResources)
 }

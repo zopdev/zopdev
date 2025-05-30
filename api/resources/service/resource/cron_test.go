@@ -28,7 +28,8 @@ func TestService_SyncCron(t *testing.T) {
 		Container: cnt,
 	}
 	mockResp := []models.Resource{
-		{Name: "sql-instance-1", UID: "zop/sql1"}, {Name: "sql-instance-2", UID: "zop/sql2"},
+		{ID: 1, Name: "sql-instance-1", UID: "zop/sql1", Status: RUNNING},
+		{ID: 2, Name: "sql-instance-2", UID: "zop/sql2", Status: STOPPED},
 	}
 	mockLister := &mockSQLClient{
 		isError:   false,
@@ -53,8 +54,10 @@ func TestService_SyncCron(t *testing.T) {
 
 	mStore.EXPECT().GetResources(ctx, int64(1), nil).
 		Return(mockResp, nil).Times(2)
-	mStore.EXPECT().UpdateResource(ctx, gomock.Any()).
-		Return(nil).Times(2)
+	mStore.EXPECT().UpdateStatus(ctx, RUNNING, int64(1)).
+		Return(nil)
+	mStore.EXPECT().UpdateStatus(ctx, STOPPED, int64(2)).
+		Return(nil)
 
 	// This means that the syncAll returned an error.
 	mocks.Metrics.EXPECT().IncrementCounter(ctx, "sync_error_count")

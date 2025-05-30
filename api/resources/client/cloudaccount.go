@@ -65,12 +65,6 @@ func (*Client) GetAllCloudAccounts(ctx *gofr.Context) ([]CloudAccount, error) {
 		return nil, err
 	}
 
-	if err != nil {
-		ctx.Errorf("failed to get cloud accounts: %v", err)
-
-		return nil, err
-	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
