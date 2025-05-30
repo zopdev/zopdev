@@ -18,6 +18,7 @@ func TestSettings_Scan(t *testing.T) {
 
 	// Test nil value
 	var s2 Settings
+
 	err = s2.Scan(nil)
 	if err != nil {
 		t.Errorf("Scan(nil) error = %v, wantErr nil", err)
@@ -25,6 +26,7 @@ func TestSettings_Scan(t *testing.T) {
 
 	// Test non-byte input
 	var s3 Settings
+
 	err = s3.Scan(123)
 	if err == nil {
 		t.Errorf("Scan(non-bytes) error = nil, wantErr driver.ErrSkip")

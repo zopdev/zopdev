@@ -145,25 +145,25 @@ func Test_getError(t *testing.T) {
 		Message: "Conflict error",
 	}
 
-	result := getError(err)
+	errRes := getError(err)
 	expected := &ErrConflict{
 		Message: "Conflict error",
 	}
 
-	assert.Equal(t, expected, result)
+	assert.Equal(t, expected, errRes)
 
 	err = &googleapi.Error{
 		Code:    http.StatusInternalServerError,
 		Message: "Internal server error",
 	}
 
-	result = getError(err)
+	errRes = getError(err)
 	expected2 := &InternalServerError{}
 
-	assert.Equal(t, expected2, result)
+	assert.Equal(t, expected2, errRes)
 
-	result = getError(nil)
-	assert.Nil(t, result)
+	errRes = getError(nil)
+	assert.NoError(t, errRes)
 }
 
 func Test_Errors(t *testing.T) {

@@ -10,12 +10,12 @@ func (e *ErrConflict) Error() string {
 	return e.Message
 }
 
-func (e *ErrConflict) StatusCode() int {
+func (*ErrConflict) StatusCode() int {
 	return http.StatusConflict
 }
 
 type InternalServerError struct{}
 
-func (e *InternalServerError) Error() string {
+func (*InternalServerError) Error() string {
 	return "Internal server error!"
 }
