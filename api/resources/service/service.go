@@ -47,6 +47,7 @@ func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) err
 		err = s.changeSQLState(ctx, ca, resDetails)
 		if err != nil {
 			ctx.Errorf("failed to change SQL state: %v", err)
+			return err
 		}
 
 		err = s.store.UpdateStatus(ctx, getStatus(resDetails.State), resDetails.ID)
