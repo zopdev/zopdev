@@ -12,7 +12,7 @@ package handler
 import (
 	reflect "reflect"
 
-	models "github.com/zopdev/zopdev/api/resources/providers/models"
+	models "github.com/zopdev/zopdev/api/resources/models"
 	service "github.com/zopdev/zopdev/api/resources/service"
 	gomock "go.uber.org/mock/gomock"
 	gofr "gofr.dev/pkg/gofr"
@@ -56,17 +56,32 @@ func (mr *MockServiceMockRecorder) ChangeState(ctx, resDetails any) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeState", reflect.TypeOf((*MockService)(nil).ChangeState), ctx, resDetails)
 }
 
-// GetResources mocks base method.
-func (m *MockService) GetResources(ctx *gofr.Context, id int64, resources []string) ([]models.Instance, error) {
+// GetAll mocks base method.
+func (m *MockService) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Instance, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetResources", ctx, id, resources)
+	ret := m.ctrl.Call(m, "GetAll", ctx, id, resourceType)
 	ret0, _ := ret[0].([]models.Instance)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetResources indicates an expected call of GetResources.
-func (mr *MockServiceMockRecorder) GetResources(ctx, id, resources any) *gomock.Call {
+// GetAll indicates an expected call of GetAll.
+func (mr *MockServiceMockRecorder) GetAll(ctx, id, resourceType any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResources", reflect.TypeOf((*MockService)(nil).GetResources), ctx, id, resources)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAll", reflect.TypeOf((*MockService)(nil).GetAll), ctx, id, resourceType)
+}
+
+// SyncResources mocks base method.
+func (m *MockService) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SyncResources", ctx, id)
+	ret0, _ := ret[0].([]models.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SyncResources indicates an expected call of SyncResources.
+func (mr *MockServiceMockRecorder) SyncResources(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SyncResources", reflect.TypeOf((*MockService)(nil).SyncResources), ctx, id)
 }

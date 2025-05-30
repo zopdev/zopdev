@@ -5,7 +5,7 @@ import (
 
 	"gofr.dev/pkg/gofr"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 type SQLClient interface {

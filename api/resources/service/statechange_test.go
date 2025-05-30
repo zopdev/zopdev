@@ -24,7 +24,7 @@ func TestService_changeSQLState(t *testing.T) {
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockStopper := &mockSQLClient{}
-	s := New(mGCP, nil)
+	s := New(mGCP, nil, nil)
 
 	testCases := []struct {
 		name      string
@@ -76,7 +76,7 @@ func TestService_changeSQLState_Errors(t *testing.T) {
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockStopper := &mockSQLClient{}
-	s := New(mGCP, nil)
+	s := New(mGCP, nil, nil)
 
 	testCases := []struct {
 		name      string

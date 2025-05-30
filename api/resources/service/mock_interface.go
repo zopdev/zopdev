@@ -14,6 +14,7 @@ import (
 	reflect "reflect"
 
 	client "github.com/zopdev/zopdev/api/resources/client"
+	models "github.com/zopdev/zopdev/api/resources/models"
 	gcp "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	gomock "go.uber.org/mock/gomock"
 	gofr "gofr.dev/pkg/gofr"
@@ -109,6 +110,21 @@ func (m *MockHTTPClient) EXPECT() *MockHTTPClientMockRecorder {
 	return m.recorder
 }
 
+// GetAllCloudAccounts mocks base method.
+func (m *MockHTTPClient) GetAllCloudAccounts(ctx *gofr.Context) ([]client.CloudAccount, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAllCloudAccounts", ctx)
+	ret0, _ := ret[0].([]client.CloudAccount)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAllCloudAccounts indicates an expected call of GetAllCloudAccounts.
+func (mr *MockHTTPClientMockRecorder) GetAllCloudAccounts(ctx any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllCloudAccounts", reflect.TypeOf((*MockHTTPClient)(nil).GetAllCloudAccounts), ctx)
+}
+
 // GetCloudCredentials mocks base method.
 func (m *MockHTTPClient) GetCloudCredentials(ctx *gofr.Context, cloudAccID int64) (*client.CloudAccount, error) {
 	m.ctrl.T.Helper()
@@ -122,4 +138,100 @@ func (m *MockHTTPClient) GetCloudCredentials(ctx *gofr.Context, cloudAccID int64
 func (mr *MockHTTPClientMockRecorder) GetCloudCredentials(ctx, cloudAccID any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetCloudCredentials", reflect.TypeOf((*MockHTTPClient)(nil).GetCloudCredentials), ctx, cloudAccID)
+}
+
+// MockStore is a mock of Store interface.
+type MockStore struct {
+	ctrl     *gomock.Controller
+	recorder *MockStoreMockRecorder
+	isgomock struct{}
+}
+
+// MockStoreMockRecorder is the mock recorder for MockStore.
+type MockStoreMockRecorder struct {
+	mock *MockStore
+}
+
+// NewMockStore creates a new mock instance.
+func NewMockStore(ctrl *gomock.Controller) *MockStore {
+	mock := &MockStore{ctrl: ctrl}
+	mock.recorder = &MockStoreMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockStore) EXPECT() *MockStoreMockRecorder {
+	return m.recorder
+}
+
+// GetResourceByID mocks base method.
+func (m *MockStore) GetResourceByID(ctx *gofr.Context, id int64) (*models.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetResourceByID", ctx, id)
+	ret0, _ := ret[0].(*models.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResourceByID indicates an expected call of GetResourceByID.
+func (mr *MockStoreMockRecorder) GetResourceByID(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResourceByID", reflect.TypeOf((*MockStore)(nil).GetResourceByID), ctx, id)
+}
+
+// GetResources mocks base method.
+func (m *MockStore) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Instance, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetResources", ctx, cloudAccountID, resourceType)
+	ret0, _ := ret[0].([]models.Instance)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetResources indicates an expected call of GetResources.
+func (mr *MockStoreMockRecorder) GetResources(ctx, cloudAccountID, resourceType any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetResources", reflect.TypeOf((*MockStore)(nil).GetResources), ctx, cloudAccountID, resourceType)
+}
+
+// InsertResource mocks base method.
+func (m *MockStore) InsertResource(ctx *gofr.Context, resources *models.Instance) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "InsertResource", ctx, resources)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// InsertResource indicates an expected call of InsertResource.
+func (mr *MockStoreMockRecorder) InsertResource(ctx, resources any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertResource", reflect.TypeOf((*MockStore)(nil).InsertResource), ctx, resources)
+}
+
+// RemoveResource mocks base method.
+func (m *MockStore) RemoveResource(ctx *gofr.Context, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "RemoveResource", ctx, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// RemoveResource indicates an expected call of RemoveResource.
+func (mr *MockStoreMockRecorder) RemoveResource(ctx, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveResource", reflect.TypeOf((*MockStore)(nil).RemoveResource), ctx, id)
+}
+
+// UpdateStatus mocks base method.
+func (m *MockStore) UpdateStatus(ctx *gofr.Context, status string, id int64) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateStatus", ctx, status, id)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateStatus indicates an expected call of UpdateStatus.
+func (mr *MockStoreMockRecorder) UpdateStatus(ctx, status, id any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateStatus", reflect.TypeOf((*MockStore)(nil).UpdateStatus), ctx, status, id)
 }

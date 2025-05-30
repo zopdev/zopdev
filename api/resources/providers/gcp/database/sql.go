@@ -1,10 +1,14 @@
 package sql
 
 import (
+	"errors"
+	"net/http"
+
 	"gofr.dev/pkg/gofr"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/sqladmin/v1"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 const (
@@ -37,9 +41,9 @@ func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.In
 		instances = append(instances, models.Instance{
 			Name:         item.Name,
 			Type:         "SQL",
-			ProviderID:   item.Project,
 			Region:       item.Region,
 			CreationTime: item.CreateTime,
+			UID:          projectID + "/" + item.Name,
 			Status:       getState(item.Settings.ActivationPolicy),
 		})
 	}
@@ -67,7 +71,7 @@ func (c *Client) StartInstance(_ *gofr.Context, projectID, instanceName string) 
 
 	_, err := c.SQL.Patch(projectID, instanceName, patchReq).Do()
 	if err != nil {
-		return err
+		return getError(err)
 	}
 
 	return nil
@@ -82,8 +86,24 @@ func (c *Client) StopInstance(_ *gofr.Context, projectID, instanceName string) e
 
 	_, err := c.SQL.Patch(projectID, instanceName, patchReq).Do()
 	if err != nil {
-		return err
+		return getError(err)
 	}
 
 	return nil
+}
+
+func getError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	var gErr *googleapi.Error
+
+	if errors.As(err, &gErr) {
+		if gErr.Code == http.StatusConflict {
+			return &ErrConflict{Message: gErr.Message}
+		}
+	}
+
+	return &InternalServerError{}
 }

@@ -5,7 +5,7 @@ export function useGetCloudResources(id, options = {}) {
   return useQuery({
     queryKey: ['cloudResourcesGetData', id],
     queryFn: async () => {
-      const url = `/resources?cloudAccId=${id}`;
+      const url = `/cloud-account/${id}/resources`;
       return await fetchData(url);
     },
     ...options,
@@ -14,8 +14,8 @@ export function useGetCloudResources(id, options = {}) {
 
 export function usePostResourceState() {
   return useMutation({
-    mutationFn: async (payload) => {
-      const response = await postData('/resources/state', payload);
+    mutationFn: async ({ cloudAccId, ...payload }) => {
+      const response = await postData(`/cloud-account/${cloudAccId}/resources/state`, payload);
       return response;
     },
   });

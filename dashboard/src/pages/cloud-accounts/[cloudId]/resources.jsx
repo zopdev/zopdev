@@ -25,6 +25,7 @@ const CloudResourceRow = (resource) => {
     setCurrentState(state);
     resourceStateChanger.mutate({
       cloudAccId: parseInt(cloudId),
+      id: resource?.id,
       name: resource?.instance_name,
       type: resource?.instance_type,
       state: state ? 'START' : 'SUSPEND',
