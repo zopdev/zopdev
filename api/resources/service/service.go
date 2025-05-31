@@ -141,10 +141,10 @@ func (s *Service) getALLComputeInstances(ctx *gofr.Context, details CloudDetails
 		if err != nil {
 			return nil, err
 		}
+
 		return ec2Client.GetAllInstances(ctx)
-	// case GCP:
-	// 	// Add GCP compute logic here in the future
-	// 	return nil, nil
+	case GCP:
+		return nil, nil
 	default:
 		// We are not returning any error because the sync process is completely internal, works on the cloud Account ID,
 		// if we are getting an unknown cloud type, then this feature is not implemented and we simply return nil.

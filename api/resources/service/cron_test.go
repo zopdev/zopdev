@@ -20,35 +20,43 @@ import (
 	"github.com/zopdev/zopdev/api/resources/providers/aws/vm"
 )
 
-// stubEC2 implements the EC2API interface with no-op methods
+// stubEC2 implements the EC2API interface with no-op methods.
 type stubEC2 struct{}
 
-func (s *stubEC2) DescribeInstancesWithContext(ctx aws.Context, input *ec2.DescribeInstancesInput, opts ...request.Option) (*ec2.DescribeInstancesOutput, error) {
+func (*stubEC2) DescribeInstancesWithContext(_ aws.Context, _ *ec2.DescribeInstancesInput,
+	_ ...request.Option) (*ec2.DescribeInstancesOutput, error) {
 	return &ec2.DescribeInstancesOutput{}, nil
 }
-func (s *stubEC2) StartInstancesWithContext(ctx aws.Context, input *ec2.StartInstancesInput, opts ...request.Option) (*ec2.StartInstancesOutput, error) {
+func (*stubEC2) StartInstancesWithContext(_ aws.Context, _ *ec2.StartInstancesInput,
+	_ ...request.Option) (*ec2.StartInstancesOutput, error) {
 	return &ec2.StartInstancesOutput{}, nil
 }
-func (s *stubEC2) StopInstancesWithContext(ctx aws.Context, input *ec2.StopInstancesInput, opts ...request.Option) (*ec2.StopInstancesOutput, error) {
+func (*stubEC2) StopInstancesWithContext(_ aws.Context, _ *ec2.StopInstancesInput,
+	_ ...request.Option) (*ec2.StopInstancesOutput, error) {
 	return &ec2.StopInstancesOutput{}, nil
 }
 
-// stubRDS implements the RDSAPI interface with no-op methods
+// stubRDS implements the RDSAPI interface with no-op methods.
 type stubRDS struct{}
 
-func (s *stubRDS) DescribeDBInstancesWithContext(ctx aws.Context, input *rds.DescribeDBInstancesInput, opts ...request.Option) (*rds.DescribeDBInstancesOutput, error) {
+func (*stubRDS) DescribeDBInstancesWithContext(_ aws.Context, _ *rds.DescribeDBInstancesInput,
+	_ ...request.Option) (*rds.DescribeDBInstancesOutput, error) {
 	return &rds.DescribeDBInstancesOutput{}, nil
 }
-func (s *stubRDS) StartDBClusterWithContext(ctx aws.Context, input *rds.StartDBClusterInput, opts ...request.Option) (*rds.StartDBClusterOutput, error) {
+func (*stubRDS) StartDBClusterWithContext(_ aws.Context, _ *rds.StartDBClusterInput,
+	_ ...request.Option) (*rds.StartDBClusterOutput, error) {
 	return &rds.StartDBClusterOutput{}, nil
 }
-func (s *stubRDS) StartDBInstanceWithContext(ctx aws.Context, input *rds.StartDBInstanceInput, opts ...request.Option) (*rds.StartDBInstanceOutput, error) {
+func (*stubRDS) StartDBInstanceWithContext(_ aws.Context, _ *rds.StartDBInstanceInput,
+	_ ...request.Option) (*rds.StartDBInstanceOutput, error) {
 	return &rds.StartDBInstanceOutput{}, nil
 }
-func (s *stubRDS) StopDBClusterWithContext(ctx aws.Context, input *rds.StopDBClusterInput, opts ...request.Option) (*rds.StopDBClusterOutput, error) {
+func (*stubRDS) StopDBClusterWithContext(_ aws.Context, _ *rds.StopDBClusterInput,
+	_ ...request.Option) (*rds.StopDBClusterOutput, error) {
 	return &rds.StopDBClusterOutput{}, nil
 }
-func (s *stubRDS) StopDBInstanceWithContext(ctx aws.Context, input *rds.StopDBInstanceInput, opts ...request.Option) (*rds.StopDBInstanceOutput, error) {
+func (*stubRDS) StopDBInstanceWithContext(_ aws.Context, _ *rds.StopDBInstanceInput,
+	_ ...request.Option) (*rds.StopDBInstanceOutput, error) {
 	return &rds.StopDBInstanceOutput{}, nil
 }
 

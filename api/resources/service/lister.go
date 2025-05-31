@@ -52,6 +52,7 @@ func (s *Service) getAllInstances(ctx *gofr.Context, ca *client.CloudAccount) ([
 	}()
 
 	var sqlRes, computeRes result
+
 	for i := 0; i < 2; i++ {
 		select {
 		case r := <-sqlCh:
@@ -64,6 +65,7 @@ func (s *Service) getAllInstances(ctx *gofr.Context, ca *client.CloudAccount) ([
 	if sqlRes.err != nil {
 		return nil, sqlRes.err
 	}
+
 	if computeRes.err != nil {
 		return nil, computeRes.err
 	}
