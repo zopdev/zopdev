@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"gofr.dev/pkg/gofr"
-	gofrHttp "gofr.dev/pkg/gofr/http"
 	"google.golang.org/api/option"
 
 	"github.com/zopdev/zopdev/api/resources/client"
@@ -85,7 +84,9 @@ func (s *Service) getAllSQLInstances(ctx *gofr.Context, req CloudDetails) ([]mod
 	case AWS:
 		return s.getAWSRDSInstances(ctx, req.Creds)
 	default:
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}}
+		// We are not returning any error because the sync process is completely internal, works on the cloud Account ID,
+		// if we are getting an unknown cloud type, then this feature is not implemented and we simply return nil.
+		return nil, nil
 	}
 }
 

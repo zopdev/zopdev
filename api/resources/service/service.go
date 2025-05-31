@@ -135,17 +135,21 @@ func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.In
 }
 
 func (s *Service) getALLComputeInstances(ctx *gofr.Context, details CloudDetails) ([]models.Instance, error) {
-	ec2Client, err := s.aws.NewEC2Client(ctx, details.Creds)
-	if err != nil {
-		return nil, err
+	switch details.CloudType {
+	case AWS:
+		ec2Client, err := s.aws.NewEC2Client(ctx, details.Creds)
+		if err != nil {
+			return nil, err
+		}
+		return ec2Client.GetAllInstances(ctx)
+	// case GCP:
+	// 	// Add GCP compute logic here in the future
+	// 	return nil, nil
+	default:
+		// We are not returning any error because the sync process is completely internal, works on the cloud Account ID,
+		// if we are getting an unknown cloud type, then this feature is not implemented and we simply return nil.
+		return nil, nil
 	}
-
-	instances, err := ec2Client.GetAllInstances(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return instances, nil
 }
 
 // bSearch performs a binary search on the sorted slice of models.Instance.
