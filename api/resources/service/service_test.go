@@ -23,12 +23,16 @@ func TestService_SyncResources(t *testing.T) {
 	mClient := NewMockHTTPClient(ctrl)
 	mStore := NewMockStore(ctrl)
 	mGCP := NewMockGCPClient(ctrl)
-	ctx := &gofr.Context{Context: context.Background()}
+	mAWS := NewMockAWSClient(ctrl)
+
+	mockContainer, _ := container.NewMockContainer(t)
+
+	ctx := &gofr.Context{Context: context.Background(), Container: mockContainer}
 	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 
-	s := New(mGCP, mClient, mStore)
+	s := New(mGCP, mAWS, mClient, mStore)
 
 	req := CloudDetails{
 		CloudType: GCP,
@@ -66,6 +70,7 @@ func TestService_SyncResources(t *testing.T) {
 			name:      "Sync all resources",
 			id:        123,
 			resources: []string{},
+			expErr:    nil,
 			expResp:   mStrResp,
 			mockCalls: func() {
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
@@ -73,22 +78,25 @@ func TestService_SyncResources(t *testing.T) {
 					Return(mockCreds, nil)
 				mGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
 					Return(mockLister, nil)
-				mStore.EXPECT().GetResources(ctx, int64(123), nil).
-					Return([]models.Instance{
+				gomock.InOrder(
+					mStore.EXPECT().GetResources(gomock.Any(), int64(123), nil).
+						Return([]models.Instance{
+							{ID: 1, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
+								Name: "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1"},
+							{ID: 2, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
+								Name: "sql-instance-3", Type: string(SQL), UID: "zopdev/sql-instance-3"},
+						}, nil),
+					mStore.EXPECT().UpdateStatus(gomock.Any(), RUNNING, int64(1)).Return(nil),
+					mStore.EXPECT().InsertResource(gomock.Any(), gomock.Any()).Return(nil),
+					mStore.EXPECT().RemoveResource(gomock.Any(), gomock.Any()).Return(nil),
+					mStore.EXPECT().GetResources(gomock.Any(), int64(123), nil).Return([]models.Instance{
 						{ID: 1, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
-							Name: "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1"},
-						{ID: 2, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
-							Name: "sql-instance-3", Type: string(SQL), UID: "zopdev/sql-instance-3"},
-					}, nil)
-				mStore.EXPECT().UpdateStatus(ctx, RUNNING, int64(1)).Return(nil)
-				mStore.EXPECT().InsertResource(ctx, &models.Instance{
-					CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
-					Name:         "sql-instance-2", Type: string(SQL), UID: "zopdev/sql-instance-2", Status: "SUSPENDED",
-				}).Return(nil)
-				mStore.EXPECT().RemoveResource(ctx, int64(2)).
-					Return(nil)
-				mStore.EXPECT().GetResources(ctx, int64(123), nil).
-					Return(mStrResp, nil)
+							Name: "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1", Status: "RUNNING"},
+						{ID: 3, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
+							Name: "sql-instance-2", Type: string(SQL), UID: "zopdev/sql-instance-3", Status: "SUSPENDED"},
+					}, nil),
+					mStore.EXPECT().GetResources(gomock.Any(), int64(123), nil).Return(mStrResp, nil).AnyTimes(),
+				)
 			},
 		},
 	}
@@ -115,7 +123,7 @@ func TestService_SyncResources_Errors(t *testing.T) {
 	ctx := &gofr.Context{Context: context.Background(), Container: ct}
 	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
-	s := New(mGCP, mClient, nil)
+	s := New(mGCP, nil, mClient, nil)
 	req := CloudDetails{
 		CloudType: GCP,
 		Creds: map[string]any{
@@ -183,12 +191,13 @@ func TestService_ChangeState(t *testing.T) {
 	mClient := NewMockHTTPClient(ctrl)
 	mStore := NewMockStore(ctrl)
 	mGCP := NewMockGCPClient(ctrl)
+	mAWS := NewMockAWSClient(ctrl)
 	ctx := &gofr.Context{Context: context.Background()}
 	ca := &client.CloudAccount{ID: 123, Name: "MyCloud", Provider: string(GCP),
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockStopper := &mockSQLClient{}
-	s := New(mGCP, mClient, mStore)
+	s := New(mGCP, mAWS, mClient, mStore)
 
 	testCases := []struct {
 		name      string

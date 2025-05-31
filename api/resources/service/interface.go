@@ -9,12 +9,19 @@ import (
 
 	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/models"
+	"github.com/zopdev/zopdev/api/resources/providers/aws/database"
+	"github.com/zopdev/zopdev/api/resources/providers/aws/vm"
 	"github.com/zopdev/zopdev/api/resources/providers/gcp"
 )
 
 type GCPClient interface {
 	NewGoogleCredentials(ctx context.Context, cred any, scopes ...string) (*google.Credentials, error)
 	NewSQLClient(ctx context.Context, opts ...option.ClientOption) (gcp.SQLClient, error)
+}
+
+type AWSClient interface {
+	NewRDSClient(_ context.Context, creds any) (*database.Client, error)
+	NewEC2Client(_ context.Context, creds any) (*vm.Client, error)
 }
 
 type HTTPClient interface {

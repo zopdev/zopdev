@@ -11,6 +11,7 @@ const (
 	// Cloud Providers that are currently supported in zopdev.
 
 	GCP CloudProvider = "GCP"
+	AWS CloudProvider = "AWS"
 
 	// Resource Types that are currently supported in zopdev.
 	// TODO: add more resource types.
