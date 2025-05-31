@@ -2,9 +2,10 @@ package vm
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
-	"time"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/zopdev/zopdev/api/resources/models"
@@ -13,7 +14,8 @@ import (
 
 // EC2API defines the methods used from the AWS EC2 client for easier testing/mocking.
 type EC2API interface {
-	DescribeInstancesWithContext(ctx aws.Context, input *ec2.DescribeInstancesInput, opts ...request.Option) (*ec2.DescribeInstancesOutput, error)
+	DescribeInstancesWithContext(ctx aws.Context, input *ec2.DescribeInstancesInput,
+		opts ...request.Option) (*ec2.DescribeInstancesOutput, error)
 	StartInstancesWithContext(ctx aws.Context, input *ec2.StartInstancesInput, opts ...request.Option) (*ec2.StartInstancesOutput, error)
 	StopInstancesWithContext(ctx aws.Context, input *ec2.StopInstancesInput, opts ...request.Option) (*ec2.StopInstancesOutput, error)
 }
@@ -31,20 +33,24 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 	}
 
 	resultsCh := make(chan result, len(regions))
+
 	for _, region := range regions {
 		currentRegion := region // capture range variable
 		go func(region string) {
 			input := &ec2.DescribeInstancesInput{}
+
 			ec2Result, err := c.EC2.DescribeInstancesWithContext(ctx, input)
 			if err != nil {
 				resultsCh <- result{nil, err}
 				return
 			}
+
 			instances := make([]models.Instance, 0)
+
 			for _, reservation := range ec2Result.Reservations {
 				for _, inst := range reservation.Instances {
-
 					var instanceName string
+
 					for _, tag := range inst.Tags {
 						if *tag.Key == "Name" {
 							instanceName = awsStringValue(tag.Value)
@@ -71,14 +77,18 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 	}
 
 	allInstances := make([]models.Instance, 0)
+
 	var firstErr error
+
 	for i := 0; i < len(regions); i++ {
 		r := <-resultsCh
 		if r.err != nil && firstErr == nil {
 			firstErr = r.err
 		}
+
 		allInstances = append(allInstances, r.instances...)
 	}
+
 	close(resultsCh)
 
 	return allInstances, firstErr
@@ -89,6 +99,7 @@ func (c *Client) StartInstance(ctx *gofr.Context, instanceID string) error {
 		InstanceIds: []*string{&instanceID},
 	}
 	_, err := c.EC2.StartInstancesWithContext(ctx, input)
+
 	return err
 }
 
@@ -97,6 +108,7 @@ func (c *Client) StopInstance(ctx *gofr.Context, instanceID string) error {
 		InstanceIds: []*string{&instanceID},
 	}
 	_, err := c.EC2.StopInstancesWithContext(ctx, input)
+
 	return err
 }
 
@@ -104,5 +116,6 @@ func awsStringValue(s *string) string {
 	if s == nil {
 		return ""
 	}
+
 	return *s
 }

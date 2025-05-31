@@ -13,6 +13,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+var errFail = errors.New("fail")
+
 type mockEC2 struct {
 	DescribeInstancesResp map[string]*ec2.DescribeInstancesOutput
 	DescribeInstancesErr  error
@@ -22,22 +24,27 @@ type mockEC2 struct {
 	CurrentRegion         string
 }
 
-func (m *mockEC2) DescribeInstancesWithContext(ctx aws.Context, input *ec2.DescribeInstancesInput, opts ...request.Option) (*ec2.DescribeInstancesOutput, error) {
+func (m *mockEC2) DescribeInstancesWithContext(_ aws.Context, _ *ec2.DescribeInstancesInput,
+	_ ...request.Option) (*ec2.DescribeInstancesOutput, error) {
 	if m.DescribeInstancesErr != nil {
 		return nil, m.DescribeInstancesErr
 	}
+
 	resp, ok := m.DescribeInstancesResp[m.CurrentRegion]
 	if !ok {
 		return &ec2.DescribeInstancesOutput{}, nil
 	}
+
 	return resp, nil
 }
 
-func (m *mockEC2) StartInstancesWithContext(ctx aws.Context, input *ec2.StartInstancesInput, opts ...request.Option) (*ec2.StartInstancesOutput, error) {
+func (m *mockEC2) StartInstancesWithContext(_ aws.Context, _ *ec2.StartInstancesInput,
+	_ ...request.Option) (*ec2.StartInstancesOutput, error) {
 	return &ec2.StartInstancesOutput{}, m.StartErr
 }
 
-func (m *mockEC2) StopInstancesWithContext(ctx aws.Context, input *ec2.StopInstancesInput, opts ...request.Option) (*ec2.StopInstancesOutput, error) {
+func (m *mockEC2) StopInstancesWithContext(_ aws.Context, _ *ec2.StopInstancesInput,
+	_ ...request.Option) (*ec2.StopInstancesOutput, error) {
 	return &ec2.StopInstancesOutput{}, m.StopErr
 }
 
@@ -46,6 +53,7 @@ func Test_GetAllInstances_Success(t *testing.T) {
 	mock := &mockEC2{
 		DescribeInstancesResp: map[string]*ec2.DescribeInstancesOutput{},
 	}
+
 	for _, region := range regions {
 		mock.DescribeInstancesResp[region] = &ec2.DescribeInstancesOutput{
 			Reservations: []*ec2.Reservation{{
@@ -59,17 +67,21 @@ func Test_GetAllInstances_Success(t *testing.T) {
 			}},
 		}
 	}
+
 	mock.CurrentRegion = "us-east-1" // Not used in this test, but set for completeness
 	client := &Client{EC2: mock}
 	instances, err := client.GetAllInstances(nil)
 	require.NoError(t, err)
 	require.Len(t, instances, len(regions))
+
 	regionSet := make(map[string]struct{})
+
 	for _, inst := range instances {
 		assert.Equal(t, "test-instance", inst.Name)
 		assert.Equal(t, "EC2-t2.micro", inst.Type)
 		assert.Equal(t, "i-123", inst.UID)
 		assert.Equal(t, "running", inst.Status)
+
 		regionSet[inst.Region] = struct{}{}
 	}
 	// Ensure all regions are present in the results
@@ -80,12 +92,12 @@ func Test_GetAllInstances_Success(t *testing.T) {
 }
 
 func Test_GetAllInstances_Error(t *testing.T) {
-	mock := &mockEC2{DescribeInstancesErr: errors.New("fail"), Region: "us-east-1"}
+	mock := &mockEC2{DescribeInstancesErr: errFail, Region: "us-east-1"}
 	mock.CurrentRegion = "us-east-1"
 	client := &Client{EC2: mock}
 	instances, err := client.GetAllInstances(nil)
-	assert.Error(t, err)
-	assert.Empty(t, instances)
+	require.Error(t, err)
+	require.Empty(t, instances)
 }
 
 func Test_GetAllInstances_NoReservations(t *testing.T) {
@@ -99,7 +111,7 @@ func Test_GetAllInstances_NoReservations(t *testing.T) {
 	client := &Client{EC2: mock}
 	instances, err := client.GetAllInstances(nil)
 	require.NoError(t, err)
-	assert.Empty(t, instances)
+	require.Empty(t, instances)
 }
 
 func Test_StartInstance(t *testing.T) {
@@ -109,18 +121,19 @@ func Test_StartInstance(t *testing.T) {
 		expectOK bool
 	}{
 		{"Success", nil, true},
-		{"Error", errors.New("fail"), false},
+		{"Error", errFail, false},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mock := &mockEC2{StartErr: c.err}
 			mock.CurrentRegion = "us-east-1"
 			client := &Client{EC2: mock}
+
 			err := client.StartInstance(nil, "i-123")
 			if c.expectOK {
 				assert.NoError(t, err)
 			} else {
-				assert.Error(t, err)
+				require.Error(t, err)
 			}
 		})
 	}
@@ -133,18 +146,19 @@ func Test_StopInstance(t *testing.T) {
 		expectOK bool
 	}{
 		{"Success", nil, true},
-		{"Error", errors.New("fail"), false},
+		{"Error", errFail, false},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			mock := &mockEC2{StopErr: c.err}
 			mock.CurrentRegion = "us-east-1"
 			client := &Client{EC2: mock}
+
 			err := client.StopInstance(nil, "i-123")
 			if c.expectOK {
 				assert.NoError(t, err)
 			} else {
-				assert.Error(t, err)
+				require.Error(t, err)
 			}
 		})
 	}
@@ -152,7 +166,8 @@ func Test_StopInstance(t *testing.T) {
 
 func Test_awsStringValue(t *testing.T) {
 	var nilStr *string
-	assert.Equal(t, "", awsStringValue(nilStr))
+
+	require.Empty(t, awsStringValue(nilStr))
 
 	val := "hello"
 	assert.Equal(t, "hello", awsStringValue(&val))

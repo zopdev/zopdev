@@ -16,38 +16,48 @@ type mockRDS struct {
 	shouldErr   bool
 }
 
-func (m *mockRDS) DescribeDBInstancesWithContext(_ aws.Context, _ *rds.DescribeDBInstancesInput, _ ...request.Option) (*rds.DescribeDBInstancesOutput, error) {
+func (m *mockRDS) DescribeDBInstancesWithContext(_ aws.Context, _ *rds.DescribeDBInstancesInput,
+	_ ...request.Option) (*rds.DescribeDBInstancesOutput, error) {
 	if m.shouldErr {
 		return nil, assert.AnError
 	}
+
 	return &rds.DescribeDBInstancesOutput{DBInstances: m.dbInstances}, nil
 }
 
-func (m *mockRDS) StartDBClusterWithContext(_ aws.Context, _ *rds.StartDBClusterInput, _ ...request.Option) (*rds.StartDBClusterOutput, error) {
+func (m *mockRDS) StartDBClusterWithContext(_ aws.Context, _ *rds.StartDBClusterInput,
+	_ ...request.Option) (*rds.StartDBClusterOutput, error) {
 	if m.shouldErr {
 		return nil, assert.AnError
 	}
+
 	return &rds.StartDBClusterOutput{}, nil
 }
 
-func (m *mockRDS) StartDBInstanceWithContext(_ aws.Context, _ *rds.StartDBInstanceInput, _ ...request.Option) (*rds.StartDBInstanceOutput, error) {
+func (m *mockRDS) StartDBInstanceWithContext(_ aws.Context, _ *rds.StartDBInstanceInput,
+	_ ...request.Option) (*rds.StartDBInstanceOutput, error) {
 	if m.shouldErr {
 		return nil, assert.AnError
 	}
+
 	return &rds.StartDBInstanceOutput{}, nil
 }
 
-func (m *mockRDS) StopDBClusterWithContext(_ aws.Context, _ *rds.StopDBClusterInput, _ ...request.Option) (*rds.StopDBClusterOutput, error) {
+func (m *mockRDS) StopDBClusterWithContext(_ aws.Context, _ *rds.StopDBClusterInput,
+	_ ...request.Option) (*rds.StopDBClusterOutput, error) {
 	if m.shouldErr {
 		return nil, assert.AnError
 	}
+
 	return &rds.StopDBClusterOutput{}, nil
 }
 
-func (m *mockRDS) StopDBInstanceWithContext(_ aws.Context, _ *rds.StopDBInstanceInput, _ ...request.Option) (*rds.StopDBInstanceOutput, error) {
+func (m *mockRDS) StopDBInstanceWithContext(_ aws.Context, _ *rds.StopDBInstanceInput,
+	_ ...request.Option) (*rds.StopDBInstanceOutput, error) {
 	if m.shouldErr {
 		return nil, assert.AnError
 	}
+
 	return &rds.StopDBInstanceOutput{}, nil
 }
 
@@ -78,8 +88,8 @@ func Test_GetAllInstances_Error(t *testing.T) {
 	mock := &mockRDS{shouldErr: true}
 	client := &Client{RDS: mock}
 	instances, err := client.GetAllInstances(nil)
-	assert.Error(t, err)
-	assert.Nil(t, instances)
+	require.Error(t, err)
+	require.Nil(t, instances)
 }
 
 func Test_StartInstance(t *testing.T) {
@@ -98,9 +108,10 @@ func Test_StartInstance(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			mock := &mockRDS{shouldErr: c.shouldErr}
 			client := &Client{RDS: mock}
+
 			err := client.StartInstance(nil, c.engine, c.clusterID, "test-instance")
 			if c.shouldErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}
@@ -124,9 +135,10 @@ func Test_StopInstance(t *testing.T) {
 		t.Run(c.name, func(t *testing.T) {
 			mock := &mockRDS{shouldErr: c.shouldErr}
 			client := &Client{RDS: mock}
+
 			err := client.StopInstance(nil, c.engine, c.clusterID, "test-instance")
 			if c.shouldErr {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
 				assert.NoError(t, err)
 			}

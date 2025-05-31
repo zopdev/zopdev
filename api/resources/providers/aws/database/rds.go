@@ -1,9 +1,10 @@
 package database
 
 import (
-	"github.com/aws/aws-sdk-go/aws/request"
 	"strings"
 	"time"
+
+	"github.com/aws/aws-sdk-go/aws/request"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/rds"
@@ -13,7 +14,8 @@ import (
 
 // RDSAPI defines the methods used from the AWS RDS client for easier testing/mocking.
 type RDSAPI interface {
-	DescribeDBInstancesWithContext(ctx aws.Context, input *rds.DescribeDBInstancesInput, opts ...request.Option) (*rds.DescribeDBInstancesOutput, error)
+	DescribeDBInstancesWithContext(ctx aws.Context, input *rds.DescribeDBInstancesInput,
+		opts ...request.Option) (*rds.DescribeDBInstancesOutput, error)
 	StartDBClusterWithContext(ctx aws.Context, input *rds.StartDBClusterInput, opts ...request.Option) (*rds.StartDBClusterOutput, error)
 	StartDBInstanceWithContext(ctx aws.Context, input *rds.StartDBInstanceInput, opts ...request.Option) (*rds.StartDBInstanceOutput, error)
 	StopDBClusterWithContext(ctx aws.Context, input *rds.StopDBClusterInput, opts ...request.Option) (*rds.StopDBClusterOutput, error)
@@ -26,16 +28,20 @@ type Client struct {
 
 func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 	input := &rds.DescribeDBInstancesInput{}
+
 	result, err := c.RDS.DescribeDBInstancesWithContext(ctx, input)
 	if err != nil {
 		return nil, err
 	}
 
 	instances := make([]models.Instance, 0, len(result.DBInstances))
+
 	for _, db := range result.DBInstances {
 		engine := awsStringValue(db.Engine)
 		clusterID := awsStringValue(db.DBClusterIdentifier)
+
 		var typ string
+
 		switch {
 		case strings.Contains(strings.ToLower(engine), "aurora") && clusterID != "":
 			typ = "RDS-AURORA"
@@ -70,6 +76,7 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 		}
 		instances = append(instances, instance)
 	}
+
 	return instances, nil
 }
 
@@ -81,12 +88,15 @@ func (c *Client) StartInstance(ctx *gofr.Context, engine, clusterID, dbInstanceI
 			DBClusterIdentifier: aws.String(clusterID),
 		}
 		_, err := c.RDS.StartDBClusterWithContext(ctx, input)
+
 		return err
 	}
+
 	input := &rds.StartDBInstanceInput{
 		DBInstanceIdentifier: aws.String(dbInstanceIdentifier),
 	}
 	_, err := c.RDS.StartDBInstanceWithContext(ctx, input)
+
 	return err
 }
 
@@ -98,12 +108,15 @@ func (c *Client) StopInstance(ctx *gofr.Context, engine, clusterID, dbInstanceId
 			DBClusterIdentifier: aws.String(clusterID),
 		}
 		_, err := c.RDS.StopDBClusterWithContext(ctx, input)
+
 		return err
 	}
+
 	input := &rds.StopDBInstanceInput{
 		DBInstanceIdentifier: aws.String(dbInstanceIdentifier),
 	}
 	_, err := c.RDS.StopDBInstanceWithContext(ctx, input)
+
 	return err
 }
 
@@ -111,5 +124,6 @@ func awsStringValue(s *string) string {
 	if s == nil {
 		return ""
 	}
+
 	return *s
 }

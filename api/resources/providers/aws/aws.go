@@ -84,12 +84,14 @@ func (c *Client) NewEC2Client(_ context.Context, creds any) (*vm.Client, error) 
 	if err != nil {
 		return nil, ErrInitializingClient
 	}
+
 	return &vm.Client{EC2: ec2.New(sess)}, nil
 }
 
 // newSession creates a new AWS session with the stored config and credentials.
-func (c *Client) newSession(accessKey, secretKey string) (*session.Session, error) {
+func (*Client) newSession(accessKey, secretKey string) (*session.Session, error) {
 	creds := credentials.NewStaticCredentials(accessKey, secretKey, "")
+
 	sess, err := session.NewSession(&aws.Config{
 		Credentials: creds,
 		Region:      aws.String("us-east-1"), // Default region, can be overridden
@@ -97,5 +99,6 @@ func (c *Client) newSession(accessKey, secretKey string) (*session.Session, erro
 	if err != nil {
 		return nil, ErrInvalidCredentials
 	}
+
 	return sess, nil
 }
