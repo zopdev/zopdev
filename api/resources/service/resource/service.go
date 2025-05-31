@@ -26,6 +26,19 @@ func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]
 	return res, nil
 }
 
+func (s *Service) GetByID(ctx *gofr.Context, id int64) (*models.Resource, error) {
+	res, err := s.store.GetResourceByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if res == nil {
+		return nil, gofrHttp.ErrorEntityNotFound{Name: "resource"}
+	}
+
+	return res, nil
+}
+
 func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) error {
 	res, err := s.store.GetResourceByID(ctx, resDetails.ID)
 	if err != nil {

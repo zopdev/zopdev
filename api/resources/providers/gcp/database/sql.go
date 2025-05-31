@@ -14,8 +14,8 @@ import (
 const (
 	// RUNNING instance state for zopdev.
 	RUNNING = "RUNNING"
-	// SUSPENDED instance state for zopdev.
-	SUSPENDED = "SUSPENDED"
+	// STOPPED instance state for zopdev.
+	STOPPED = "STOPPED"
 
 	// The following constants are to identify and change the state of the instance.
 
@@ -56,9 +56,9 @@ func getState(state string) string {
 	case ALWAYS:
 		return RUNNING
 	case NEVER:
-		return SUSPENDED
+		return STOPPED
 	default:
-		return SUSPENDED
+		return STOPPED
 	}
 }
 

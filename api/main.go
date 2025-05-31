@@ -33,6 +33,10 @@ import (
 	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	resourceService "github.com/zopdev/zopdev/api/resources/service/resource"
 	resourceStore "github.com/zopdev/zopdev/api/resources/store/resource"
+
+	resGroupHandler "github.com/zopdev/zopdev/api/resources/handler/resourcegroup"
+	resGroupService "github.com/zopdev/zopdev/api/resources/service/resourcegroup"
+	resGroupStore "github.com/zopdev/zopdev/api/resources/store/resourcegroup"
 )
 
 func main() {
@@ -121,4 +125,17 @@ func registerCloudResourceRoutes(app *gofr.App) {
 	app.GET("/cloud-account/{id}/resources", resHld.GetResources)
 	app.POST("/cloud-account/{id}/resources/state", resHld.ChangeState)
 	app.POST("/cloud-account/{id}/resources/sync", resHld.SyncResources)
+
+	rgStr := resGroupStore.New()
+	rgSvc := resGroupService.New(rgStr, resSvc)
+	rgHld := resGroupHandler.New(rgSvc)
+
+	app.GET("/cloud-account/{id}/resource-groups", rgHld.GetAllResourceGroups)
+	app.GET("/cloud-account/{id}/resource-groups/{rgID}", rgHld.GetResourceGroup)
+	app.POST("/cloud-account/{id}/resource-groups", rgHld.CreateResourceGroup)
+	app.PATCH("/cloud-account/{id}/resource-groups", rgHld.UpdateResourceGroup)
+	app.DELETE("/cloud-account/{id}/resource-groups/{rgID}", rgHld.DeleteResourceGroup)
+
+	app.POST("/resource-groups/{rgID}/resources/{resourceID}", rgHld.AddResourceToGroup)
+	app.DELETE("/resource-groups/{rgID}/resources/{resourceID}", rgHld.RemoveResourceFromGroup)
 }
