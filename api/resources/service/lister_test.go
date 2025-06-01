@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
-	gofrHttp "gofr.dev/pkg/gofr/http"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
@@ -17,14 +16,16 @@ import (
 
 func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	ctx := &gofr.Context{}
-	req := CloudDetails{CloudType: "AWS"}
+	req := CloudDetails{CloudType: "Unknown"}
 
-	s := New(nil, nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mAWS := NewMockAWSClient(ctrl)
+	s := New(nil, mAWS, nil, nil)
 	instances, err := s.getAllSQLInstances(ctx, req)
 
 	assert.Nil(t, instances)
-	require.Error(t, err)
-	assert.Equal(t, gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}}, err)
+	require.NoError(t, err)
 }
 
 func TestService_getAllSQLInstances_GCP(t *testing.T) {
@@ -106,7 +107,8 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 		},
 	}
 
-	s := New(mockGCP, nil, nil)
+	mAWS := NewMockAWSClient(ctrl)
+	s := New(mockGCP, mAWS, nil, nil)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {

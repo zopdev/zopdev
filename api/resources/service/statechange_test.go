@@ -2,8 +2,9 @@ package service
 
 import (
 	"context"
-	gofrHttp "gofr.dev/pkg/gofr/http"
 	"testing"
+
+	gofrHttp "gofr.dev/pkg/gofr/http"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -24,7 +25,7 @@ func TestService_changeSQLState(t *testing.T) {
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockStopper := &mockSQLClient{}
-	s := New(mGCP, nil, nil)
+	s := New(mGCP, nil, nil, nil)
 
 	testCases := []struct {
 		name      string
@@ -76,7 +77,7 @@ func TestService_changeSQLState_Errors(t *testing.T) {
 		Credentials: map[string]any{"project_id": "test-project", "region": "us-central1"}}
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
 	mockStopper := &mockSQLClient{}
-	s := New(mGCP, nil, nil)
+	s := New(mGCP, nil, nil, nil)
 
 	testCases := []struct {
 		name      string
