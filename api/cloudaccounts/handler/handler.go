@@ -219,10 +219,13 @@ func (h *Handler) GetStackStatus(ctx *gofr.Context) (interface{}, error) {
 	if integrationID == "" {
 		return nil, http.ErrorMissingParam{Params: []string{"integrationId"}}
 	}
+
 	stackName := fmt.Sprintf("Zopdev-%s", integrationID)
+
 	status, err := h.service.GetStackStatus(ctx, stackName)
 	if err != nil {
 		return nil, err
 	}
+
 	return map[string]string{"status": status}, nil
 }

@@ -23,6 +23,7 @@ var (
 	errFailedToCreateIAMUser            = errors.New("failed to create IAM user")
 	errFailedToAddUserToGroup           = errors.New("failed to add user to group")
 	errFailedToCreateAccessKeyForUser   = errors.New("failed to create access key for user")
+	errStackDoesNotExist                = errors.New("stack does not exist")
 )
 
 // createAdminUserWithGroup creates an IAM user and group with admin access.
@@ -140,25 +141,27 @@ func assumeRole(roleArn, externalID, sessionName string) (*sts.AssumeRoleOutput,
 }
 
 // GetStackStatus fetches the status of a CloudFormation stack.
-func (s *Service) GetStackStatus(ctx *gofr.Context, stackName string) (string, error) {
+func (*Service) GetStackStatus(ctx *gofr.Context, stackName string) (string, error) {
 	cfg, err := config.LoadDefaultConfig(ctx)
 	if err != nil {
 		return "", fmt.Errorf("failed to load AWS config: %w", err)
 	}
 
 	cf := cloudformation.NewFromConfig(cfg)
+
 	out, err := cf.DescribeStacks(ctx, &cloudformation.DescribeStacksInput{
 		StackName: &stackName,
 	})
 	if err != nil {
 		if strings.Contains(err.Error(), "does not exist") {
-			return "STACK_DOES_NOT_EXIST", nil
+			return "", errStackDoesNotExist
 		}
+
 		return "", fmt.Errorf("failed to describe stack: %w", err)
 	}
 
 	if len(out.Stacks) == 0 {
-		return "STACK_DOES_NOT_EXIST", nil
+		return "", errStackDoesNotExist
 	}
 
 	return string(out.Stacks[0].StackStatus), nil

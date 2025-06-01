@@ -280,7 +280,7 @@ func (s *Service) FetchCredentials(ctx *gofr.Context, cloudAccountID int64) (int
 
 func (s *Service) GetCloudAccountConnectionInfo(_ *gofr.Context, cloudAccountType string) (AWSIntegrationINFO, error) {
 	// Validate cloudAccountType
-	if strings.ToUpper(cloudAccountType) != providerAWS {
+	if !strings.EqualFold(cloudAccountType, providerAWS) {
 		return AWSIntegrationINFO{}, errUnsupportedProvider
 	}
 

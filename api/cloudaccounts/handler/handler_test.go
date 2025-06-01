@@ -221,6 +221,7 @@ func TestHandler_GetStackStatus(t *testing.T) {
 					"integrationId": tc.integrationID,
 				})
 			}
+
 			ctx := &gofr.Context{
 				Context: context.Background(),
 				Request: http.NewRequest(req),
@@ -233,6 +234,7 @@ func TestHandler_GetStackStatus(t *testing.T) {
 				require.Equal(t, tc.expectedError, err)
 			} else {
 				require.NoError(t, err)
+
 				statusMap, ok := resp.(map[string]string)
 				require.True(t, ok, "response should be a map[string]string")
 				require.Equal(t, tc.expectedStatus, statusMap["status"])
@@ -306,6 +308,7 @@ func TestHandler_GetCloudAccountConnectionInfo(t *testing.T) {
 					"provider": tc.provider,
 				})
 			}
+
 			ctx := &gofr.Context{
 				Context: context.Background(),
 				Request: http.NewRequest(req),
@@ -338,8 +341,9 @@ func TestHandler_CreateCloudAccountConnection(t *testing.T) {
 		expectedError  error
 	}{
 		{
-			name:        "success",
-			requestBody: `{"roleArn": "arn:aws:iam::123456789012:role/test-role", "integrationId": "test-id", "accountId": "123456789012", "cloudAccountName": "Test Account"}`,
+			name: "success",
+			requestBody: `{"roleArn": "arn:aws:iam::123456789012:role/test-role", "integrationId": "test-id", "accountId":
+"123456789012", "cloudAccountName": "Test Account"}`,
 			mockBehavior: func() {
 				mockService.EXPECT().
 					CreateCloudAccountConnection(gomock.Any(), gomock.Any()).
@@ -363,8 +367,9 @@ func TestHandler_CreateCloudAccountConnection(t *testing.T) {
 			expectedError:  errMissingIntegrationOrAccountID,
 		},
 		{
-			name:        "service error",
-			requestBody: `{"roleArn": "arn:aws:iam::123456789012:role/test-role", "integrationId": "test-id", "accountId": "123456789012", "cloudAccountName": "Test Account"}`,
+			name: "service error",
+			requestBody: `{"roleArn": "arn:aws:iam::123456789012:role/test-role", "integrationId": "test-id", "accountId": 
+"123456789012", "cloudAccountName": "Test Account"}`,
 			mockBehavior: func() {
 				mockService.EXPECT().
 					CreateCloudAccountConnection(gomock.Any(), gomock.Any()).
