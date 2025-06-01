@@ -57,6 +57,11 @@ func (s *Service) AddCloudAccount(ctx *gofr.Context, cloudAccount *store.CloudAc
 		if err != nil {
 			return nil, err
 		}
+	case oci:
+		err := fetchOCIProviderDetails(ctx, cloudAccount)
+		if err != nil {
+			return nil, err
+		}
 	default:
 		return nil, http.ErrorInvalidParam{Params: []string{"provider"}}
 	}
@@ -156,6 +161,31 @@ func getAWSAccountID(awsCred awsCredentials) (string, error) {
 	return *resp.Account, nil
 }
 
+// fetchOCIProviderDetails retrieves and assigns OCI details for a cloud account.
+func fetchOCIProviderDetails(ctx *gofr.Context, cloudAccount *store.CloudAccount) error {
+	var ociCred ociCredentials
+
+	body, err := json.Marshal(cloudAccount.Credentials)
+	if err != nil {
+		ctx.Error(err.Error())
+		return http.ErrorInvalidParam{Params: []string{"credentials"}}
+	}
+
+	err = json.Unmarshal(body, &ociCred)
+	if err != nil {
+		return err
+	}
+
+	if ociCred.TenancyOCID == "" || ociCred.UserOCID == "" {
+		return http.ErrorInvalidParam{Params: []string{"credentials"}}
+	}
+
+	// For OCI, we'll use the tenancy OCID as the provider ID since it's unique
+	cloudAccount.ProviderID = ociCred.TenancyOCID
+
+	return nil
+}
+
 func (s *Service) FetchDeploymentSpace(ctx *gofr.Context, cloudAccountID int64) (interface{}, error) {
 	cloudAccount, err := s.store.GetCloudAccountByID(ctx, cloudAccountID)
 	if err != nil {
@@ -219,6 +249,11 @@ func (*Service) FetchDeploymentSpaceOptions(_ *gofr.Context, id int64) ([]Deploy
 	options := []DeploymentSpaceOptions{
 		{
 			Name: "gke",
+			Path: fmt.Sprintf("/cloud-accounts/%v/deployment-space/clusters", id),
+			Type: "type",
+		},
+		{
+			Name: "oke",
 			Path: fmt.Sprintf("/cloud-accounts/%v/deployment-space/clusters", id),
 			Type: "type",
 		},

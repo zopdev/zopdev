@@ -13,7 +13,7 @@ import (
 	"google.golang.org/api/option"
 	"google.golang.org/api/sqladmin/v1"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 func getServer(t *testing.T, resp any, isError bool) *httptest.Server {
@@ -45,9 +45,9 @@ func Test_GetAllInstances(t *testing.T) {
 			{Name: "test-instance3", Project: "test-project", Settings: &sqladmin.Settings{ActivationPolicy: "ON_DEMAND"}},
 		}}
 	result := []models.Instance{
-		{Name: "test-instance1", Type: "SQL", ProviderID: "test-project", Status: RUNNING},
-		{Name: "test-instance2", Type: "SQL", ProviderID: "test-project", Status: SUSPENDED},
-		{Name: "test-instance3", Type: "SQL", ProviderID: "test-project", Status: SUSPENDED},
+		{Name: "test-instance1", UID: "test-project/test-instance1", Type: "SQL", Status: RUNNING},
+		{Name: "test-instance2", UID: "test-project/test-instance2", Type: "SQL", Status: SUSPENDED},
+		{Name: "test-instance3", UID: "test-project/test-instance3", Type: "SQL", Status: SUSPENDED},
 	}
 
 	srv := getServer(t, resp, false)
@@ -110,6 +110,7 @@ func TestClient_StartInstance(t *testing.T) {
 
 	err = c.StartInstance(nil, "test-project", "test-instance")
 	require.Error(t, err)
+	assert.Equal(t, &InternalServerError{}, err)
 }
 
 func TestClient_StopInstance(t *testing.T) {
@@ -136,4 +137,40 @@ func TestClient_StopInstance(t *testing.T) {
 
 	err = c.StopInstance(nil, "test-project", "test-instance")
 	require.Error(t, err)
+}
+
+func Test_getError(t *testing.T) {
+	err := &googleapi.Error{
+		Code:    http.StatusConflict,
+		Message: "Conflict error",
+	}
+
+	errRes := getError(err)
+	expected := &ErrConflict{
+		Message: "Conflict error",
+	}
+
+	assert.Equal(t, expected, errRes)
+
+	err = &googleapi.Error{
+		Code:    http.StatusInternalServerError,
+		Message: "Internal server error",
+	}
+
+	errRes = getError(err)
+	expected2 := &InternalServerError{}
+
+	assert.Equal(t, expected2, errRes)
+
+	errRes = getError(nil)
+	assert.NoError(t, errRes)
+}
+
+func Test_Errors(t *testing.T) {
+	e := &ErrConflict{Message: "Conflict error"}
+	assert.Equal(t, "Conflict error", e.Error())
+	assert.Equal(t, http.StatusConflict, e.StatusCode())
+
+	e2 := &InternalServerError{}
+	assert.Equal(t, "Internal server error!", e2.Error())
 }

@@ -5,17 +5,18 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/stretchr/testify/require"
+	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 	"github.com/zopdev/zopdev/api/resources/service"
 )
 
@@ -36,6 +37,7 @@ func TestHandler_GetResources(t *testing.T) {
 
 	testCases := []struct {
 		name         string
+		id           string
 		typeQuery    string
 		expectedErr  error
 		expectedResp any
@@ -43,40 +45,45 @@ func TestHandler_GetResources(t *testing.T) {
 	}{
 		{
 			name:         "valid request",
-			typeQuery:    "cloudAccId=1&type=sql",
+			typeQuery:    "type=sql",
+			id:           "1",
 			expectedResp: mockResp,
 			mockCall: func() {
-				mockSvc.EXPECT().GetResources(ctx, int64(1), []string{"sql"}).
+				mockSvc.EXPECT().GetAll(ctx, int64(1), []string{"sql"}).
 					Return(mockResp, nil)
 			},
 		},
 		{
 			name:         "multiple resource types",
-			typeQuery:    "cloudAccId=1&type=sql&type=redis",
+			typeQuery:    "type=sql&type=redis",
+			id:           "1",
 			expectedResp: mockResp,
 			mockCall: func() {
-				mockSvc.EXPECT().GetResources(ctx, int64(1), []string{"sql", "redis"}).
+				mockSvc.EXPECT().GetAll(ctx, int64(1), []string{"sql", "redis"}).
 					Return(mockResp, nil)
 			},
 		},
 		{
 			name:        "error in service",
-			typeQuery:   "cloudAccId=1&type=sql",
+			typeQuery:   "type=sql",
+			id:          "1",
 			expectedErr: errMock,
 			mockCall: func() {
-				mockSvc.EXPECT().GetResources(ctx, int64(1), []string{"sql"}).
+				mockSvc.EXPECT().GetAll(ctx, int64(1), []string{"sql"}).
 					Return(nil, errMock)
 			},
 		},
 		{
 			name:        "invalid id",
-			typeQuery:   "cloudAccId=a&type=sql",
+			typeQuery:   "type=sql",
+			id:          "a",
 			expectedErr: gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
 			mockCall:    func() {},
 		},
 		{
 			name:        "missing id",
 			typeQuery:   "type=sql",
+			id:          "",
 			expectedErr: gofrHttp.ErrorMissingParam{Params: []string{"id"}},
 			mockCall:    func() {},
 		},
@@ -87,7 +94,8 @@ func TestHandler_GetResources(t *testing.T) {
 			tc.mockCall()
 
 			req := httptest.NewRequest(http.MethodGet,
-				fmt.Sprintf(`/cloud-account/resources?%s`, tc.typeQuery), http.NoBody)
+				fmt.Sprintf(`/cloud-account/{id}/resources?%s`, tc.typeQuery), http.NoBody)
+			req = mux.SetURLVars(req, map[string]string{"id": tc.id})
 			req.Header.Set("content-type", "application/json")
 
 			ctx.Request = gofrHttp.NewRequest(req)
@@ -112,31 +120,48 @@ func TestHandler_ChangeState(t *testing.T) {
 	h := New(mockSvc)
 
 	testCases := []struct {
-		name     string
-		reqBody  string
-		expErr   error
-		mockCall func()
+		name      string
+		pathParam string
+		reqBody   string
+		expErr    error
+		mockCall  func()
 	}{
 		{
-			name:    "Success",
-			reqBody: `{"cloudAccID": 123, "name": "sql-instance-1", "type": "sql", "state": "START"}`,
+			name:      "Success",
+			pathParam: "123",
+			reqBody:   `{"name": "sql-instance-1", "type": "sql", "state": "START"}`,
 			mockCall: func() {
 				mockSvc.EXPECT().ChangeState(ctx, resDetails).Return(nil)
 			},
 		},
 		{
-			name:    "Error from service",
-			reqBody: `{"cloudAccID": 123, "name": "sql-instance-1", "type": "sql", "state" : "START"}`,
-			expErr:  errMock,
+			name:      "Error from service",
+			pathParam: "123",
+			reqBody:   `{"name": "sql-instance-1", "type": "sql", "state" : "START"}`,
+			expErr:    errMock,
 			mockCall: func() {
 				mockSvc.EXPECT().ChangeState(ctx, resDetails).Return(errMock)
 			},
 		},
 		{
 			name:     "Invalid request body",
-			reqBody:  `"cloudAccID": 123, "name": "sql-instance-1"}`,
+			reqBody:  `""name": "sql-instance-1"}`,
 			expErr:   gofrHttp.ErrorInvalidParam{Params: []string{"request body"}},
 			mockCall: func() {},
+		},
+		{
+			name:      "Invalid id",
+			pathParam: "a",
+			reqBody:   `{"name": "sql-instance-1", "type": "sql", "state": "START"}`,
+			expErr:    gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
+			mockCall:  func() {},
+		},
+		{
+			name:      "Missing id",
+			pathParam: "",
+			reqBody:   `{"name": "sql-instance-1", "type": "sql", "state": "START"}`,
+			expErr:    gofrHttp.ErrorMissingParam{Params: []string{"id"}},
+			mockCall:  func() {},
 		},
 	}
 
@@ -146,6 +171,7 @@ func TestHandler_ChangeState(t *testing.T) {
 
 			req := httptest.NewRequest(http.MethodPost, "/cloud-account/1/resources/start",
 				bytes.NewBufferString(tc.reqBody))
+			req = mux.SetURLVars(req, map[string]string{"id": tc.pathParam})
 			req.Header.Set("content-type", "application/json")
 
 			ctx.Request = gofrHttp.NewRequest(req)
@@ -158,6 +184,73 @@ func TestHandler_ChangeState(t *testing.T) {
 				require.NoError(t, err)
 				assert.Equal(t, resDetails, resp)
 			}
+		})
+	}
+}
+
+func TestHandler_SyncResources(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mockSvc := NewMockService(ctrl)
+	ctx := &gofr.Context{
+		Context: context.Background(),
+	}
+	mockResp := []models.Instance{
+		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
+	}
+	h := New(mockSvc)
+
+	testCases := []struct {
+		name        string
+		pathParam   string
+		expectedErr error
+		expectedRes any
+		mockCall    func()
+	}{
+		{
+			name:        "Success",
+			pathParam:   "123",
+			expectedRes: mockResp,
+			mockCall: func() {
+				mockSvc.EXPECT().SyncResources(ctx, int64(123)).Return(mockResp, nil)
+			},
+		},
+		{
+			name:        "Service error",
+			pathParam:   "123",
+			expectedErr: errMock,
+			mockCall: func() {
+				mockSvc.EXPECT().SyncResources(ctx, int64(123)).Return(nil, errMock)
+			},
+		},
+		{
+			name:        "Invalid id",
+			pathParam:   "a",
+			expectedErr: gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
+			mockCall:    func() {},
+		},
+		{
+			name:        "Missing id",
+			pathParam:   "",
+			expectedErr: gofrHttp.ErrorMissingParam{Params: []string{"id"}},
+			mockCall:    func() {},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			tc.mockCall()
+
+			req := httptest.NewRequest(http.MethodPost, "/cloud-account/{id}/resources/sync", http.NoBody)
+			req = mux.SetURLVars(req, map[string]string{"id": tc.pathParam})
+			req.Header.Set("content-type", "application/json")
+			ctx.Request = gofrHttp.NewRequest(req)
+
+			resp, err := h.SyncResources(ctx)
+
+			assert.Equal(t, tc.expectedErr, err)
+			assert.Equal(t, tc.expectedRes, resp)
 		})
 	}
 }

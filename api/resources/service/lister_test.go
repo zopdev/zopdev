@@ -8,23 +8,24 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
-	gofrHttp "gofr.dev/pkg/gofr/http"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	ctx := &gofr.Context{}
-	req := CloudDetails{CloudType: "AWS"}
+	req := CloudDetails{CloudType: "Unknown"}
 
-	s := New(nil, nil)
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+	mAWS := NewMockAWSClient(ctrl)
+	s := New(nil, mAWS, nil, nil)
 	instances, err := s.getAllSQLInstances(ctx, req)
 
 	assert.Nil(t, instances)
-	require.Error(t, err)
-	assert.Equal(t, gofrHttp.ErrorInvalidParam{Params: []string{"req.CloudType"}}, err)
+	require.NoError(t, err)
 }
 
 func TestService_getAllSQLInstances_GCP(t *testing.T) {
@@ -106,7 +107,8 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 		},
 	}
 
-	s := New(mockGCP, nil)
+	mAWS := NewMockAWSClient(ctrl)
+	s := New(mockGCP, mAWS, nil, nil)
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -118,4 +120,21 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 			assert.Equal(t, tc.expErr, err)
 		})
 	}
+}
+
+func TestService_bSearch(t *testing.T) {
+	res := []models.Instance{
+		{ID: 1, UID: "zopdev-test/mysql01"},
+		{ID: 2, UID: "zopdev-test/mysql02"},
+		{ID: 3, UID: "zopdev-test/pgs1l01"},
+	}
+
+	idx, found := bSearch(res, "zopdev-test/mysql02")
+
+	assert.True(t, found)
+	assert.Equal(t, 1, idx)
+
+	idx, found = bSearch(res, "zopdev-test/mysql03")
+	assert.False(t, found)
+	assert.Equal(t, -1, idx)
 }

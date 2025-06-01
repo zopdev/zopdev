@@ -3,7 +3,6 @@ package monitoring
 import (
 	"context"
 	"errors"
-	"google.golang.org/genproto/googleapis/api/distribution"
 	"net"
 	"testing"
 	"time"
@@ -14,10 +13,11 @@ import (
 	"github.com/stretchr/testify/require"
 	"gofr.dev/pkg/gofr"
 	"google.golang.org/api/option"
+	"google.golang.org/genproto/googleapis/api/distribution"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 var errMock = errors.New("error")
