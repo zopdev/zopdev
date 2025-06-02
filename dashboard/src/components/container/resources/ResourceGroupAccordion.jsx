@@ -1,5 +1,9 @@
 import React, { useState } from 'react';
-import { ChevronRightIcon, PencilSquareIcon, TrashIcon } from '@heroicons/react/20/solid';
+import {
+  ChevronRightIcon,
+  PencilSquareIcon,
+  //  TrashIcon
+} from '@heroicons/react/20/solid';
 import IconButton from '@/components/atom/Button/IconButton';
 import FullScreenOverlay from '@/components/atom/FullScreenOverlay';
 import ResourceGroupManager from '@/components/container/resources/AddResourceGroup';
@@ -76,13 +80,13 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], resource
                       renderContent={ResourceGroupManager}
                       renderContentProps={{ resources, initialData: group }}
                     />
-                    <IconButton
+                    {/* <IconButton
                       onClick={() => {
-                        /* TODO: Add delete logic */
+                     
                       }}
                     >
                       <TrashIcon className="size-4 text-red-400" />
-                    </IconButton>
+                    </IconButton> */}
                   </div>
                 </div>
               </div>
