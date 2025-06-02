@@ -1,10 +1,12 @@
 package resourcegroup
 
 import (
-	"github.com/zopdev/zopdev/api/resources/models"
+	"strconv"
+
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
-	"strconv"
+
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 type Handler struct {
@@ -17,7 +19,7 @@ func New(svc Service) *Handler {
 
 func (h *Handler) GetAllResourceGroups(ctx *gofr.Context) (any, error) {
 	id := ctx.PathParam("id")
-	if id != "" {
+	if id == "" {
 		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
 	}
 
@@ -74,7 +76,7 @@ func (h *Handler) CreateResourceGroup(ctx *gofr.Context) (any, error) {
 		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
 	}
 
-	var rg models.ResourceGroup
+	var rg models.RGCreate
 
 	err = ctx.Bind(&rg)
 	if err != nil {
@@ -102,7 +104,17 @@ func (h *Handler) UpdateResourceGroup(ctx *gofr.Context) (any, error) {
 		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
 	}
 
-	var rg models.ResourceGroup
+	grpID := ctx.PathParam("rgID")
+	if grpID == "" {
+		return nil, gofrHttp.ErrorMissingParam{Params: []string{"rgId"}}
+	}
+
+	groupID, err := strconv.ParseInt(grpID, 10, 64)
+	if err != nil {
+		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}}
+	}
+
+	var rg models.RGUpdate
 
 	err = ctx.Bind(&rg)
 	if err != nil {
@@ -110,6 +122,7 @@ func (h *Handler) UpdateResourceGroup(ctx *gofr.Context) (any, error) {
 	}
 
 	rg.CloudAccountID = accID
+	rg.ID = groupID
 
 	res, err := h.svc.UpdateResourceGroup(ctx, &rg)
 	if err != nil {
@@ -141,64 +154,6 @@ func (h *Handler) DeleteResourceGroup(ctx *gofr.Context) (any, error) {
 	}
 
 	err = h.svc.DeleteResourceGroup(ctx, accID, rgID)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func (h *Handler) AddResourceToGroup(ctx *gofr.Context) (any, error) {
-	idStr := ctx.PathParam("rgID")
-	if idStr == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"rgId"}}
-	}
-
-	rgID, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}}
-	}
-
-	resourceIDStr := ctx.PathParam("resourceID")
-	if resourceIDStr == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"resourceId"}}
-	}
-
-	resourceID, err := strconv.ParseInt(resourceIDStr, 10, 64)
-	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"resourceId"}}
-	}
-
-	err = h.svc.AddResourceToGroup(ctx, rgID, resourceID)
-	if err != nil {
-		return nil, err
-	}
-
-	return nil, nil
-}
-
-func (h *Handler) RemoveResourceFromGroup(ctx *gofr.Context) (any, error) {
-	idStr := ctx.PathParam("rgID")
-	if idStr == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"rgId"}}
-	}
-
-	rgID, err := strconv.ParseInt(idStr, 10, 64)
-	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}}
-	}
-
-	resourceIDStr := ctx.PathParam("resourceID")
-	if resourceIDStr == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"resourceId"}}
-	}
-
-	resourceID, err := strconv.ParseInt(resourceIDStr, 10, 64)
-	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"resourceId"}}
-	}
-
-	err = h.svc.RemoveResourceFromGroup(ctx, rgID, resourceID)
 	if err != nil {
 		return nil, err
 	}

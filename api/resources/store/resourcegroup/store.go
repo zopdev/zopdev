@@ -3,8 +3,9 @@ package resourcegroup
 import (
 	"database/sql"
 	"errors"
-	"gofr.dev/pkg/gofr"
 	"time"
+
+	"gofr.dev/pkg/gofr"
 
 	"github.com/zopdev/zopdev/api/resources/models"
 )
@@ -19,8 +20,9 @@ func New() *Store {
 // GetAllResourceGroups retrieves all resource groups from the database.
 func (*Store) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]models.ResourceGroup, error) {
 	rows, err := ctx.SQL.QueryContext(ctx,
-		`SELECT id, name, description, res_ids FROM resource_groups WHERE cloud_account_id = ? AND deleted_at IS NULL`, cloudAccID)
-	if err != nil {
+		`SELECT id, name, description, cloud_account_id FROM resource_groups 
+                                               WHERE cloud_account_id = ? AND deleted_at IS NULL`, cloudAccID)
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 
@@ -30,9 +32,12 @@ func (*Store) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]model
 
 	for rows.Next() {
 		var resourceGroup models.ResourceGroup
-		if er := rows.Scan(&resourceGroup.ID, &resourceGroup.Name, &resourceGroup.Description); er != nil {
+
+		if er := rows.Scan(&resourceGroup.ID, &resourceGroup.Name,
+			&resourceGroup.Description, &resourceGroup.CloudAccountID); er != nil {
 			return nil, er
 		}
+
 		resourceGroups = append(resourceGroups, resourceGroup)
 	}
 
@@ -42,7 +47,8 @@ func (*Store) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]model
 // GetResourceGroupByID retrieves a resource group by its ID from the database.
 func (*Store) GetResourceGroupByID(ctx *gofr.Context, cloudAccID, id int64) (*models.ResourceGroup, error) {
 	row := ctx.SQL.QueryRowContext(ctx,
-		`SELECT id, name, description, cloud_account_id FROM resource_groups WHERE id = ? AND cloud_account_id = ? AND deleted_at IS NULL`, id, cloudAccID)
+		`SELECT id, name, description, cloud_account_id FROM resource_groups 
+                                               WHERE id = ? AND cloud_account_id = ? AND deleted_at IS NULL`, id, cloudAccID)
 
 	var resourceGroup models.ResourceGroup
 
@@ -60,8 +66,9 @@ func (*Store) GetResourceGroupByID(ctx *gofr.Context, cloudAccID, id int64) (*mo
 }
 
 // CreateResourceGroup inserts a new resource group into the database and returns its ID.
-func (*Store) CreateResourceGroup(ctx *gofr.Context, resourceGroup *models.ResourceGroup) (int64, error) {
-	result, err := ctx.SQL.ExecContext(ctx, `INSERT INTO resource_groups (name, description, cloud_account_id) VALUES (?, ?, ?)`,
+func (*Store) CreateResourceGroup(ctx *gofr.Context, resourceGroup *models.RGCreate) (int64, error) {
+	result, err := ctx.SQL.ExecContext(ctx,
+		`INSERT INTO resource_groups (name, description, cloud_account_id) VALUES (?, ?, ?)`,
 		resourceGroup.Name, resourceGroup.Description, resourceGroup.CloudAccountID)
 	if err != nil {
 		return 0, err
@@ -76,7 +83,7 @@ func (*Store) CreateResourceGroup(ctx *gofr.Context, resourceGroup *models.Resou
 }
 
 // UpdateResourceGroup updates an existing resource group in the database.
-func (*Store) UpdateResourceGroup(ctx *gofr.Context, resourceGroup *models.ResourceGroup) error {
+func (*Store) UpdateResourceGroup(ctx *gofr.Context, resourceGroup *models.RGUpdate) error {
 	_, err := ctx.SQL.ExecContext(ctx, `UPDATE resource_groups SET name = ?, description = ? WHERE id = ?`,
 		resourceGroup.Name, resourceGroup.Description, resourceGroup.ID)
 	if err != nil {
@@ -104,20 +111,21 @@ func (*Store) DeleteResourceGroup(ctx *gofr.Context, id int64) error {
 
 // GetResourceIDs retrieves all resource IDs associated with a given resource group ID.
 func (*Store) GetResourceIDs(ctx *gofr.Context, id int64) ([]int64, error) {
-	query := `SELECT resource_id FROM resource_group_memberships WHERE group_id = ?`
-
-	rows, err := ctx.SQL.QueryContext(ctx, query, id)
-	if err != nil {
+	rows, err := ctx.SQL.QueryContext(ctx,
+		`SELECT resource_id FROM resource_group_memberships WHERE group_id = ? ORDER BY  resource_id`, id)
+	if err != nil || rows.Err() != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
 
 	var resIDs []int64
-	if rows.Next() {
+
+	for rows.Next() {
 		var ids int64
 
-		if er := rows.Scan(&ids); er != nil {
+		er := rows.Scan(&ids)
+		if er != nil {
 			return nil, er
 		}
 
@@ -127,12 +135,15 @@ func (*Store) GetResourceIDs(ctx *gofr.Context, id int64) ([]int64, error) {
 	return resIDs, nil
 }
 
-// AddResourceToGroup adds a resource to a resource group by inserting a record into the membership table.
-func (*Store) AddResourceToGroup(ctx *gofr.Context, groupID, resourceID int64) error {
-	_, err := ctx.SQL.ExecContext(ctx, `INSERT INTO resource_group_memberships (resource_id, group_id) VALUES (?, ?)`,
-		resourceID, groupID)
-	if err != nil {
-		return err
+// AddResourcesToGroup adds a resource to a resource group by inserting a record into the membership table.
+func (*Store) AddResourcesToGroup(ctx *gofr.Context, groupID int64, resourceIDs []int64) error {
+	for _, resourceID := range resourceIDs {
+		_, err := ctx.SQL.ExecContext(ctx,
+			`INSERT INTO resource_group_memberships (resource_id, group_id) VALUES (?, ?)`,
+			resourceID, groupID)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -140,7 +151,8 @@ func (*Store) AddResourceToGroup(ctx *gofr.Context, groupID, resourceID int64) e
 
 // RemoveResourceFromGroup removes a resource from a resource group by deleting the record from the membership table.
 func (*Store) RemoveResourceFromGroup(ctx *gofr.Context, groupID, resourceID int64) error {
-	_, err := ctx.SQL.ExecContext(ctx, `DELETE FROM resource_group_memberships WHERE resource_id = ? AND group_id = ?`,
+	_, err := ctx.SQL.ExecContext(ctx,
+		`DELETE FROM resource_group_memberships WHERE resource_id = ? AND group_id = ?`,
 		resourceID, groupID)
 	if err != nil {
 		return err

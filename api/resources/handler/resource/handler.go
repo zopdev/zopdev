@@ -1,11 +1,12 @@
 package resource
 
 import (
-	"github.com/zopdev/zopdev/api/resources/service/resource"
 	"strconv"
 
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
+
+	"github.com/zopdev/zopdev/api/resources/service/resource"
 )
 
 type Handler struct {

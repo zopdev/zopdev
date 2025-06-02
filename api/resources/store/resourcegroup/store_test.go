@@ -75,7 +75,3 @@ func TestStore_GetAllResourceGroups(t *testing.T) {
 		})
 	}
 }
-
-func TestStore_GetResourceGroupByID(t *testing.T) {
-
-}
