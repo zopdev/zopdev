@@ -13,7 +13,7 @@ const tableHeaders = [
   { key: 'region', label: 'Region', align: 'left', width: '120px' },
 ];
 
-const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
+const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], resources }) => {
   const [expandedGroups, setExpandedGroups] = useState(new Set(defaultExpandedIds));
 
   const toggleGroup = (groupId) => {
@@ -74,7 +74,7 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
                       size="xl"
                       variant="drawer"
                       renderContent={ResourceGroupManager}
-                      renderContentProps={{ resources: [] }}
+                      renderContentProps={{ resources, initialData: group }}
                     />
                     <IconButton
                       onClick={() => {

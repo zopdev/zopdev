@@ -1,4 +1,4 @@
-import { fetchData, postData } from '@/services/api.js';
+import { fetchData, postData, putData } from '@/services/api.js';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 export function useGetCloudResources(id, options = {}) {
@@ -44,6 +44,36 @@ export function usePostResourceGroup() {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['ResourceGroupGetData'],
+      });
+    },
+  });
+}
+
+export function usePutResourceGroup() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ cloudAccId, id, ...details }) => {
+      const response = await putData(`/cloud-account/${cloudAccId}/resource-groups/${id}`, details);
+      return response?.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['ResourceGroupGetData'],
+      });
+    },
+  });
+}
+
+export function usePostResourceGroupSync() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ cloudAccId }) => {
+      const response = await postData(`/cloud-account/${cloudAccId}/resources/sync`);
+      return response?.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['cloudResourcesGetData'],
       });
     },
   });

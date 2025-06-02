@@ -5,13 +5,44 @@ import ErrorComponent from '@/components/atom/ErrorComponent';
 import Input from '@/components/atom/Input';
 import Label from '@/components/atom/Label';
 import Textarea from '@/components/atom/Textarea';
-import { usePostResourceGroup } from '@/queries/cloud-resources';
+import { usePostResourceGroup, usePutResourceGroup } from '@/queries/cloud-resources';
 
-const ResourceGroupManager = ({ resources, onClose }) => {
+const ResourceGroupManager = ({ resources, onClose, initialData = null }) => {
   const [form, setForm] = useState({ name: '', description: '' });
   const [selectedResourceIds, setSelectedResourceIds] = useState([]);
 
-  const { mutate, isPending, isSuccess, isError, error } = usePostResourceGroup();
+  const {
+    mutate: createGroup,
+    isPending: isCreating,
+    isSuccess: createSuccess,
+    isError: isCreateError,
+    error: createError,
+  } = usePostResourceGroup();
+
+  const {
+    mutate: updateGroup,
+    isPending: isUpdating,
+    isSuccess: updateSuccess,
+    isError: isUpdateError,
+    error: updateError,
+  } = usePutResourceGroup();
+
+  const isEditMode = Boolean(initialData?.id);
+
+  useEffect(() => {
+    if (initialData) {
+      setForm({ name: initialData.name || '', description: initialData.description || '' });
+      setSelectedResourceIds(initialData?.resources?.map((item) => item?.id) || []);
+    }
+  }, [initialData]);
+
+  useEffect(() => {
+    if (createSuccess || updateSuccess) {
+      onClose();
+      setForm({ name: '', description: '' });
+      setSelectedResourceIds([]);
+    }
+  }, [createSuccess, updateSuccess]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
@@ -33,26 +64,26 @@ const ResourceGroupManager = ({ resources, onClose }) => {
   };
 
   const handleSave = () => {
-    const resource_ids = selectedResourceIds;
-    mutate({
+    const payload = {
       name: form.name,
       description: form.description,
       cloudAccId: 1,
-      resource_ids,
-    });
+      resource_ids: selectedResourceIds,
+    };
+
+    if (isEditMode) {
+      updateGroup({ ...payload, id: initialData.id });
+    } else {
+      createGroup(payload);
+    }
   };
 
   const isFormValid = form.name.trim() !== '' && selectedResourceIds.length > 0;
   const isAllSelected = selectedResourceIds.length === resources.length;
   const isIndeterminate = selectedResourceIds.length > 0 && !isAllSelected;
-
-  useEffect(() => {
-    if (isSuccess) {
-      onClose();
-      setForm({ name: '', description: '' });
-      setSelectedResourceIds([]);
-    }
-  }, [isPending]);
+  const isPending = isCreating || isUpdating;
+  const isError = isCreateError || isUpdateError;
+  const error = createError || updateError;
 
   return (
     <div>
@@ -120,7 +151,7 @@ const ResourceGroupManager = ({ resources, onClose }) => {
 
       <div className="flex justify-end">
         <Button onClick={handleSave} disabled={!isFormValid} loading={isPending}>
-          Save Resource Group
+          {isEditMode ? 'Update Resource Group' : 'Save Resource Group'}
         </Button>
       </div>
     </div>

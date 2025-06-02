@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { PlusCircleIcon } from '@heroicons/react/20/solid';
+import { ArrowPathIcon, PlusCircleIcon } from '@heroicons/react/20/solid';
 
 import BlankCloudAccountSvg from '@/assets/svg/BlankCloudAccount';
 import Button from '@/components/atom/Button';
@@ -15,7 +15,12 @@ import { CloudResourceRow } from '@/components/container/resources/ResourceTable
 import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
 import { Tabs } from '@/components/molecules/Tabs';
-import { useGetCloudResources, useGetResourceGroup } from '@/queries/cloud-resources';
+import {
+  useGetCloudResources,
+  useGetResourceGroup,
+  usePostResourceGroupSync,
+} from '@/queries/cloud-resources';
+import { toast } from '@/components/molecules/Toast';
 
 const headers = [
   { key: 'name', label: 'Name', align: 'left', width: '200px' },
@@ -29,9 +34,7 @@ const pageTabs = [{ label: 'Resources' }, { label: 'Resource Group' }];
 const CreateResourceGroupButton = ({ resources }) => (
   <FullScreenOverlay
     customCTA={
-      <Button startEndornment={<PlusCircleIcon className="h-5 w-5" />}>
-        Create Resource Group
-      </Button>
+      <Button startEndornment={<PlusCircleIcon className="size-5" />}>Create Resource Group</Button>
     }
     title="Create Resource Group"
     size="xl"
@@ -49,10 +52,23 @@ const CloudResourcesPage = () => {
 
   const { data: resourceGroupData = [] } = useGetResourceGroup(cloudId);
 
+  const resourceSync = usePostResourceGroupSync();
+
   const breadcrumbList = [
     { name: 'Cloud Accounts', link: '/cloud-accounts' },
     { name: 'Resources', link: '#', disable: true },
   ];
+  const onResourceSync = () => {
+    resourceSync.mutate({ cloudAccId: cloudId });
+  };
+
+  useEffect(() => {
+    if (resourceSync?.isSuccess) {
+      toast.success('Resources Synced Successfully');
+    } else if (resourceSync?.isError) {
+      toast.failed(resourceSync?.error?.message);
+    }
+  }, [resourceSync?.isPending]);
 
   return (
     <>
@@ -65,31 +81,53 @@ const CloudResourcesPage = () => {
           <div className="flex justify-between flex-wrap xs:space-y-2 md:space-y-0">
             <Tabs tabs={pageTabs} activeTab={activeTab} onTabChange={setActiveTab} size="md" />
             <div className="flex items-center">
-              <CreateResourceGroupButton resources={resourceData} />
+              {
+                {
+                  Resources: (
+                    <Button
+                      startEndornment={<ArrowPathIcon className="size-5" />}
+                      onClick={onResourceSync}
+                      loading={resourceSync?.isPending}
+                    >
+                      Sync
+                    </Button>
+                  ),
+                  'Resource Group': <CreateResourceGroupButton resources={resourceData} />,
+                }[activeTab]
+              }
             </div>
           </div>
 
-          {activeTab === 'Resources' ? (
-            <Table
-              headers={headers}
-              data={resourceData}
-              enableRowClick={false}
-              renderRow={CloudResourceRow}
-              emptyStateTitle="No Resources Found"
-              // emptyStateDescription="Looks like your cloud account has no active resources right now"
-            />
-          ) : (
-            <>
-              <ResourceGroupAccordion groups={resourceGroupData} defaultExpandedIds={[]} />
-              {resourceGroupData.length === 0 && (
-                <EmptyComponent
-                  imageComponent={<BlankCloudAccountSvg />}
-                  customButton={<CreateResourceGroupButton resources={resourceData} />}
-                  title="Please start by setting up your first resource group"
+          {
+            {
+              Resources: (
+                <Table
+                  headers={headers}
+                  data={resourceData}
+                  enableRowClick={false}
+                  renderRow={CloudResourceRow}
+                  emptyStateTitle="No Resources Found"
+                  // emptyStateDescription="Looks like your cloud account has no active resources right now"
                 />
-              )}
-            </>
-          )}
+              ),
+              'Resource Group': (
+                <>
+                  <ResourceGroupAccordion
+                    groups={resourceGroupData}
+                    defaultExpandedIds={[]}
+                    resources={resourceData}
+                  />
+                  {resourceGroupData.length === 0 && (
+                    <EmptyComponent
+                      imageComponent={<BlankCloudAccountSvg />}
+                      customButton={<CreateResourceGroupButton resources={resourceData} />}
+                      title="Please start by setting up your first resource group"
+                    />
+                  )}
+                </>
+              ),
+            }[activeTab]
+          }
         </>
       )}
 
