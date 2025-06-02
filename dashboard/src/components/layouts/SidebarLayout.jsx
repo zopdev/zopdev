@@ -8,7 +8,7 @@ export default function SidebarLayout() {
   return (
     <div>
       <TopBar />
-      <div className=" xs:inline-block md:flex h-[90vh] w-[100vw] overflow-hidden ">
+      <div className=" xs:inline-block md:flex min-h-[90vh] w-[100vw] overflow-hidden ">
         <div>
           <Sidebar
             menu={[

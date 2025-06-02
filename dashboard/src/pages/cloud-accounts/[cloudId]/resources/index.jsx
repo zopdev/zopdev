@@ -117,6 +117,7 @@ const CloudResourcesPage = () => {
               />
             </div>
           </div>
+
           <Table
             headers={header}
             data={data}
@@ -125,6 +126,7 @@ const CloudResourcesPage = () => {
             emptyStateTitle="No Resources Found"
             // emptyStateDescription="Looks like your cloud account has no active resources right now"
           />
+
           <ResourceGroupAccordion />
         </>
       )}
