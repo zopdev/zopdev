@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import Button from '@/components/atom/Button';
 import Checkbox from '@/components/atom/Checkbox';
 import ErrorComponent from '@/components/atom/ErrorComponent';
@@ -5,84 +6,71 @@ import Input from '@/components/atom/Input';
 import Label from '@/components/atom/Label';
 import Textarea from '@/components/atom/Textarea';
 import { usePostResourceGroup } from '@/queries/cloud-resources';
-import React, { useEffect, useState } from 'react';
 
 const ResourceGroupManager = ({ resources, onClose }) => {
-  const [resourceGroupName, setResourceGroupName] = useState('');
-  const [description, setDescription] = useState('');
+  const [form, setForm] = useState({ name: '', description: '' });
+  const [selectedResourceIds, setSelectedResourceIds] = useState([]);
 
-  const postToResourceGroup = usePostResourceGroup();
-  const [selectedResources, setSelectedResources] = useState([]);
+  const { mutate, isPending, isSuccess, isError, error } = usePostResourceGroup();
 
-  const handleResourceSelect = (resourceId) => {
-    setSelectedResources((prev) => {
-      if (prev.includes(resourceId)) {
-        return prev.filter((id) => id !== resourceId);
-      } else {
-        return [...prev, resourceId];
-      }
-    });
+  const handleInputChange = (e) => {
+    const { id, value } = e.target;
+    setForm((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const handleResourceToggle = (id) => {
+    setSelectedResourceIds((prev) =>
+      prev.includes(id) ? prev.filter((r) => r !== id) : [...prev, id],
+    );
   };
 
   const handleSelectAll = () => {
-    if (selectedResources.length === resources.length) {
-      setSelectedResources([]);
+    if (selectedResourceIds.length === resources.length) {
+      setSelectedResourceIds([]);
     } else {
-      setSelectedResources(resources.map((resource) => resource.id));
+      setSelectedResourceIds(resources.map((r) => r.id));
     }
   };
 
-  const isAllSelected = selectedResources.length === resources.length;
-  const isIndeterminate =
-    selectedResources.length > 0 && selectedResources.length < resources.length;
-
   const handleSave = () => {
-    const selectedResourceDetails = resources.filter((resource) =>
-      selectedResources.includes(resource.id),
-    );
-
-    postToResourceGroup.mutate({
-      name: resourceGroupName,
-      description,
+    const resource_ids = selectedResourceIds;
+    mutate({
+      name: form.name,
+      description: form.description,
       cloudAccId: 1,
-      resource_ids: selectedResourceDetails.map((item) => item?.id),
+      resource_ids,
     });
   };
 
-  const isFormValid = resourceGroupName.trim() !== '' && selectedResources.length > 0;
+  const isFormValid = form.name.trim() !== '' && selectedResourceIds.length > 0;
+  const isAllSelected = selectedResourceIds.length === resources.length;
+  const isIndeterminate = selectedResourceIds.length > 0 && !isAllSelected;
 
   useEffect(() => {
-    if (postToResourceGroup?.isSuccess) {
+    if (isSuccess) {
       onClose();
-      setSelectedResources([]);
-      setResourceGroupName('');
-      setDescription('');
+      setForm({ name: '', description: '' });
+      setSelectedResourceIds([]);
     }
-  }, [postToResourceGroup?.isPending]);
+  }, [isPending]);
 
   return (
     <div>
       <div className="mb-4">
-        <Label htmlFor="resourceGroupName">Name</Label>
-        <Input
-          id="resourceGroupName"
-          value={resourceGroupName}
-          onChange={(e) => setResourceGroupName(e.target.value)}
-          placeholder="Enter name"
-        />
+        <Label htmlFor="name">Name</Label>
+        <Input id="name" value={form.name} onChange={handleInputChange} placeholder="Enter name" />
       </div>
 
       <div className="mb-6">
-        <Label htmlFor="description"> Description</Label>
+        <Label htmlFor="description">Description</Label>
         <Textarea
-          rows={3}
           id="description"
-          name="description"
+          value={form.description}
+          onChange={handleInputChange}
           placeholder="Enter description (optional)"
+          rows={3}
           variant="outlined"
           className="focus:outline-none focus:ring-1 focus:ring-primary-500"
-          onChange={(e) => setDescription(e.target.value)}
-          value={description}
         />
       </div>
 
@@ -93,28 +81,28 @@ const ResourceGroupManager = ({ resources, onClose }) => {
           <Label className="flex items-center cursor-pointer">
             <Checkbox
               checked={isAllSelected}
-              ref={(input) => {
-                if (input) input.indeterminate = isIndeterminate;
+              ref={(el) => {
+                if (el) el.indeterminate = isIndeterminate;
               }}
               onChange={handleSelectAll}
             />
             <span className="ml-2 text-sm font-medium text-gray-700">
-              Select All ({selectedResources.length} of {resources.length} selected)
+              Select All ({selectedResourceIds.length} of {resources.length} selected)
             </span>
           </Label>
         </div>
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
-          {resources.map((resource) => (
-            <div key={resource.id} className="flex items-center p-2 hover:bg-gray-50 rounded">
+          {resources.map(({ id, name, type }) => (
+            <div key={id} className="flex items-center p-2 hover:bg-gray-50 rounded">
               <Label className="flex items-center cursor-pointer w-full">
                 <Checkbox
-                  checked={selectedResources.includes(resource.id)}
-                  onChange={() => handleResourceSelect(resource.id)}
+                  checked={selectedResourceIds.includes(id)}
+                  onChange={() => handleResourceToggle(id)}
                 />
                 <div className="ml-3 flex-1">
-                  <div className="text-sm font-medium text-gray-900">{resource.name}</div>
-                  <div className="text-xs text-gray-500">{resource.type}</div>
+                  <div className="text-sm font-medium text-gray-900">{name}</div>
+                  <div className="text-xs text-gray-500">{type}</div>
                 </div>
               </Label>
             </div>
@@ -122,21 +110,16 @@ const ResourceGroupManager = ({ resources, onClose }) => {
         </div>
       </div>
 
-      {!isFormValid && (resourceGroupName.trim() === '' || selectedResources.length === 0) && (
+      {!isFormValid && (
         <div className="mt-3 text-sm text-red-600">
-          {selectedResources.length === 0 && 'Please select at least one resource.'}
+          {selectedResourceIds.length === 0 && 'Please select at least one resource.'}
         </div>
       )}
-      {postToResourceGroup?.isError && (
-        <ErrorComponent errorText={postToResourceGroup?.error?.message} className="mb-4" />
-      )}
+
+      {isError && <ErrorComponent errorText={error?.message} className="mb-4" />}
 
       <div className="flex justify-end">
-        <Button
-          onClick={handleSave}
-          disabled={!isFormValid}
-          loading={postToResourceGroup?.isPending}
-        >
+        <Button onClick={handleSave} disabled={!isFormValid} loading={isPending}>
           Save Resource Group
         </Button>
       </div>
