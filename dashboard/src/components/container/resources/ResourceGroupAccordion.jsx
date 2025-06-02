@@ -1,19 +1,6 @@
 import Table from '@/components/molecules/Table';
 import React, { useState } from 'react';
 
-const getStatusColor = (status) => {
-  switch (status.toLowerCase()) {
-    case 'running':
-      return 'bg-green-100 text-green-800';
-    case 'stopped':
-      return 'bg-red-100 text-red-800';
-    case 'pending':
-      return 'bg-yellow-100 text-yellow-800';
-    default:
-      return 'bg-gray-100 text-gray-800';
-  }
-};
-
 const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction = () => {} }) => {
   const [expandedGroups, setExpandedGroups] = useState(new Set(defaultExpandedIds));
 
@@ -22,6 +9,14 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction
     newExpanded.has(groupId) ? newExpanded.delete(groupId) : newExpanded.add(groupId);
     setExpandedGroups(newExpanded);
   };
+
+  // Define table headers
+  const tableHeaders = [
+    { key: 'name', label: 'Resource', align: 'left', width: '200px' },
+    { key: 'type', label: 'Type', align: 'left', width: '150px' },
+    { key: 'status', label: 'Status', align: 'left', width: '120px' },
+    { key: 'actions', label: 'Actions', align: 'left', width: '100px' },
+  ];
 
   return (
     <div className="space-y-4 py-4">
@@ -82,51 +77,16 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction
             </div>
           </div>
 
-          {/* Table */}
+          {/* Your Table Component */}
           {expandedGroups.has(group.id) && (
-            <div className="bg-white overflow-x-auto">
-              <table className="min-w-full">
-                <thead className="bg-gray-50 border-t border-gray-200">
-                  <tr>
-                    {['Resource', 'Type', 'Status', 'Actions'].map((header) => (
-                      <th
-                        key={header}
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        {header}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {group.resources.map((resource) => (
-                    <tr key={resource.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {resource.name}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {resource.type}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span
-                          className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(resource.status)}`}
-                        >
-                          {resource.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <button
-                          className="text-red-600 hover:bg-red-50 p-1 rounded"
-                          onClick={() => onAction('delete', resource)}
-                        >
-                          <ActionIcon type="delete" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+            <Table
+              headers={tableHeaders}
+              data={group.resources || []}
+              enableRowClick={false}
+              // renderRow={CloudResourceRow}
+              emptyStateTitle="No Resources Found"
+              // emptyStateDescription="Looks like your cloud account has no active resources right now"
+            />
           )}
         </div>
       ))}
@@ -178,7 +138,7 @@ const ActionIcon = ({ type }) => {
             strokeLinecap="round"
             strokeLinejoin="round"
             strokeWidth={2}
-            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1-1v3M4 7h16"
           />
         </svg>
       );
@@ -187,4 +147,58 @@ const ActionIcon = ({ type }) => {
   }
 };
 
-export default ResourceGroupAccordion;
+// Demo with sample data
+const App = () => {
+  const sampleGroups = [
+    {
+      id: 1,
+      name: 'Production Resources',
+      description: 'Critical production infrastructure',
+      runningResources: 3,
+      totalResources: 5,
+      resources: [
+        { id: 1, name: 'Web Server 1', type: 'EC2', status: 'running' },
+        { id: 2, name: 'Database Server', type: 'RDS', status: 'running' },
+        { id: 3, name: 'Load Balancer', type: 'ALB', status: 'stopped' },
+        { id: 4, name: 'Cache Server', type: 'ElastiCache', status: 'pending' },
+        { id: 5, name: 'File Storage', type: 'S3', status: 'running' },
+      ],
+    },
+    {
+      id: 2,
+      name: 'Development Resources',
+      description: 'Development and testing environment',
+      runningResources: 1,
+      totalResources: 3,
+      resources: [
+        { id: 6, name: 'Dev Server', type: 'EC2', status: 'running' },
+        { id: 7, name: 'Test Database', type: 'RDS', status: 'pending' },
+        { id: 8, name: 'Dev Cache', type: 'ElastiCache', status: 'stopped' },
+      ],
+    },
+    {
+      id: 3,
+      name: 'Staging Resources',
+      description: 'Pre-production staging environment',
+      runningResources: 0,
+      totalResources: 0,
+      resources: [],
+    },
+  ];
+
+  const handleAction = (action, item) => {
+    console.log(`Action: ${action}`, item);
+  };
+
+  return (
+    <div>
+      <ResourceGroupAccordion
+        groups={sampleGroups}
+        defaultExpandedIds={[1]}
+        onAction={handleAction}
+      />
+    </div>
+  );
+};
+
+export default App;
