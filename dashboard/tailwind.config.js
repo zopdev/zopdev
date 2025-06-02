@@ -3,12 +3,7 @@ const typographyPlugin = require('@tailwindcss/typography');
 
 module.exports = {
   darkMode: false,
-  plugins: [
-    require('@tailwindcss/forms')({
-      strategy: 'base',
-    }),
-    typographyPlugin,
-  ],
+  plugins: [typographyPlugin],
   theme: {
     fontSize: {
       xs: ['0.75rem', { lineHeight: '1rem' }],

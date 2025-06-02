@@ -15,6 +15,7 @@ const FullScreenOverlay = ({
   closeOnOutsideClick = true,
   overlayColor = 'light',
   maxHeight = '80vh',
+  renderContentProps,
 }) => {
   const defaultPosition = variant === 'popup' ? 'center' : 'right';
   const effectivePosition = position || defaultPosition;
@@ -54,7 +55,7 @@ const FullScreenOverlay = ({
 
   const drawerPositionClasses = {
     left: 'left-0 top-0 bottom-0 h-full w-full',
-    right: 'right-0 top-0 bottom-0 h-full max-w-sm',
+    right: 'right-0 top-0 bottom-0 h-full w-full',
   };
 
   const popupPositionClasses = {
@@ -141,7 +142,7 @@ const FullScreenOverlay = ({
                     )}
                   </div>
                   <div className="flex-grow px-6 py-4 overflow-y-auto">
-                    {renderContent && renderContent({ onClose: closePopup })}
+                    {renderContent && renderContent({ onClose: closePopup, ...renderContentProps })}
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
@@ -173,7 +174,7 @@ const FullScreenOverlay = ({
                     )}
                   </div>
                   <div className="flex-grow px-6 py-4 overflow-y-auto">
-                    {renderContent && renderContent({ onClose: closePopup })}
+                    {renderContent && renderContent({ onClose: closePopup, ...renderContentProps })}
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

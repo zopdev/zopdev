@@ -5,6 +5,7 @@ import { appRoutes } from './routes';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader.jsx';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import ToastContainer from '@/components/organisms/ToastContainer.jsx';
+import ContextProvider from '@/utils/context';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -27,10 +28,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <HashRouter>
         <ErrorBoundary>
-          <Suspense fallback={<CompleteLoader />}>
-            <ToastContainer classNameParent="absolute right-5 top-10" stacked={false} />
-            <AppRoutes />
-          </Suspense>
+          <ContextProvider>
+            <Suspense fallback={<CompleteLoader />}>
+              <ToastContainer classNameParent="absolute right-5 top-10" stacked={false} />
+              <AppRoutes />
+            </Suspense>
+          </ContextProvider>
         </ErrorBoundary>
       </HashRouter>
     </QueryClientProvider>
