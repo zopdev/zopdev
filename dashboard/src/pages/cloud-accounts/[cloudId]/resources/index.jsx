@@ -84,11 +84,7 @@ const CloudResourcesPage = () => {
             />
           ) : (
             <>
-              <ResourceGroupAccordion
-                groups={resourceGroupData}
-                defaultExpandedIds={[]}
-                // onAction={() => console.log('sss')}
-              />
+              <ResourceGroupAccordion groups={resourceGroupData} defaultExpandedIds={[]} />
 
               {resourceGroupData?.length === 0 && (
                 <EmptyComponent
