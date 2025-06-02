@@ -10,6 +10,7 @@ import { usePostResourceGroup, usePutResourceGroup } from '@/queries/cloud-resou
 const ResourceGroupManager = ({ resources, onClose, initialData = null }) => {
   const [form, setForm] = useState({ name: '', description: '' });
   const [selectedResourceIds, setSelectedResourceIds] = useState([]);
+  const [hasOpened, setHasOpened] = useState(false);
 
   const {
     mutate: createGroup,
@@ -17,6 +18,7 @@ const ResourceGroupManager = ({ resources, onClose, initialData = null }) => {
     isSuccess: createSuccess,
     isError: isCreateError,
     error: createError,
+    reset: resetCreateGroup,
   } = usePostResourceGroup();
 
   const {
@@ -25,24 +27,37 @@ const ResourceGroupManager = ({ resources, onClose, initialData = null }) => {
     isSuccess: updateSuccess,
     isError: isUpdateError,
     error: updateError,
+    reset: resetUpdateGroup,
   } = usePutResourceGroup();
 
   const isEditMode = Boolean(initialData?.id);
 
   useEffect(() => {
+    if (!hasOpened) {
+      resetCreateGroup();
+      resetUpdateGroup();
+      setHasOpened(true);
+    }
+
     if (initialData) {
       setForm({ name: initialData.name || '', description: initialData.description || '' });
       setSelectedResourceIds(initialData?.resources?.map((item) => item?.id) || []);
+    } else {
+      setForm({ name: '', description: '' });
+      setSelectedResourceIds([]);
     }
-  }, [initialData]);
+  }, [initialData, resources]);
 
   useEffect(() => {
+    if (!hasOpened) return;
+
     if (createSuccess || updateSuccess) {
       onClose();
       setForm({ name: '', description: '' });
       setSelectedResourceIds([]);
+      setHasOpened(false);
     }
-  }, [createSuccess, updateSuccess]);
+  }, [createSuccess, updateSuccess, hasOpened]);
 
   const handleInputChange = (e) => {
     const { id, value } = e.target;
