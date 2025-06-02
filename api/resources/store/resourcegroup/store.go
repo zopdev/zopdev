@@ -152,8 +152,8 @@ func (*Store) AddResourcesToGroup(ctx *gofr.Context, groupID int64, resourceIDs 
 // RemoveResourceFromGroup removes a resource from a resource group by deleting the record from the membership table.
 func (*Store) RemoveResourceFromGroup(ctx *gofr.Context, groupID, resourceID int64) error {
 	_, err := ctx.SQL.ExecContext(ctx,
-		`DELETE FROM resource_group_memberships WHERE resource_id = ? AND group_id = ?`,
-		resourceID, groupID)
+		`DELETE from resource_group_memberships WHERE group_id = ? AND resource_id = ?`,
+		groupID, resourceID)
 	if err != nil {
 		return err
 	}

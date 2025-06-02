@@ -1,12 +1,12 @@
 package resourcegroup
 
 import (
-	"slices"
 	"strconv"
 	"sync"
 
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/zopdev/zopdev/api/resources/models"
 )
@@ -34,19 +34,15 @@ func (s *Service) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]m
 	var (
 		resourceGroupData []models.ResourceGroupData
 		mu                sync.Mutex
-		wg                sync.WaitGroup
+		errGrp            = new(errgroup.Group)
 	)
 
 	for _, rg := range rsg {
-		wg.Add(1)
-
-		go func(rg models.ResourceGroup) {
-			defer wg.Done()
-
+		errGrp.Go(func() error {
 			// Get resource IDs for the current resource group
 			resIDs, er := s.grpStore.GetResourceIDs(ctx, rg.ID)
 			if er != nil {
-				return
+				return er
 			}
 
 			var resources []models.Resource
@@ -54,7 +50,7 @@ func (s *Service) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]m
 			for i := range resIDs {
 				resource, er := s.resSvc.GetByID(ctx, resIDs[i])
 				if er != nil {
-					return
+					return er
 				}
 
 				resources = append(resources, *resource)
@@ -66,10 +62,15 @@ func (s *Service) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]m
 				Resources:     resources,
 			})
 			mu.Unlock()
-		}(rg)
+
+			return nil
+		})
 	}
 
-	wg.Wait()
+	err = errGrp.Wait()
+	if err != nil {
+		return resourceGroupData, &errInternalServer{}
+	}
 
 	return resourceGroupData, nil
 }
@@ -87,7 +88,7 @@ func (s *Service) GetResourceGroupByID(ctx *gofr.Context, cloudAccID, id int64) 
 
 	rg.Status = RUNNING
 
-	resources := make([]models.Resource, len(resIDs))
+	resources := make([]models.Resource, 0, len(resIDs))
 
 	for i := range resIDs {
 		resource, er := s.resSvc.GetByID(ctx, resIDs[i])
@@ -147,25 +148,52 @@ func (s *Service) UpdateResourceGroup(ctx *gofr.Context, rg *models.RGUpdate) (*
 		return nil, &errInternalServer{}
 	}
 
+	err = s.modifyResources(ctx, rg.ID, existingResourceIDs, rg.ResourceIDs)
+	if err != nil {
+		return nil, &errInternalServer{}
+	}
+
+	return s.GetResourceGroupByID(ctx, rg.CloudAccountID, rg.ID)
+}
+
+func (s *Service) modifyResources(ctx *gofr.Context, rgID int64, existingResources, resourceIDs []int64) error {
+	set := make(map[int64]struct{})
+
+	for _, id := range resourceIDs {
+		set[id] = struct{}{}
+	}
+
 	// Remove resources that are no longer in the update
-	for _, id := range rg.ResourceIDs {
-		if _, ok := slices.BinarySearch(existingResourceIDs, id); !ok {
-			err = s.grpStore.RemoveResourceFromGroup(ctx, rg.ID, id)
+	for _, id := range existingResources {
+		if _, ok := set[id]; !ok {
+			err := s.grpStore.RemoveResourceFromGroup(ctx, rgID, id)
 			if err != nil {
-				return nil, &errInternalServer{}
+				return &errInternalServer{}
 			}
 		}
 	}
 
-	// After updating the name and description, add the update the resources
-	if len(rg.ResourceIDs) > 0 {
-		err = s.grpStore.AddResourcesToGroup(ctx, rg.ID, rg.ResourceIDs)
-		if err != nil {
-			return nil, &errInternalServer{}
+	existingSet := make(map[int64]struct{})
+	for _, id := range existingResources {
+		existingSet[id] = struct{}{}
+	}
+
+	newIDs := make([]int64, 0, len(resourceIDs))
+	for _, id := range resourceIDs {
+		if _, ok := existingSet[id]; !ok {
+			newIDs = append(newIDs, id)
 		}
 	}
 
-	return s.GetResourceGroupByID(ctx, rg.CloudAccountID, rg.ID)
+	// After updating the name and description, add the update the resources
+	if len(newIDs) > 0 {
+		err := s.grpStore.AddResourcesToGroup(ctx, rgID, newIDs)
+		if err != nil {
+			return &errInternalServer{}
+		}
+	}
+
+	return nil
 }
 
 func (s *Service) DeleteResourceGroup(ctx *gofr.Context, cloudAccID, id int64) error {
