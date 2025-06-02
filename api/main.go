@@ -30,6 +30,7 @@ import (
 
 	resourceClient "github.com/zopdev/zopdev/api/resources/client"
 	resourceHandler "github.com/zopdev/zopdev/api/resources/handler/resource"
+	"github.com/zopdev/zopdev/api/resources/providers/aws"
 	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	resourceService "github.com/zopdev/zopdev/api/resources/service/resource"
 	resourceStore "github.com/zopdev/zopdev/api/resources/store/resource"
@@ -114,8 +115,9 @@ func registerAuditAPIRoutes(app *gofr.App) {
 func registerCloudResourceRoutes(app *gofr.App) {
 	client := resourceClient.New()
 	gcpClient := gcpResource.New()
+	awsClient := aws.New()
 	resStore := resourceStore.New()
-	resSvc := resourceService.New(gcpClient, client, resStore)
+	resSvc := resourceService.New(gcpClient, awsClient, client, resStore)
 	resHld := resourceHandler.New(resSvc)
 
 	// TODO: Figure out a way to sync resources on startup.
