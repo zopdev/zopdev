@@ -14,10 +14,16 @@ export function useGetCloudResources(id, options = {}) {
 }
 
 export function usePostResourceState() {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async ({ cloudAccId, ...payload }) => {
       const response = await postData(`/cloud-account/${cloudAccId}/resources/state`, payload);
       return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ['cloudResourcesGetData'],
+      });
     },
   });
 }
