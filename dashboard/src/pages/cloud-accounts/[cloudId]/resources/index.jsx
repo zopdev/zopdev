@@ -5,20 +5,15 @@ import ErrorComponent from '@/components/atom/ErrorComponent';
 import FullScreenOverlay from '@/components/atom/FullScreenOverlay';
 import LinearProgress from '@/components/atom/Loaders/LinerProgress';
 import PageHeading from '@/components/atom/PageHeading';
-import SwitchButton from '@/components/atom/Switch';
 import ResourceGroupManager from '@/components/container/resources/AddResourceGroup';
 import ResourceGroupAccordion from '@/components/container/resources/ResourceGroupAccordion';
+import { CloudResourceRow } from '@/components/container/resources/ResourceTableRow';
 import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
 import { Tabs } from '@/components/molecules/Tabs';
-import { toast } from '@/components/molecules/Toast';
-import {
-  useGetCloudResources,
-  useGetResourceGroup,
-  usePostResourceState,
-} from '@/queries/cloud-resources';
+import { useGetCloudResources, useGetResourceGroup } from '@/queries/cloud-resources';
 import { PlusCircleIcon } from '@heroicons/react/20/solid';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 const header = [
@@ -29,49 +24,6 @@ const header = [
 ];
 
 const pageTabs = [{ label: 'Resources' }, { label: 'Resource Group' }];
-
-const CloudResourceRow = (resource) => {
-  const [currentState, setCurrentState] = useState(resource?.status === 'RUNNING' ? true : false);
-  const { cloudId } = useParams();
-  const resourceStateChanger = usePostResourceState();
-
-  const handleToggle = (state) => {
-    setCurrentState(state);
-    resourceStateChanger.mutate({
-      cloudAccId: parseInt(cloudId),
-      id: resource?.id,
-      name: resource?.name,
-      type: resource?.type,
-      state: state ? 'START' : 'SUSPEND',
-    });
-  };
-
-  useEffect(() => {
-    if (resourceStateChanger.isError) {
-      toast.failed(resourceStateChanger?.error?.message);
-      setCurrentState((prev) => !prev);
-    }
-  }, [resourceStateChanger.isError, resourceStateChanger.error]);
-
-  return {
-    id: resource?.id,
-    name: resource?.name,
-    state: (
-      <div className="min-w-36">
-        <SwitchButton
-          labelPosition="right"
-          value={currentState}
-          disabled={resourceStateChanger?.isPending}
-          onChange={handleToggle}
-          titleList={{ true: 'Running', false: 'Suspended' }}
-          name="status"
-        />
-      </div>
-    ),
-    instance_type: resource?.type,
-    region: resource?.region,
-  };
-};
 
 const CloudResourcesPage = () => {
   const { cloudId } = useParams();
@@ -135,7 +87,7 @@ const CloudResourcesPage = () => {
               <ResourceGroupAccordion
                 groups={resourceGroupData}
                 defaultExpandedIds={[]}
-                onAction={() => console.log('sss')}
+                // onAction={() => console.log('sss')}
               />
 
               {resourceGroupData?.length === 0 && (
