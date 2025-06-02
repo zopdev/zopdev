@@ -38,8 +38,8 @@ const CloudResourceRow = (resource) => {
     resourceStateChanger.mutate({
       cloudAccId: parseInt(cloudId),
       id: resource?.id,
-      name: resource?.instance_name,
-      type: resource?.instance_type,
+      name: resource?.name,
+      type: resource?.type,
       state: state ? 'START' : 'SUSPEND',
     });
   };
@@ -52,8 +52,8 @@ const CloudResourceRow = (resource) => {
   }, [resourceStateChanger.isError, resourceStateChanger.error]);
 
   return {
-    id: resource?.instance_name,
-    name: resource?.instance_name,
+    id: resource?.id,
+    name: resource?.name,
     state: (
       <div className="min-w-36">
         <SwitchButton
@@ -66,7 +66,7 @@ const CloudResourceRow = (resource) => {
         />
       </div>
     ),
-    instance_type: resource?.instance_type,
+    instance_type: resource?.type,
     region: resource?.region,
   };
 };
@@ -184,22 +184,25 @@ const CloudResourcesPage = () => {
             </div>
           </div>
 
-          <Table
-            headers={header}
-            data={data}
-            enableRowClick={false}
-            renderRow={CloudResourceRow}
-            emptyStateTitle="No Resources Found"
-            // emptyStateDescription="Looks like your cloud account has no active resources right now"
-          />
-
-          <ResourceGroupAccordion
-            groups={mockGroups}
-            defaultExpandedIds={[1]}
-            onAction={() => console.log('sss')}
-          />
+          {activeTab == 'Resources' ? (
+            <Table
+              headers={header}
+              data={data}
+              enableRowClick={false}
+              renderRow={CloudResourceRow}
+              emptyStateTitle="No Resources Found"
+              // emptyStateDescription="Looks like your cloud account has no active resources right now"
+            />
+          ) : (
+            <ResourceGroupAccordion
+              groups={mockGroups}
+              defaultExpandedIds={[1]}
+              onAction={() => console.log('sss')}
+            />
+          )}
         </>
       )}
+
       {cloudResources?.isError && (
         <ErrorComponent errorText={cloudResources?.error?.message || 'Something went wrong'} />
       )}

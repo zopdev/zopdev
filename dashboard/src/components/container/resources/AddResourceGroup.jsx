@@ -113,8 +113,8 @@ const ResourceGroupManager = ({ resources, onClose }) => {
                   onChange={() => handleResourceSelect(resource.id)}
                 />
                 <div className="ml-3 flex-1">
-                  <div className="text-sm font-medium text-gray-900">{resource.instance_name}</div>
-                  <div className="text-xs text-gray-500">{resource.instance_type}</div>
+                  <div className="text-sm font-medium text-gray-900">{resource.name}</div>
+                  <div className="text-xs text-gray-500">{resource.type}</div>
                 </div>
               </Label>
             </div>

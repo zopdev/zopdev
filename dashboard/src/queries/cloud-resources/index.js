@@ -38,10 +38,10 @@ export function usePostResourceGroup() {
   return useMutation({
     mutationFn: async ({ cloudAccId, resourceIds, ...details }) => {
       const response = await postData(`/cloud-account/${cloudAccId}/resource-groups`, details);
-      // const assignPromises = resourceIds.map((resourceId) =>
-      //   postData(`/resource-groups/${response?.data?.id}/resources/${resourceId?.id}`, {}),
-      // );
-      // await Promise.all(assignPromises);
+      const assignPromises = resourceIds.map((resourceId) =>
+        postData(`/resource-groups/${response?.data?.id}/resources/${resourceId?.id}`, {}),
+      );
+      await Promise.all(assignPromises);
       return response?.data;
     },
     onSuccess: () => {

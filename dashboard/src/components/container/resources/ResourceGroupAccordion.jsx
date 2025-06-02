@@ -1,7 +1,7 @@
 import Table from '@/components/molecules/Table';
 import React, { useState } from 'react';
 
-const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction = () => {} }) => {
+const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
   const [expandedGroups, setExpandedGroups] = useState(new Set(defaultExpandedIds));
 
   const toggleGroup = (groupId) => {
@@ -10,7 +10,6 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction
     setExpandedGroups(newExpanded);
   };
 
-  // Define table headers
   const tableHeaders = [
     { key: 'name', label: 'Resource', align: 'left', width: '200px' },
     { key: 'type', label: 'Type', align: 'left', width: '150px' },
@@ -22,7 +21,6 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction
     <div className="space-y-4 py-4">
       {groups.map((group) => (
         <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">
-          {/* Header */}
           <div
             className="bg-gray-50 px-4 py-3 sm:px-6 cursor-pointer hover:bg-gray-100 transition-colors"
             onClick={() => toggleGroup(group.id)}
@@ -52,8 +50,7 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction
                 <span className="text-sm text-gray-600 whitespace-nowrap">
                   {group.runningResources}/{group.totalResources} running
                 </span>
-                <div className="flex space-x-2">
-                  {/* Actions */}
+                {/* <div className="flex space-x-2">
                   {['start', 'stop', 'edit', 'delete'].map((action) => (
                     <button
                       key={action}
@@ -72,20 +69,17 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction
                       <ActionIcon type={action} />
                     </button>
                   ))}
-                </div>
+                </div> */}
               </div>
             </div>
           </div>
 
-          {/* Your Table Component */}
           {expandedGroups.has(group.id) && (
             <Table
               headers={tableHeaders}
               data={group.resources || []}
               enableRowClick={false}
-              // renderRow={CloudResourceRow}
-              emptyStateTitle="No Resources Found"
-              // emptyStateDescription="Looks like your cloud account has no active resources right now"
+              emptyStateTitle="No Resources added"
             />
           )}
         </div>
@@ -94,7 +88,6 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], onAction
   );
 };
 
-// Sub-component for rendering action icons
 const ActionIcon = ({ type }) => {
   switch (type) {
     case 'start':
@@ -147,58 +140,4 @@ const ActionIcon = ({ type }) => {
   }
 };
 
-// Demo with sample data
-const App = () => {
-  const sampleGroups = [
-    {
-      id: 1,
-      name: 'Production Resources',
-      description: 'Critical production infrastructure',
-      runningResources: 3,
-      totalResources: 5,
-      resources: [
-        { id: 1, name: 'Web Server 1', type: 'EC2', status: 'running' },
-        { id: 2, name: 'Database Server', type: 'RDS', status: 'running' },
-        { id: 3, name: 'Load Balancer', type: 'ALB', status: 'stopped' },
-        { id: 4, name: 'Cache Server', type: 'ElastiCache', status: 'pending' },
-        { id: 5, name: 'File Storage', type: 'S3', status: 'running' },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Development Resources',
-      description: 'Development and testing environment',
-      runningResources: 1,
-      totalResources: 3,
-      resources: [
-        { id: 6, name: 'Dev Server', type: 'EC2', status: 'running' },
-        { id: 7, name: 'Test Database', type: 'RDS', status: 'pending' },
-        { id: 8, name: 'Dev Cache', type: 'ElastiCache', status: 'stopped' },
-      ],
-    },
-    {
-      id: 3,
-      name: 'Staging Resources',
-      description: 'Pre-production staging environment',
-      runningResources: 0,
-      totalResources: 0,
-      resources: [],
-    },
-  ];
-
-  const handleAction = (action, item) => {
-    console.log(`Action: ${action}`, item);
-  };
-
-  return (
-    <div>
-      <ResourceGroupAccordion
-        groups={sampleGroups}
-        defaultExpandedIds={[1]}
-        onAction={handleAction}
-      />
-    </div>
-  );
-};
-
-export default App;
+export default ResourceGroupAccordion;
