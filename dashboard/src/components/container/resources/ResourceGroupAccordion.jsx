@@ -1,5 +1,52 @@
+import SwitchButton from '@/components/atom/Switch';
 import Table from '@/components/molecules/Table';
-import React, { useState } from 'react';
+import { toast } from '@/components/molecules/Toast';
+import { usePostResourceState } from '@/queries/cloud-resources';
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
+const CloudResourceRow = (resource) => {
+  const [currentState, setCurrentState] = useState(resource?.status === 'RUNNING' ? true : false);
+  const { cloudId } = useParams();
+  const resourceStateChanger = usePostResourceState();
+
+  const handleToggle = (state) => {
+    setCurrentState(state);
+    resourceStateChanger.mutate({
+      cloudAccId: parseInt(cloudId),
+      id: resource?.id,
+      name: resource?.name,
+      type: resource?.type,
+      state: state ? 'START' : 'SUSPEND',
+    });
+  };
+
+  useEffect(() => {
+    if (resourceStateChanger.isError) {
+      toast.failed(resourceStateChanger?.error?.message);
+      setCurrentState((prev) => !prev);
+    }
+  }, [resourceStateChanger.isError, resourceStateChanger.error]);
+
+  return {
+    id: resource?.id,
+    name: resource?.name,
+    state: (
+      <div className="min-w-36">
+        <SwitchButton
+          labelPosition="right"
+          value={currentState}
+          disabled={resourceStateChanger?.isPending}
+          onChange={handleToggle}
+          titleList={{ true: 'Running', false: 'Suspended' }}
+          name="status"
+        />
+      </div>
+    ),
+    instance_type: resource?.type,
+    region: resource?.region,
+  };
+};
 
 const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
   const [expandedGroups, setExpandedGroups] = useState(new Set(defaultExpandedIds));
@@ -11,10 +58,10 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
   };
 
   const tableHeaders = [
-    { key: 'name', label: 'Resource', align: 'left', width: '200px' },
-    { key: 'type', label: 'Type', align: 'left', width: '150px' },
-    { key: 'status', label: 'Status', align: 'left', width: '120px' },
-    { key: 'actions', label: 'Actions', align: 'left', width: '100px' },
+    { key: 'name', label: 'Name', align: 'left', width: '200px' },
+    { key: 'state', label: 'State', align: 'left', width: '150px' },
+    { key: 'instance_type', label: 'Instance Type', align: 'left', width: '120px' },
+    { key: 'region', label: 'Region', align: 'left', width: '120px' },
   ];
 
   return (
@@ -22,8 +69,10 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
       {groups.map((group) => (
         <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">
           <div
-            className="bg-gray-50 px-4 py-3 sm:px-6 cursor-pointer hover:bg-gray-100 transition-colors"
-            onClick={() => toggleGroup(group.id)}
+            className={`bg-gray-50 px-4 py-3 sm:px-6  transition-colors ${
+              group?.resources?.length > 0 && 'cursor-pointer hover:bg-gray-100'
+            } `}
+            onClick={() => group?.resources?.length > 0 && toggleGroup(group.id)}
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="flex items-start gap-3">
@@ -47,9 +96,9 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-                <span className="text-sm text-gray-600 whitespace-nowrap">
+                {/* <span className="text-sm text-gray-600 whitespace-nowrap">
                   {group.runningResources}/{group.totalResources} running
-                </span>
+                </span> */}
                 {/* <div className="flex space-x-2">
                   {['start', 'stop', 'edit', 'delete'].map((action) => (
                     <button
@@ -79,6 +128,7 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [] }) => {
               headers={tableHeaders}
               data={group.resources || []}
               enableRowClick={false}
+              renderRow={CloudResourceRow}
               emptyStateTitle="No Resources added"
             />
           )}

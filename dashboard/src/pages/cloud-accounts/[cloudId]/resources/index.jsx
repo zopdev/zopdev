@@ -1,4 +1,6 @@
+import BlankCloudAccountSvg from '@/assets/svg/BlankCloudAccount';
 import Button from '@/components/atom/Button';
+import EmptyComponent from '@/components/atom/EmptyComponent';
 import ErrorComponent from '@/components/atom/ErrorComponent';
 import FullScreenOverlay from '@/components/atom/FullScreenOverlay';
 import LinearProgress from '@/components/atom/Loaders/LinerProgress';
@@ -78,6 +80,7 @@ const CloudResourcesPage = () => {
   const resourceGroup = useGetResourceGroup(cloudId);
 
   const data = cloudResources?.data || [];
+  const resourceGroupData = resourceGroup?.data || [];
 
   const breadcrumbList = [
     { name: 'Cloud Accounts', link: '/cloud-accounts' },
@@ -85,72 +88,6 @@ const CloudResourcesPage = () => {
       name: 'Resources',
       link: `#`,
       disable: true,
-    },
-  ];
-
-  const mockGroups = [
-    {
-      id: 1,
-      name: 'Production Services',
-      description: 'Core production services that need to run 24/7',
-      totalResources: 2,
-      runningResources: 2,
-      resources: [
-        {
-          id: 1,
-          name: 'web-server-prod',
-          type: 'EC2',
-          status: 'Running',
-        },
-        {
-          id: 2,
-          name: 'order-processing-db',
-          type: 'RDS',
-          status: 'Running',
-        },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Development Environment',
-      description: 'Development and testing resources that can be shut down outside of work hours',
-      totalResources: 3,
-      runningResources: 0,
-      resources: [
-        {
-          id: 3,
-          name: 'dev-web-server',
-          type: 'EC2',
-          status: 'Stopped',
-        },
-        {
-          id: 4,
-          name: 'test-database',
-          type: 'RDS',
-          status: 'Stopped',
-        },
-        {
-          id: 5,
-          name: 'dev-cache',
-          type: 'ElastiCache',
-          status: 'Stopped',
-        },
-      ],
-    },
-    {
-      id: 3,
-      name: 'Analytics Platform',
-      description: 'Data processing and analytics services',
-      totalResources: 1,
-      runningResources: 1,
-      resources: [
-        {
-          id: 6,
-          name: 'analytics-cluster',
-          type: 'EMR',
-          status: 'Running',
-        },
-      ],
     },
   ];
 
@@ -194,11 +131,40 @@ const CloudResourcesPage = () => {
               // emptyStateDescription="Looks like your cloud account has no active resources right now"
             />
           ) : (
-            <ResourceGroupAccordion
-              groups={mockGroups}
-              defaultExpandedIds={[1]}
-              onAction={() => console.log('sss')}
-            />
+            <>
+              <ResourceGroupAccordion
+                groups={resourceGroupData}
+                defaultExpandedIds={[]}
+                onAction={() => console.log('sss')}
+              />
+
+              {resourceGroupData?.length === 0 && (
+                <EmptyComponent
+                  imageComponent={<BlankCloudAccountSvg />}
+                  customButton={
+                    <FullScreenOverlay
+                      customCTA={
+                        <Button
+                          startEndornment={
+                            <PlusCircleIcon className="h-5 w-5" aria-hidden="true" />
+                          }
+                        >
+                          Create Resource Group
+                        </Button>
+                      }
+                      title="Create Resource Group"
+                      size="xl"
+                      variant="drawer"
+                      renderContent={ResourceGroupManager}
+                      renderContentProps={{
+                        resources: data,
+                      }}
+                    />
+                  }
+                  title={'Please start by setting up your first resource group'}
+                />
+              )}
+            </>
           )}
         </>
       )}

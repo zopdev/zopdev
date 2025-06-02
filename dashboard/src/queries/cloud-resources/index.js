@@ -27,7 +27,8 @@ export function useGetResourceGroup(id, options = {}) {
     queryKey: ['ResourceGroupGetData', id],
     queryFn: async () => {
       const url = `/cloud-account/${id}/resource-groups`;
-      return await fetchData(url);
+      const response = await fetchData(url);
+      return response?.data;
     },
     ...options,
   });
@@ -36,12 +37,8 @@ export function useGetResourceGroup(id, options = {}) {
 export function usePostResourceGroup() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({ cloudAccId, resourceIds, ...details }) => {
+    mutationFn: async ({ cloudAccId, ...details }) => {
       const response = await postData(`/cloud-account/${cloudAccId}/resource-groups`, details);
-      const assignPromises = resourceIds.map((resourceId) =>
-        postData(`/resource-groups/${response?.data?.id}/resources/${resourceId?.id}`, {}),
-      );
-      await Promise.all(assignPromises);
       return response?.data;
     },
     onSuccess: () => {

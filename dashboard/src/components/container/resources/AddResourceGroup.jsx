@@ -45,7 +45,7 @@ const ResourceGroupManager = ({ resources, onClose }) => {
       name: resourceGroupName,
       description,
       cloudAccId: 1,
-      resourceIds: selectedResourceDetails,
+      resource_ids: selectedResourceDetails.map((item) => item?.id),
     });
   };
 
