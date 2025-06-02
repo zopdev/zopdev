@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { ArrowPathIcon, PlusCircleIcon } from '@heroicons/react/20/solid';
 
@@ -22,14 +22,14 @@ import {
 } from '@/queries/cloud-resources';
 import { toast } from '@/components/molecules/Toast';
 
-const headers = [
+const HEADERS = [
   { key: 'name', label: 'Name', align: 'left', width: '200px' },
   { key: 'state', label: 'State', align: 'left', width: '150px' },
   { key: 'instance_type', label: 'Instance Type', align: 'left', width: '120px' },
   { key: 'region', label: 'Region', align: 'left', width: '120px' },
 ];
 
-const pageTabs = [{ label: 'Resources' }, { label: 'Resource Group' }];
+const TABS = ['Resources', 'Resource Group'];
 
 const CreateResourceGroupButton = ({ resources }) => (
   <FullScreenOverlay
@@ -44,21 +44,25 @@ const CreateResourceGroupButton = ({ resources }) => (
   />
 );
 
+const SyncButton = ({ onClick, loading }) => (
+  <Button
+    startEndornment={<ArrowPathIcon className="size-5" />}
+    onClick={onClick}
+    loading={loading}
+  >
+    Sync
+  </Button>
+);
+
 const CloudResourcesPage = () => {
   const { cloudId } = useParams();
-  const [activeTab, setActiveTab] = useState('Resources');
+  const [activeTab, setActiveTab] = useState(TABS[0]);
 
   const { data: resourceData = [], isLoading, isError, error } = useGetCloudResources(cloudId);
-
   const { data: resourceGroupData = [] } = useGetResourceGroup(cloudId);
-
   const resourceSync = usePostResourceGroupSync();
 
-  const breadcrumbList = [
-    { name: 'Cloud Accounts', link: '/cloud-accounts' },
-    { name: 'Resources', link: '#', disable: true },
-  ];
-  const onResourceSync = () => {
+  const handleResourceSync = () => {
     resourceSync.mutate({ cloudAccId: cloudId });
   };
 
@@ -70,6 +74,78 @@ const CloudResourcesPage = () => {
     }
   }, [resourceSync?.isPending]);
 
+  const breadcrumbList = useMemo(
+    () => [
+      { name: 'Cloud Accounts', link: '/cloud-accounts' },
+      { name: 'Resources', link: '#', disable: true },
+    ],
+    [],
+  );
+
+  const renderTabActions = () => {
+    if (activeTab === 'Resources' && resourceData?.length > 0) {
+      return <SyncButton onClick={handleResourceSync} loading={resourceSync?.isPending} />;
+    }
+
+    if (activeTab === 'Resource Group' && resourceGroupData?.length > 0) {
+      return <CreateResourceGroupButton resources={resourceData} />;
+    }
+
+    return null;
+  };
+
+  const renderResourcesContent = () => {
+    if (resourceData?.length > 0) {
+      return (
+        <Table
+          headers={HEADERS}
+          data={resourceData}
+          enableRowClick={false}
+          renderRow={CloudResourceRow}
+          emptyStateTitle="No Resources Found"
+        />
+      );
+    }
+
+    return (
+      <EmptyComponent
+        imageComponent={<BlankCloudAccountSvg />}
+        customButton={<SyncButton onClick={handleResourceSync} loading={resourceSync?.isPending} />}
+        title="No resources found. Please sync your cloud account."
+      />
+    );
+  };
+
+  const renderResourceGroupContent = () => {
+    if (resourceGroupData?.length > 0) {
+      return (
+        <ResourceGroupAccordion
+          groups={resourceGroupData}
+          defaultExpandedIds={[]}
+          resources={resourceData}
+        />
+      );
+    }
+
+    if (resourceData?.length > 0) {
+      return (
+        <EmptyComponent
+          imageComponent={<BlankCloudAccountSvg />}
+          customButton={<CreateResourceGroupButton resources={resourceData} />}
+          title="Please start by setting up your first resource group"
+        />
+      );
+    }
+
+    return (
+      <EmptyComponent
+        imageComponent={<BlankCloudAccountSvg />}
+        customButton={<SyncButton onClick={handleResourceSync} loading={resourceSync?.isPending} />}
+        title="No resources found. Please sync your cloud account."
+      />
+    );
+  };
+
   return (
     <>
       <BreadCrumb breadcrumbList={breadcrumbList} />
@@ -79,90 +155,16 @@ const CloudResourcesPage = () => {
       {!isLoading && !isError && (
         <>
           <div className="flex justify-between flex-wrap xs:space-y-2 md:space-y-0">
-            <Tabs tabs={pageTabs} activeTab={activeTab} onTabChange={setActiveTab} size="md" />
-            <div className="flex items-center">
-              {
-                {
-                  Resources: resourceData?.length > 0 && (
-                    <Button
-                      startEndornment={<ArrowPathIcon className="size-5" />}
-                      onClick={onResourceSync}
-                      loading={resourceSync?.isPending}
-                    >
-                      Sync
-                    </Button>
-                  ),
-                  'Resource Group': resourceGroupData?.length > 0 && (
-                    <CreateResourceGroupButton resources={resourceData} />
-                  ),
-                }[activeTab]
-              }
-            </div>
+            <Tabs
+              tabs={TABS.map((label) => ({ label }))}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              size="md"
+            />
+            <div className="flex items-center">{renderTabActions()}</div>
           </div>
 
-          {
-            {
-              Resources: (
-                <>
-                  {resourceData?.length > 0 ? (
-                    <Table
-                      headers={headers}
-                      data={resourceData}
-                      enableRowClick={false}
-                      renderRow={CloudResourceRow}
-                      emptyStateTitle="No Resources Found"
-                      // emptyStateDescription="Looks like your cloud account has no active resources right now"
-                    />
-                  ) : (
-                    <EmptyComponent
-                      imageComponent={<BlankCloudAccountSvg />}
-                      customButton={
-                        <Button
-                          startEndornment={<ArrowPathIcon className="size-5" />}
-                          onClick={onResourceSync}
-                          loading={resourceSync?.isPending}
-                        >
-                          Sync
-                        </Button>
-                      }
-                      title="No resources found. Please sync your cloud account."
-                    />
-                  )}
-                </>
-              ),
-              'Resource Group': (
-                <>
-                  {resourceGroupData?.length > 0 ? (
-                    <ResourceGroupAccordion
-                      groups={resourceGroupData}
-                      defaultExpandedIds={[]}
-                      resources={resourceData}
-                    />
-                  ) : resourceData?.length > 0 ? (
-                    <EmptyComponent
-                      imageComponent={<BlankCloudAccountSvg />}
-                      customButton={<CreateResourceGroupButton resources={resourceData} />}
-                      title="Please start by setting up your first resource group"
-                    />
-                  ) : (
-                    <EmptyComponent
-                      imageComponent={<BlankCloudAccountSvg />}
-                      customButton={
-                        <Button
-                          startEndornment={<ArrowPathIcon className="size-5" />}
-                          onClick={onResourceSync}
-                          loading={resourceSync?.isPending}
-                        >
-                          Sync
-                        </Button>
-                      }
-                      title="No resources found. Please sync your cloud account."
-                    />
-                  )}
-                </>
-              ),
-            }[activeTab]
-          }
+          {activeTab === 'Resources' ? renderResourcesContent() : renderResourceGroupContent()}
         </>
       )}
 
