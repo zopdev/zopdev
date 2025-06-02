@@ -94,7 +94,7 @@ const ResourceGroupManager = ({ resources, onClose, initialData = null }) => {
   };
 
   const isFormValid = form.name.trim() !== '' && selectedResourceIds.length > 0;
-  const isAllSelected = selectedResourceIds.length === resources.length;
+  const isAllSelected = selectedResourceIds.length === resources?.length;
   const isIndeterminate = selectedResourceIds.length > 0 && !isAllSelected;
   const isPending = isCreating || isUpdating;
   const isError = isCreateError || isUpdateError;
@@ -133,13 +133,13 @@ const ResourceGroupManager = ({ resources, onClose, initialData = null }) => {
               onChange={handleSelectAll}
             />
             <span className="ml-2 text-sm font-medium text-gray-700">
-              Select All ({selectedResourceIds.length} of {resources.length} selected)
+              Select All ({selectedResourceIds.length} of {resources?.length} selected)
             </span>
           </Label>
         </div>
 
         <div className="space-y-2 max-h-64 overflow-y-auto">
-          {resources.map(({ id, name, type }) => (
+          {resources?.map(({ id, name, type }) => (
             <div key={id} className="flex items-center p-2 hover:bg-gray-50 rounded">
               <Label className="flex items-center cursor-pointer w-full">
                 <Checkbox

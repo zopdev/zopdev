@@ -117,7 +117,7 @@ const CloudResourcesPage = () => {
                     defaultExpandedIds={[]}
                     resources={resourceData}
                   />
-                  {resourceGroupData.length === 0 && (
+                  {resourceGroupData?.length === 0 && (
                     <EmptyComponent
                       imageComponent={<BlankCloudAccountSvg />}
                       customButton={<CreateResourceGroupButton resources={resourceData} />}

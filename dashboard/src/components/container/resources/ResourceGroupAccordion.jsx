@@ -26,7 +26,7 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], resource
 
   return (
     <div className="space-y-4 py-4">
-      {groups.map((group) => {
+      {groups?.map((group) => {
         const hasResources = group?.resources?.length > 0;
         const isExpanded = expandedGroups.has(group.id);
         const runningCount = group.resources?.filter((r) => r.status === 'RUNNING')?.length || 0;
