@@ -83,7 +83,7 @@ const CloudResourcesPage = () => {
             <div className="flex items-center">
               {
                 {
-                  Resources: (
+                  Resources: resourceData?.length > 0 && (
                     <Button
                       startEndornment={<ArrowPathIcon className="size-5" />}
                       onClick={onResourceSync}
@@ -92,7 +92,9 @@ const CloudResourcesPage = () => {
                       Sync
                     </Button>
                   ),
-                  'Resource Group': <CreateResourceGroupButton resources={resourceData} />,
+                  'Resource Group': resourceGroupData?.length > 0 && (
+                    <CreateResourceGroupButton resources={resourceData} />
+                  ),
                 }[activeTab]
               }
             </div>
@@ -101,27 +103,60 @@ const CloudResourcesPage = () => {
           {
             {
               Resources: (
-                <Table
-                  headers={headers}
-                  data={resourceData}
-                  enableRowClick={false}
-                  renderRow={CloudResourceRow}
-                  emptyStateTitle="No Resources Found"
-                  // emptyStateDescription="Looks like your cloud account has no active resources right now"
-                />
+                <>
+                  {resourceData?.length > 0 ? (
+                    <Table
+                      headers={headers}
+                      data={resourceData}
+                      enableRowClick={false}
+                      renderRow={CloudResourceRow}
+                      emptyStateTitle="No Resources Found"
+                      // emptyStateDescription="Looks like your cloud account has no active resources right now"
+                    />
+                  ) : (
+                    <EmptyComponent
+                      imageComponent={<BlankCloudAccountSvg />}
+                      customButton={
+                        <Button
+                          startEndornment={<ArrowPathIcon className="size-5" />}
+                          onClick={onResourceSync}
+                          loading={resourceSync?.isPending}
+                        >
+                          Sync
+                        </Button>
+                      }
+                      title="No resources found. Please sync your cloud account."
+                    />
+                  )}
+                </>
               ),
               'Resource Group': (
                 <>
-                  <ResourceGroupAccordion
-                    groups={resourceGroupData}
-                    defaultExpandedIds={[]}
-                    resources={resourceData}
-                  />
-                  {resourceGroupData?.length === 0 && (
+                  {resourceGroupData?.length > 0 ? (
+                    <ResourceGroupAccordion
+                      groups={resourceGroupData}
+                      defaultExpandedIds={[]}
+                      resources={resourceData}
+                    />
+                  ) : resourceData?.length > 0 ? (
                     <EmptyComponent
                       imageComponent={<BlankCloudAccountSvg />}
                       customButton={<CreateResourceGroupButton resources={resourceData} />}
                       title="Please start by setting up your first resource group"
+                    />
+                  ) : (
+                    <EmptyComponent
+                      imageComponent={<BlankCloudAccountSvg />}
+                      customButton={
+                        <Button
+                          startEndornment={<ArrowPathIcon className="size-5" />}
+                          onClick={onResourceSync}
+                          loading={resourceSync?.isPending}
+                        >
+                          Sync
+                        </Button>
+                      }
+                      title="No resources found. Please sync your cloud account."
                     />
                   )}
                 </>
