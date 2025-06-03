@@ -174,11 +174,12 @@ func (s *Service) modifyResources(ctx *gofr.Context, rgID int64, existingResourc
 	}
 
 	existingSet := make(map[int64]struct{})
+	newIDs := make([]int64, 0, len(resourceIDs))
+
 	for _, id := range existingResources {
 		existingSet[id] = struct{}{}
 	}
 
-	newIDs := make([]int64, 0, len(resourceIDs))
 	for _, id := range resourceIDs {
 		if _, ok := existingSet[id]; !ok {
 			newIDs = append(newIDs, id)
@@ -207,7 +208,8 @@ func (s *Service) DeleteResourceGroup(ctx *gofr.Context, cloudAccID, id int64) e
 		return gofrHttp.ErrorEntityNotFound{Name: "resource group", Value: strconv.FormatInt(id, 10)}
 	}
 
-	if err := s.grpStore.DeleteResourceGroup(ctx, id); err != nil {
+	err = s.grpStore.DeleteResourceGroup(ctx, id)
+	if err != nil {
 		return &errInternalServer{}
 	}
 

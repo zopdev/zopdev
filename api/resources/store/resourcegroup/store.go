@@ -100,8 +100,8 @@ func (*Store) DeleteResourceGroup(ctx *gofr.Context, id int64) error {
 		return err
 	}
 
-	// Optionally, you can also delete the membership entries for this group
-	_, err = ctx.SQL.ExecContext(ctx, `DELETE FROM resource_group_membership WHERE resource_group_id = ?`, id)
+	// Additionally, delete all memberships associated with this resource group
+	_, err = ctx.SQL.ExecContext(ctx, `DELETE FROM resource_group_memberships WHERE group_id = ?`, id)
 	if err != nil {
 		return err
 	}

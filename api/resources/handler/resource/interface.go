@@ -1,10 +1,10 @@
 package resource
 
 import (
-	"github.com/zopdev/zopdev/api/resources/service/resource"
 	"gofr.dev/pkg/gofr"
 
 	"github.com/zopdev/zopdev/api/resources/models"
+	"github.com/zopdev/zopdev/api/resources/service/resource"
 )
 
 type Service interface {

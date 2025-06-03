@@ -290,7 +290,86 @@ func TestHandler_CreateResourceGroup(t *testing.T) {
 	}
 }
 
-func TestHandler_UpdateResourceGroup(t *testing.T) {
+func TestHandler_UpdateResourceGroup1(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	mSvc := NewMockService(ctrl)
+	h := New(mSvc)
+	ctx := &gofr.Context{Context: context.Background()}
+	updateReq := &models.RGUpdate{
+		ID:             1,
+		Name:           "myGroup",
+		Description:    "sample group",
+		CloudAccountID: 1,
+		ResourceIDs:    []int64{2, 4},
+	}
+
+	testCases := []struct {
+		name      string
+		accID     string
+		groupID   string
+		body      string
+		expErr    error
+		expRes    any
+		mockCalls []*gomock.Call
+	}{
+		{
+			name:   "invalid cloud account ID",
+			accID:  "invalid",
+			expErr: gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
+		},
+		{
+			name:    "missing resource group ID",
+			accID:   "1",
+			groupID: "",
+			expErr:  gofrHttp.ErrorMissingParam{Params: []string{"rgId"}},
+		},
+		{
+			name:    "invalid resource group ID",
+			accID:   "1",
+			groupID: "invalid",
+			expErr:  gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}},
+		},
+		{
+			name:    "invalid bind",
+			accID:   "1",
+			groupID: "1",
+			body:    `{`,
+			expErr:  gofrHttp.ErrorInvalidParam{Params: []string{"body"}},
+		},
+		{
+			name:    "service error",
+			accID:   "1",
+			groupID: "1",
+			body:    `{"name":"myGroup", "description" : "sample group", "resource_ids":[2, 4]}`,
+			expErr:  assert.AnError,
+			mockCalls: []*gomock.Call{
+				mSvc.EXPECT().UpdateResourceGroup(ctx, updateReq).
+					Return(nil, assert.AnError),
+			},
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			req := httptest.NewRequest(http.MethodPost,
+				"/cloud-account/{id}/resourcegroup", bytes.NewBufferString(tc.body))
+			req = mux.SetURLVars(req, map[string]string{"id": tc.accID, "rgID": tc.groupID})
+
+			req.Header.Set("Content-Type", "application/json")
+
+			ctx.Request = gofrHttp.NewRequest(req)
+
+			res, err := h.UpdateResourceGroup(ctx)
+
+			assert.Equal(t, tc.expErr, err)
+			assert.Equal(t, tc.expRes, res)
+		})
+	}
+}
+
+func TestHandler_UpdateResourceGroup2(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -346,41 +425,6 @@ func TestHandler_UpdateResourceGroup(t *testing.T) {
 			name:   "missing cloud account ID",
 			accID:  "",
 			expErr: gofrHttp.ErrorMissingParam{Params: []string{"id"}},
-		},
-		{
-			name:   "invalid cloud account ID",
-			accID:  "invalid",
-			expErr: gofrHttp.ErrorInvalidParam{Params: []string{"id"}},
-		},
-		{
-			name:    "missing resource group ID",
-			accID:   "1",
-			groupID: "",
-			expErr:  gofrHttp.ErrorMissingParam{Params: []string{"rgId"}},
-		},
-		{
-			name:    "invalid resource group ID",
-			accID:   "1",
-			groupID: "invalid",
-			expErr:  gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}},
-		},
-		{
-			name:    "invalid bind",
-			accID:   "1",
-			groupID: "1",
-			body:    `{`,
-			expErr:  gofrHttp.ErrorInvalidParam{Params: []string{"body"}},
-		},
-		{
-			name:    "service error",
-			accID:   "1",
-			groupID: "1",
-			body:    `{"name":"myGroup", "description" : "sample group", "resource_ids":[2, 4]}`,
-			expErr:  assert.AnError,
-			mockCalls: []*gomock.Call{
-				mSvc.EXPECT().UpdateResourceGroup(ctx, updateReq).
-					Return(nil, assert.AnError),
-			},
 		},
 	}
 
@@ -474,5 +518,4 @@ func TestHandler_DeleteResourceGroup(t *testing.T) {
 			assert.Nil(t, res)
 		})
 	}
-
 }

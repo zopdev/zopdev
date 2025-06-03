@@ -26,26 +26,6 @@ settings, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 	return nil
 }
 
-func (*Store) GetResource(ctx *gofr.Context, id int64) (*models.Resource, error) {
-	var res models.Resource
-
-	row := ctx.SQL.QueryRowContext(ctx, `SELECT id, resource_uid, name, state, cloud_account_id, 
-	   cloud_provider, resource_type, created_at, updated_at, settings, region
-		FROM resources WHERE id = ?`, id)
-
-	if row.Err() != nil {
-		return nil, row.Err()
-	}
-
-	if err := row.Scan(&res.ID, &res.UID, &res.Name, &res.Status,
-		&res.CloudAccount.ID, &res.CloudAccount.Type, &res.Type,
-		&res.CreatedAt, &res.UpdatedAt, &res.Settings, &res.Region); err != nil {
-		return nil, err
-	}
-
-	return &res, nil
-}
-
 // GetResourceByID fetches a resource by its unique identifier from the database.
 func (*Store) GetResourceByID(ctx *gofr.Context, id int64) (*models.Resource, error) {
 	var res models.Resource
