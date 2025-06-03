@@ -208,6 +208,19 @@ func (s *Service) DeleteResourceGroup(ctx *gofr.Context, cloudAccID, id int64) e
 		return gofrHttp.ErrorEntityNotFound{Name: "resource group", Value: strconv.FormatInt(id, 10)}
 	}
 
+	resIDs, err := s.grpStore.GetResourceIDs(ctx, id)
+	if err != nil {
+		return &errInternalServer{}
+	}
+
+	for _, resID := range resIDs {
+		// Remove the resource from the group
+		err = s.grpStore.RemoveResourceFromGroup(ctx, id, resID)
+		if err != nil {
+			return &errInternalServer{}
+		}
+	}
+
 	err = s.grpStore.DeleteResourceGroup(ctx, id)
 	if err != nil {
 		return &errInternalServer{}

@@ -14,11 +14,16 @@ type ResourceGroupData struct {
 }
 
 type RGCreate struct {
-	ID             int64   `json:"id"`
 	Name           string  `json:"name"`
-	Description    string  `json:"description,omitempty"`
-	CloudAccountID int64   `json:"cloud_account_id,omitempty"`
-	ResourceIDs    []int64 `json:"resource_ids,omitempty"`
+	Description    string  `json:"description"`
+	CloudAccountID int64   `json:"cloud_account_id"`
+	ResourceIDs    []int64 `json:"resource_ids"`
 }
 
-type RGUpdate RGCreate
+type RGUpdate struct {
+	ID             int64   `json:"id"`
+	Name           string  `json:"name"`
+	Description    string  `json:"description"`
+	CloudAccountID int64   `json:"cloud_account_id"`
+	ResourceIDs    []int64 `json:"resource_ids"`
+}

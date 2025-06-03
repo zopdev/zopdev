@@ -18,14 +18,9 @@ func New(svc Service) *Handler {
 }
 
 func (h *Handler) GetAllResourceGroups(ctx *gofr.Context) (any, error) {
-	id := ctx.PathParam("id")
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
-
-	accID, err := strconv.ParseInt(id, 10, 64)
+	accID, err := getCloudAccountID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
+		return nil, err
 	}
 
 	res, err := h.svc.GetAllResourceGroups(ctx, accID)
@@ -37,24 +32,14 @@ func (h *Handler) GetAllResourceGroups(ctx *gofr.Context) (any, error) {
 }
 
 func (h *Handler) GetResourceGroup(ctx *gofr.Context) (any, error) {
-	id := ctx.PathParam("id")
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
-
-	accID, err := strconv.ParseInt(id, 10, 64)
+	accID, err := getCloudAccountID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
+		return nil, err
 	}
 
-	idStr := ctx.PathParam("rgID")
-	if idStr == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"rgId"}}
-	}
-
-	rgID, err := strconv.ParseInt(idStr, 10, 64)
+	rgID, err := getResourceGroupID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}}
+		return nil, err
 	}
 
 	res, err := h.svc.GetResourceGroupByID(ctx, accID, rgID)
@@ -66,14 +51,9 @@ func (h *Handler) GetResourceGroup(ctx *gofr.Context) (any, error) {
 }
 
 func (h *Handler) CreateResourceGroup(ctx *gofr.Context) (any, error) {
-	id := ctx.PathParam("id")
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
-
-	accID, err := strconv.ParseInt(id, 10, 64)
+	accID, err := getCloudAccountID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
+		return nil, err
 	}
 
 	var rg models.RGCreate
@@ -94,24 +74,14 @@ func (h *Handler) CreateResourceGroup(ctx *gofr.Context) (any, error) {
 }
 
 func (h *Handler) UpdateResourceGroup(ctx *gofr.Context) (any, error) {
-	id := ctx.PathParam("id")
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
-
-	accID, err := strconv.ParseInt(id, 10, 64)
+	accID, err := getCloudAccountID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
+		return nil, err
 	}
 
-	grpID := ctx.PathParam("rgID")
-	if grpID == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"rgId"}}
-	}
-
-	groupID, err := strconv.ParseInt(grpID, 10, 64)
+	groupID, err := getResourceGroupID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}}
+		return nil, err
 	}
 
 	var rg models.RGUpdate
@@ -133,24 +103,14 @@ func (h *Handler) UpdateResourceGroup(ctx *gofr.Context) (any, error) {
 }
 
 func (h *Handler) DeleteResourceGroup(ctx *gofr.Context) (any, error) {
-	id := ctx.PathParam("id")
-	if id == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
-	}
-
-	accID, err := strconv.ParseInt(id, 10, 64)
+	accID, err := getCloudAccountID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
+		return nil, err
 	}
 
-	idStr := ctx.PathParam("rgID")
-	if idStr == "" {
-		return nil, gofrHttp.ErrorMissingParam{Params: []string{"rgId"}}
-	}
-
-	rgID, err := strconv.ParseInt(idStr, 10, 64)
+	rgID, err := getResourceGroupID(ctx)
 	if err != nil {
-		return nil, gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}}
+		return nil, err
 	}
 
 	err = h.svc.DeleteResourceGroup(ctx, accID, rgID)
@@ -159,4 +119,32 @@ func (h *Handler) DeleteResourceGroup(ctx *gofr.Context) (any, error) {
 	}
 
 	return nil, nil
+}
+
+func getResourceGroupID(ctx *gofr.Context) (int64, error) {
+	rgIDStr := ctx.PathParam("rgID")
+	if rgIDStr == "" {
+		return 0, gofrHttp.ErrorMissingParam{Params: []string{"rgId"}}
+	}
+
+	rgID, err := strconv.ParseInt(rgIDStr, 10, 64)
+	if err != nil {
+		return 0, gofrHttp.ErrorInvalidParam{Params: []string{"rgId"}}
+	}
+
+	return rgID, nil
+}
+
+func getCloudAccountID(ctx *gofr.Context) (int64, error) {
+	accIDStr := ctx.PathParam("id")
+	if accIDStr == "" {
+		return 0, gofrHttp.ErrorMissingParam{Params: []string{"id"}}
+	}
+
+	accID, err := strconv.ParseInt(accIDStr, 10, 64)
+	if err != nil {
+		return 0, gofrHttp.ErrorInvalidParam{Params: []string{"id"}}
+	}
+
+	return accID, nil
 }

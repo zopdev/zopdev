@@ -391,6 +391,9 @@ func TestService_DeleteResourceGroup(t *testing.T) {
 			name: "success",
 			setup: func() {
 				mockStore.EXPECT().GetResourceGroupByID(ctx, int64(1), int64(1)).Return(rg, nil)
+				mockStore.EXPECT().GetResourceIDs(ctx, rg.ID).Return([]int64{1, 2}, nil)
+				mockStore.EXPECT().RemoveResourceFromGroup(ctx, int64(1), int64(1)).Return(nil)
+				mockStore.EXPECT().RemoveResourceFromGroup(ctx, int64(1), int64(2)).Return(nil)
 				mockStore.EXPECT().DeleteResourceGroup(ctx, int64(1)).Return(nil)
 			},
 			expectedErr: nil,
@@ -404,9 +407,30 @@ func TestService_DeleteResourceGroup(t *testing.T) {
 			expectedErr: &errInternalServer{},
 		},
 		{
+			name: "store error - getting resource IDs",
+			setup: func() {
+				mockStore.EXPECT().GetResourceGroupByID(ctx, int64(1), int64(1)).
+					Return(rg, nil)
+				mockStore.EXPECT().GetResourceIDs(ctx, int64(1)).Return(nil, assert.AnError)
+			},
+			expectedErr: &errInternalServer{},
+		},
+		{
+			name: "store error - removing resource from group",
+			setup: func() {
+				mockStore.EXPECT().GetResourceGroupByID(ctx, int64(1), int64(1)).Return(rg, nil)
+				mockStore.EXPECT().GetResourceIDs(ctx, rg.ID).Return([]int64{1, 2}, nil)
+				mockStore.EXPECT().RemoveResourceFromGroup(ctx, int64(1), int64(1)).Return(assert.AnError)
+			},
+			expectedErr: &errInternalServer{},
+		},
+		{
 			name: "store error - delete resource group",
 			setup: func() {
 				mockStore.EXPECT().GetResourceGroupByID(ctx, int64(1), int64(1)).Return(rg, nil)
+				mockStore.EXPECT().GetResourceIDs(ctx, rg.ID).Return([]int64{1, 2}, nil)
+				mockStore.EXPECT().RemoveResourceFromGroup(ctx, int64(1), int64(1)).Return(nil)
+				mockStore.EXPECT().RemoveResourceFromGroup(ctx, int64(1), int64(2)).Return(nil)
 				mockStore.EXPECT().DeleteResourceGroup(ctx, int64(1)).Return(assert.AnError)
 			},
 			expectedErr: &errInternalServer{},

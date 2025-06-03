@@ -130,9 +130,6 @@ func TestStore_DeleteResourceGroup(t *testing.T) {
 	mocks.SQL.Sqlmock.ExpectExec(`UPDATE resource_groups SET deleted_at = ? WHERE id = ?`).
 		WithArgs(sqlmock.AnyArg(), int64(1)).
 		WillReturnResult(sqlmock.NewResult(1, 1))
-	mocks.SQL.Sqlmock.ExpectExec(`DELETE FROM resource_group_memberships WHERE group_id = ?`).
-		WithArgs(int64(1)).
-		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	err := store.DeleteResourceGroup(ctx, 1)
 
@@ -157,7 +154,7 @@ func TestStore_GetResourceIDs(t *testing.T) {
 		WithArgs(int64(1)).WillReturnRows(rows)
 
 	ids, err := store.GetResourceIDs(ctx, 1)
-	
+
 	require.NoError(t, err)
 	assert.Equal(t, []int64{1, 2}, ids)
 }

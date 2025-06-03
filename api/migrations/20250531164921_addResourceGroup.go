@@ -23,8 +23,8 @@ func addResourceGroup() migration.Migrate {
     resource_id INTEGER NOT NULL,
     group_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (resource_id) REFERENCES resources(id) ON DELETE CASCADE,
-    FOREIGN KEY (group_id) REFERENCES resource_groups(id) ON DELETE CASCADE,
+    FOREIGN KEY (resource_id) REFERENCES resources(id),
+    FOREIGN KEY (group_id) REFERENCES resource_groups(id),
     UNIQUE(resource_id, group_id)
 );`)
 			if err != nil {
