@@ -44,10 +44,10 @@ func Test_GetAllInstances(t *testing.T) {
 			{Name: "test-instance2", Project: "test-project", Settings: &sqladmin.Settings{ActivationPolicy: NEVER}},
 			{Name: "test-instance3", Project: "test-project", Settings: &sqladmin.Settings{ActivationPolicy: "ON_DEMAND"}},
 		}}
-	result := []models.Instance{
+	result := []models.Resource{
 		{Name: "test-instance1", UID: "test-project/test-instance1", Type: "SQL", Status: RUNNING},
-		{Name: "test-instance2", UID: "test-project/test-instance2", Type: "SQL", Status: SUSPENDED},
-		{Name: "test-instance3", UID: "test-project/test-instance3", Type: "SQL", Status: SUSPENDED},
+		{Name: "test-instance2", UID: "test-project/test-instance2", Type: "SQL", Status: STOPPED},
+		{Name: "test-instance3", UID: "test-project/test-instance3", Type: "SQL", Status: STOPPED},
 	}
 
 	srv := getServer(t, resp, false)

@@ -1,4 +1,4 @@
-package store
+package resource
 
 import (
 	"context"
@@ -21,7 +21,7 @@ func TestStore_InsertResource(t *testing.T) {
 
 	mockContainer, mocks := container.NewMockContainer(t)
 
-	mockInput := &models.Instance{
+	mockInput := &models.Resource{
 		UID:          "zopdev/test-instance",
 		Name:         "test-instance",
 		Status:       "RUNNING",
@@ -38,7 +38,7 @@ func TestStore_InsertResource(t *testing.T) {
 
 	testCases := []struct {
 		name      string
-		input     *models.Instance
+		input     *models.Resource
 		expErr    error
 		mockCalls func()
 	}{
@@ -98,7 +98,7 @@ func TestStore_GetResources(t *testing.T) {
 		cloudAccID   int64
 		resourceType []string
 		expErr       error
-		expResp      []models.Instance
+		expResp      []models.Resource
 		mockCalls    func()
 	}{
 		{
@@ -114,7 +114,7 @@ func TestStore_GetResources(t *testing.T) {
 						AddRow(2, "zopdev/vm-instance-1", "vm-instance-1", "STOPPED", 123, "GCP",
 							"VM", mockTime, mockTime, &settings, "us-central1"))
 			},
-			expResp: []models.Instance{
+			expResp: []models.Resource{
 				{ID: 1, UID: "zopdev/sql-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"},
 					Type: "SQL", Name: "sql-instance-1", Status: "RUNNING", CreatedAt: mockTime, UpdatedAt: mockTime,
 					Settings: settings, Region: "us-central1"},
@@ -128,7 +128,7 @@ func TestStore_GetResources(t *testing.T) {
 			cloudAccID:   123,
 			resourceType: []string{"SQL"},
 			expErr:       nil,
-			expResp: []models.Instance{
+			expResp: []models.Resource{
 				{ID: 1, Name: "sql-instance-1", Type: "SQL", Status: "RUNNING", CreatedAt: mockTime, UpdatedAt: mockTime, Region: "us-central1",
 					Settings: settings, UID: "zopdev/sql-instance-1", CloudAccount: models.CloudAccount{ID: 123, Type: "GCP"}},
 			},
@@ -268,7 +268,7 @@ func TestStore_GetResourceByID(t *testing.T) {
 	query := `SELECT id, resource_uid, name, state, cloud_account_id,
 		cloud_provider, resource_type, created_at, updated_at, settings, region
 	FROM resources WHERE id = ?`
-	mockResp := &models.Instance{
+	mockResp := &models.Resource{
 		ID:     1,
 		UID:    "zopdev/sql-instance-1",
 		Name:   "sql-instance-1",
@@ -288,7 +288,7 @@ func TestStore_GetResourceByID(t *testing.T) {
 	testCases := []struct {
 		name      string
 		inputID   int64
-		expResp   *models.Instance
+		expResp   *models.Resource
 		expErr    error
 		mockCalls func()
 	}{

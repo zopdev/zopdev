@@ -24,11 +24,11 @@ type Client struct {
 	EC2 EC2API
 }
 
-func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
+func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Resource, error) {
 	regions := GetAWSRegions()
 
 	type result struct {
-		instances []models.Instance
+		instances []models.Resource
 		err       error
 	}
 
@@ -45,7 +45,7 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 				return
 			}
 
-			instances := make([]models.Instance, 0)
+			instances := make([]models.Resource, 0)
 
 			for _, reservation := range ec2Result.Reservations {
 				for _, inst := range reservation.Instances {
@@ -58,7 +58,7 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 						}
 					}
 
-					instance := models.Instance{
+					instance := models.Resource{
 						Name:         instanceName,
 						Type:         fmt.Sprintf("EC2-%v", awsStringValue(inst.InstanceType)),
 						UID:          awsStringValue(inst.InstanceId),
@@ -76,7 +76,7 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 		}(currentRegion)
 	}
 
-	allInstances := make([]models.Instance, 0)
+	allInstances := make([]models.Resource, 0)
 
 	var firstErr error
 

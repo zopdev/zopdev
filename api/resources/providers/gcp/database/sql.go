@@ -14,8 +14,8 @@ import (
 const (
 	// RUNNING instance state for zopdev.
 	RUNNING = "RUNNING"
-	// SUSPENDED instance state for zopdev.
-	SUSPENDED = "SUSPENDED"
+	// STOPPED instance state for zopdev.
+	STOPPED = "STOPPED"
 
 	// The following constants are to identify and change the state of the instance.
 
@@ -29,16 +29,16 @@ type Client struct {
 	SQL *sqladmin.InstancesService
 }
 
-func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.Instance, error) {
+func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.Resource, error) {
 	list, err := c.SQL.List(projectID).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	var instances = make([]models.Instance, 0)
+	var instances = make([]models.Resource, 0)
 
 	for _, item := range list.Items {
-		instances = append(instances, models.Instance{
+		instances = append(instances, models.Resource{
 			Name:         item.Name,
 			Type:         "SQL",
 			Region:       item.Region,
@@ -56,9 +56,9 @@ func getState(state string) string {
 	case ALWAYS:
 		return RUNNING
 	case NEVER:
-		return SUSPENDED
+		return STOPPED
 	default:
-		return SUSPENDED
+		return STOPPED
 	}
 }
 

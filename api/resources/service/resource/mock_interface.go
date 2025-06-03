@@ -7,7 +7,7 @@
 //
 
 // Package service is a generated GoMock package.
-package service
+package resource
 
 import (
 	context "context"
@@ -221,10 +221,10 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 }
 
 // GetResourceByID mocks base method.
-func (m *MockStore) GetResourceByID(ctx *gofr.Context, id int64) (*models.Instance, error) {
+func (m *MockStore) GetResourceByID(ctx *gofr.Context, id int64) (*models.Resource, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetResourceByID", ctx, id)
-	ret0, _ := ret[0].(*models.Instance)
+	ret0, _ := ret[0].(*models.Resource)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -236,10 +236,10 @@ func (mr *MockStoreMockRecorder) GetResourceByID(ctx, id any) *gomock.Call {
 }
 
 // GetResources mocks base method.
-func (m *MockStore) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Instance, error) {
+func (m *MockStore) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Resource, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetResources", ctx, cloudAccountID, resourceType)
-	ret0, _ := ret[0].([]models.Instance)
+	ret0, _ := ret[0].([]models.Resource)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -251,7 +251,7 @@ func (mr *MockStoreMockRecorder) GetResources(ctx, cloudAccountID, resourceType 
 }
 
 // InsertResource mocks base method.
-func (m *MockStore) InsertResource(ctx *gofr.Context, resources *models.Instance) error {
+func (m *MockStore) InsertResource(ctx *gofr.Context, resources *models.Resource) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "InsertResource", ctx, resources)
 	ret0, _ := ret[0].(error)

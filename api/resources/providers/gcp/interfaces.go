@@ -18,7 +18,7 @@ type MetricsClient interface {
 }
 
 type InstanceLister interface {
-	GetAllInstances(ctx *gofr.Context, projectID string) ([]models.Instance, error)
+	GetAllInstances(ctx *gofr.Context, projectID string) ([]models.Resource, error)
 }
 
 type TimeSeriesLister interface {

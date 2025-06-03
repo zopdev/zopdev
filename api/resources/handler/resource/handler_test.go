@@ -1,15 +1,15 @@
-package handler
+package resource
 
 import (
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -17,7 +17,7 @@ import (
 	gofrHttp "gofr.dev/pkg/gofr/http"
 
 	"github.com/zopdev/zopdev/api/resources/models"
-	"github.com/zopdev/zopdev/api/resources/service"
+	"github.com/zopdev/zopdev/api/resources/service/resource"
 )
 
 var errMock = errors.New("mock error")
@@ -30,7 +30,7 @@ func TestHandler_GetResources(t *testing.T) {
 	ctx := &gofr.Context{
 		Context: context.Background(),
 	}
-	mockResp := []models.Instance{
+	mockResp := []models.Resource{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
 	h := New(mockSvc)
@@ -116,7 +116,7 @@ func TestHandler_ChangeState(t *testing.T) {
 	ctx := &gofr.Context{
 		Context: context.Background(),
 	}
-	resDetails := service.ResourceDetails{CloudAccID: 123, Name: "sql-instance-1", Type: "sql", State: service.START}
+	resDetails := resource.ResourceDetails{CloudAccID: 123, Name: "sql-instance-1", Type: "sql", State: resource.START}
 	h := New(mockSvc)
 
 	testCases := []struct {
@@ -196,7 +196,7 @@ func TestHandler_SyncResources(t *testing.T) {
 	ctx := &gofr.Context{
 		Context: context.Background(),
 	}
-	mockResp := []models.Instance{
+	mockResp := []models.Resource{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
 	h := New(mockSvc)

@@ -1,4 +1,4 @@
-package service
+package resource
 
 import (
 	"gofr.dev/pkg/gofr"
@@ -18,10 +18,23 @@ func New(gcp GCPClient, aws AWSClient, http HTTPClient, store Store) *Service {
 	return &Service{gcp: gcp, aws: aws, http: http, store: store}
 }
 
-func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Instance, error) {
+func (s *Service) GetAll(ctx *gofr.Context, id int64, resourceType []string) ([]models.Resource, error) {
 	res, err := s.store.GetResources(ctx, id, resourceType)
 	if err != nil {
 		return nil, err
+	}
+
+	return res, nil
+}
+
+func (s *Service) GetByID(ctx *gofr.Context, id int64) (*models.Resource, error) {
+	res, err := s.store.GetResourceByID(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if res == nil {
+		return nil, gofrHttp.ErrorEntityNotFound{Name: "resource"}
 	}
 
 	return res, nil
@@ -73,7 +86,7 @@ func getStatus(action ResourceState) string {
 	}
 }
 
-func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance, error) {
+func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Resource, error) {
 	ca, err := s.http.GetCloudCredentials(ctx, id)
 	if err != nil {
 		return nil, err
@@ -120,7 +133,7 @@ func (s *Service) SyncResources(ctx *gofr.Context, id int64) ([]models.Instance,
 	return s.GetAll(ctx, id, nil)
 }
 
-func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.Instance) {
+func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.Resource) {
 	for i, v := range visited {
 		if v {
 			continue
@@ -134,7 +147,7 @@ func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.In
 	}
 }
 
-func (s *Service) getALLComputeInstances(ctx *gofr.Context, details CloudDetails) ([]models.Instance, error) {
+func (s *Service) getALLComputeInstances(ctx *gofr.Context, details CloudDetails) ([]models.Resource, error) {
 	switch details.CloudType {
 	case AWS:
 		ec2Client, err := s.aws.NewEC2Client(ctx, details.Creds)
@@ -152,8 +165,8 @@ func (s *Service) getALLComputeInstances(ctx *gofr.Context, details CloudDetails
 	}
 }
 
-// bSearch performs a binary search on the sorted slice of models.Instance.
-func bSearch(res []models.Instance, uid string) (int, bool) {
+// bSearch performs a binary search on the sorted slice of models.Resource.
+func bSearch(res []models.Resource, uid string) (int, bool) {
 	l, r := 0, len(res)-1
 
 	for l <= r {

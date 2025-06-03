@@ -1,4 +1,4 @@
-package service
+package resource
 
 import (
 	"context"
@@ -45,7 +45,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 
 	mockGCP := NewMockGCPClient(ctrl)
 	mockCreds := &google.Credentials{ProjectID: "test-project"}
-	mockResp := []models.Instance{
+	mockResp := []models.Resource{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
 	}
 	mockLister := &mockSQLClient{
@@ -56,7 +56,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 	testCases := []struct {
 		name      string
 		req       CloudDetails
-		expResp   []models.Instance
+		expResp   []models.Resource
 		expErr    error
 		mockCalls func()
 	}{
@@ -123,7 +123,7 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 }
 
 func TestService_bSearch(t *testing.T) {
-	res := []models.Instance{
+	res := []models.Resource{
 		{ID: 1, UID: "zopdev-test/mysql01"},
 		{ID: 2, UID: "zopdev-test/mysql02"},
 		{ID: 3, UID: "zopdev-test/pgs1l01"},
