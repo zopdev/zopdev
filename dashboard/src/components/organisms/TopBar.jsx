@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { Disclosure, Transition, Dialog } from '@headlessui/react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline/index.js';
@@ -6,6 +6,8 @@ import AppLogo from '@/assets/svg/AppLogo.jsx';
 import CloudAccountSVG from '@/assets/svg/CloudAccountSvg.jsx';
 import AppLogoWithText from '../../assets/images/applogoWithText.svg';
 import DashboardIcon from '@/assets/svg/sidebar/DashboardIcon';
+import { AppContext } from '@/utils/context';
+import { useGetCloudAccounts } from '@/queries/cloud-account';
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(' ');
@@ -15,6 +17,29 @@ export function TopBar() {
   const location = useLocation();
   const [tab, setTab] = useState();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { setAppData } = useContext(AppContext);
+  const cloudAccounts = useGetCloudAccounts();
+
+  const handleAppData = (entity, values) =>
+    setAppData((prevValues) => ({ ...prevValues, [entity]: values }));
+
+  useEffect(() => {
+    if (cloudAccounts?.isSuccess) {
+      handleAppData('CLOUD_ACCOUNT_DATA', {
+        data: cloudAccounts?.data?.data,
+        isLoaded: true,
+        isError: false,
+      });
+    }
+    if (cloudAccounts?.isError) {
+      handleAppData('CLOUD_ACCOUNT_DATA', {
+        data: cloudAccounts?.data?.data,
+        isLoaded: true,
+        isError: true,
+      });
+    }
+  }, [cloudAccounts?.isFetching]);
+
   useEffect(() => {
     let DashboardView = navigation
       .map(function (ele) {

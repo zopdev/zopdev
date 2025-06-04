@@ -3,7 +3,7 @@ import { PROVIDER_ICON_MAPPER } from '@/utils/componentMapper';
 import { Link } from 'react-router-dom';
 
 const CloudAccountCard = ({ item }) => {
-  const isGCP = item?.provider === 'gcp';
+  const isGCP = item?.provider === 'gcp' || item?.provider === 'aws';
   const CardWrapper = isGCP ? Link : 'div';
   const wrapperProps = isGCP ? { to: `/cloud-accounts/${item?.id}/resources` } : {};
 

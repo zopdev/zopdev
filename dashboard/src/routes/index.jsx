@@ -6,7 +6,9 @@ const NotFoundPage = lazy(() => import('../pages/404.jsx'));
 const DashboardPage = lazy(() => import('../pages/index.jsx'));
 const CloudSetupPage = lazy(() => import('../pages/cloud-setup.jsx'));
 const CloudAccountsPage = lazy(() => import('../pages/cloud-accounts/index.jsx'));
-const CloudResourcesPage = lazy(() => import('../pages/cloud-accounts/[cloudId]/resources.jsx'));
+const CloudResourcesPage = lazy(
+  () => import('../pages/cloud-accounts/[cloudId]/resources/index.jsx'),
+);
 
 export const appRoutes = [
   {
