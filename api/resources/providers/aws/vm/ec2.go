@@ -1,7 +1,6 @@
 package vm
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -60,11 +59,12 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Resource, error) {
 
 					instance := models.Resource{
 						Name:         instanceName,
-						Type:         fmt.Sprintf("EC2-%v", awsStringValue(inst.InstanceType)),
+						Type:         "EC2",
 						UID:          awsStringValue(inst.InstanceId),
 						Region:       region,
 						CreationTime: inst.LaunchTime.Format(time.RFC3339),
 						Status:       awsStringValue(inst.State.Name),
+						Settings:     map[string]any{"InstanceType": awsStringValue(inst.InstanceType)},
 						CreatedAt:    time.Now(),
 						UpdatedAt:    time.Now(),
 					}

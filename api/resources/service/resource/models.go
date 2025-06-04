@@ -18,6 +18,8 @@ const (
 
 	SQL ResourceType = "SQL"
 
+	AWSCOMPUTE ResourceType = "EC2"
+
 	// Resource State constants.
 
 	START   ResourceState = "START"
