@@ -66,11 +66,7 @@ const ResourceGroupAccordion = ({
               className={`bg-gray-50 px-4 py-3 sm:px-6 transition-colors ${
                 hasResources ? 'cursor-pointer hover:bg-gray-100' : ''
               }`}
-              onClick={() => {
-                if (hasResources) {
-                  toggleGroup(group.id);
-                }
-              }}
+              onClick={() => hasResources && toggleGroup(group.id)}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-start gap-3">
