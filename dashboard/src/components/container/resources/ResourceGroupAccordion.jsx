@@ -9,6 +9,9 @@ import FullScreenOverlay from '@/components/atom/FullScreenOverlay';
 import ResourceGroupManager from '@/components/container/resources/AddResourceGroup';
 import { CloudResourceRow } from '@/components/container/resources/ResourceTableRow';
 import Table from '@/components/molecules/Table';
+import { TrashIcon } from '@heroicons/react/24/outline/index.js';
+import DeleteModal from '@/components/organisms/DeleteModal.jsx';
+import { toast } from '@/components/molecules/Toast/index.jsx';
 
 const tableHeaders = [
   { key: 'name', label: 'Name', align: 'left', width: '200px' },
@@ -17,7 +20,12 @@ const tableHeaders = [
   { key: 'region', label: 'Region', align: 'left', width: '120px' },
 ];
 
-const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], resources }) => {
+const ResourceGroupAccordion = ({
+  groups = [],
+  defaultExpandedIds = [],
+  resources,
+  resourceDelete,
+}) => {
   const [expandedGroups, setExpandedGroups] = useState(new Set(defaultExpandedIds));
 
   const toggleGroup = (groupId) => {
@@ -27,6 +35,24 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], resource
       return updated;
     });
   };
+  const [deleteItem, setDeleteItem] = useState({});
+
+  const deleteConfirmation = async () => {
+    resourceDelete.mutate(
+      {
+        cloudAccId: deleteItem?.cloud_account_id,
+        resourceGroupId: deleteItem?.id,
+      },
+      {
+        onSuccess: () => {
+          toast.success('Resource Group deleted successfully!');
+        },
+        onError: () => {
+          toast.failed('Failed to delete Resource Group.');
+        },
+      },
+    );
+  };
 
   return (
     <div className="space-y-4 py-4">
@@ -34,14 +60,17 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], resource
         const hasResources = group?.resources?.length > 0;
         const isExpanded = expandedGroups.has(group.id);
         const runningCount = group.resources?.filter((r) => r.status === 'RUNNING')?.length || 0;
-
         return (
           <div key={group.id} className="border border-gray-200 rounded-lg overflow-hidden">
             <div
               className={`bg-gray-50 px-4 py-3 sm:px-6 transition-colors ${
                 hasResources ? 'cursor-pointer hover:bg-gray-100' : ''
               }`}
-              onClick={() => hasResources && toggleGroup(group.id)}
+              onClick={() => {
+                if (hasResources) {
+                  toggleGroup(group.id);
+                }
+              }}
             >
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-start gap-3">
@@ -80,14 +109,23 @@ const ResourceGroupAccordion = ({ groups = [], defaultExpandedIds = [], resource
                       renderContent={ResourceGroupManager}
                       renderContentProps={{ resources, initialData: group }}
                     />
-                    {/* <IconButton
-                      onClick={() => {
-                     
-                      }}
-                    >
-                      <TrashIcon className="size-4 text-red-400" />
-                    </IconButton> */}
                   </div>
+                  <DeleteModal
+                    onDelete={deleteConfirmation}
+                    deleteTitle={'Delete Resource Group'}
+                    deleteKey={deleteItem?.name}
+                    isConfirmation
+                    isLoading={resourceDelete?.isPending}
+                    customCTA={
+                      <IconButton>
+                        <TrashIcon
+                          onClick={() => setDeleteItem(group)}
+                          className="text-gray-500 h-4 w-4 hover:text-red-600 rounded"
+                        />
+                      </IconButton>
+                    }
+                  />
+                  {/*<ExampleUsage group={group} resourceDelete={resourceDelete} />*/}
                 </div>
               </div>
             </div>

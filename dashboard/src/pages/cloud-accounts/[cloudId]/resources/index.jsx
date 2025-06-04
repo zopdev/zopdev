@@ -16,6 +16,7 @@ import BreadCrumb from '@/components/molecules/BreadCrumb';
 import Table from '@/components/molecules/Table';
 import { Tabs } from '@/components/molecules/Tabs';
 import {
+  useDeleteResourceGroup,
   useGetCloudResources,
   useGetResourceGroup,
   usePostResourceGroupSync,
@@ -61,6 +62,7 @@ const CloudResourcesPage = () => {
   const { data: resourceData = [], isLoading, isError, error } = useGetCloudResources(cloudId);
   const { data: resourceGroupData = [] } = useGetResourceGroup(cloudId);
   const resourceSync = usePostResourceGroupSync();
+  const resourceDelete = useDeleteResourceGroup();
 
   const handleResourceSync = () => {
     resourceSync.mutate({ cloudAccId: cloudId });
@@ -123,6 +125,7 @@ const CloudResourcesPage = () => {
           groups={resourceGroupData}
           defaultExpandedIds={[]}
           resources={resourceData}
+          resourceDelete={resourceDelete}
         />
       );
     }
