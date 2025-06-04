@@ -37,7 +37,7 @@ const ResourceGroupAccordion = ({
   };
   const [deleteItem, setDeleteItem] = useState({});
 
-  const deleteConfirmation = async () => {
+  const deleteConfirmation = () => {
     resourceDelete.mutate(
       {
         cloudAccId: deleteItem?.cloud_account_id,
@@ -117,11 +117,13 @@ const ResourceGroupAccordion = ({
                     isConfirmation
                     isLoading={resourceDelete?.isPending}
                     customCTA={
-                      <IconButton>
-                        <TrashIcon
-                          onClick={() => setDeleteItem(group)}
-                          className="text-gray-500 h-4 w-4 hover:text-red-600 rounded"
-                        />
+                      <IconButton
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDeleteItem(group);
+                        }}
+                      >
+                        <TrashIcon className="text-gray-500 h-4 w-4 hover:text-red-600 rounded" />
                       </IconButton>
                     }
                   />
