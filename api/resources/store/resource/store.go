@@ -1,4 +1,4 @@
-package store
+package resource
 
 import (
 	"gofr.dev/pkg/gofr"
@@ -14,7 +14,7 @@ type Store struct{}
 func New() *Store { return &Store{} }
 
 // InsertResource inserts a new resource into the database.
-func (*Store) InsertResource(ctx *gofr.Context, res *models.Instance) error {
+func (*Store) InsertResource(ctx *gofr.Context, res *models.Resource) error {
 	_, err := ctx.SQL.ExecContext(ctx,
 		`INSERT INTO resources (resource_uid, name, state, cloud_account_id, cloud_provider, resource_type, 
 settings, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -27,8 +27,8 @@ settings, region) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
 }
 
 // GetResourceByID fetches a resource by its unique identifier from the database.
-func (*Store) GetResourceByID(ctx *gofr.Context, id int64) (*models.Instance, error) {
-	var res models.Instance
+func (*Store) GetResourceByID(ctx *gofr.Context, id int64) (*models.Resource, error) {
+	var res models.Resource
 
 	row := ctx.SQL.QueryRowContext(ctx, `SELECT id, resource_uid, name, state, cloud_account_id, 
 	   cloud_provider, resource_type, created_at, updated_at, settings, region
@@ -50,9 +50,9 @@ func (*Store) GetResourceByID(ctx *gofr.Context, id int64) (*models.Instance, er
 // GetResources fetches resources for a given cloud account ID.
 // IMP: The returned result is sorted by resource UID. This is to ensure that the resources are returned in a consistent order.
 // The service layer can use this to compare the resources fetched from the cloud provider with the resources stored in the database.
-func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Instance, error) {
+func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType []string) ([]models.Resource, error) {
 	var (
-		resources []models.Instance
+		resources []models.Resource
 		args      = make([]any, 0, maxResTypes)
 	)
 
@@ -85,7 +85,7 @@ func (*Store) GetResources(ctx *gofr.Context, cloudAccountID int64, resourceType
 	defer rows.Close()
 
 	for rows.Next() {
-		var res models.Instance
+		var res models.Resource
 		if er := rows.Scan(&res.ID, &res.UID, &res.Name, &res.Status,
 			&res.CloudAccount.ID, &res.CloudAccount.Type, &res.Type,
 			&res.CreatedAt, &res.UpdatedAt, &res.Settings, &res.Region); er != nil {

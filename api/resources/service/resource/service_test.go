@@ -1,4 +1,4 @@
-package service
+package resource
 
 import (
 	"context"
@@ -41,11 +41,11 @@ func TestService_SyncResources(t *testing.T) {
 			"region":     "us-central1",
 		},
 	}
-	mockInst := []models.Instance{
+	mockInst := []models.Resource{
 		{Name: "sql-instance-1", UID: "zopdev/sql-instance-1", Type: "SQL", Status: "RUNNING"},
 		{Name: "sql-instance-2", UID: "zopdev/sql-instance-2", Type: "SQL", Status: "SUSPENDED"},
 	}
-	mStrResp := []models.Instance{
+	mStrResp := []models.Resource{
 		{ID: 1, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 			Name: "sql-instance-1", Type: string(SQL),
 			UID: "zopdev/sql-instance-1", Status: "RUNNING"},
@@ -63,7 +63,7 @@ func TestService_SyncResources(t *testing.T) {
 		id        int64
 		resources []string
 		expErr    error
-		expResp   []models.Instance
+		expResp   []models.Resource
 		mockCalls func()
 	}{
 		{
@@ -80,7 +80,7 @@ func TestService_SyncResources(t *testing.T) {
 					Return(mockLister, nil)
 				gomock.InOrder(
 					mStore.EXPECT().GetResources(gomock.Any(), int64(123), nil).
-						Return([]models.Instance{
+						Return([]models.Resource{
 							{ID: 1, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 								Name: "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1"},
 							{ID: 2, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
@@ -89,7 +89,7 @@ func TestService_SyncResources(t *testing.T) {
 					mStore.EXPECT().UpdateStatus(gomock.Any(), RUNNING, int64(1)).Return(nil),
 					mStore.EXPECT().InsertResource(gomock.Any(), gomock.Any()).Return(nil),
 					mStore.EXPECT().RemoveResource(gomock.Any(), gomock.Any()).Return(nil),
-					mStore.EXPECT().GetResources(gomock.Any(), int64(123), nil).Return([]models.Instance{
+					mStore.EXPECT().GetResources(gomock.Any(), int64(123), nil).Return([]models.Resource{
 						{ID: 1, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
 							Name: "sql-instance-1", Type: string(SQL), UID: "zopdev/sql-instance-1", Status: "RUNNING"},
 						{ID: 3, CloudAccount: models.CloudAccount{ID: 123, Type: string(GCP)},
@@ -137,7 +137,7 @@ func TestService_SyncResources_Errors(t *testing.T) {
 		id        int64
 		resources []string
 		expErr    error
-		expResp   []models.Instance
+		expResp   []models.Resource
 		mockCalls func()
 	}{
 		{
@@ -210,7 +210,7 @@ func TestService_ChangeState(t *testing.T) {
 			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
 			mockCalls: func() {
 				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
-					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: STOPPED}, nil)
+					Return(&models.Resource{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: STOPPED}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).
 					Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, gomock.Any(), "https://www.googleapis.com/auth/cloud-platform").
@@ -226,7 +226,7 @@ func TestService_ChangeState(t *testing.T) {
 			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: SUSPEND},
 			mockCalls: func() {
 				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
-					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
+					Return(&models.Resource{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 				mGCP.EXPECT().NewGoogleCredentials(ctx, gomock.Any(), "https://www.googleapis.com/auth/cloud-platform").
 					Return(mockCreds, nil)
@@ -241,7 +241,7 @@ func TestService_ChangeState(t *testing.T) {
 			input: ResourceDetails{ID: 1, CloudAccID: 123, Name: "test-instance", Type: SQL, State: START},
 			mockCalls: func() {
 				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
-					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
+					Return(&models.Resource{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
 			},
 		},
 		{
@@ -259,7 +259,7 @@ func TestService_ChangeState(t *testing.T) {
 			expErr: errMock,
 			mockCalls: func() {
 				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
-					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: STOPPED}, nil)
+					Return(&models.Resource{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: STOPPED}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).
 					Return(nil, errMock)
 			},
@@ -270,7 +270,7 @@ func TestService_ChangeState(t *testing.T) {
 			expErr: gofrHttp.ErrorInvalidParam{Params: []string{"req.Type"}},
 			mockCalls: func() {
 				mStore.EXPECT().GetResourceByID(ctx, int64(1)).
-					Return(&models.Instance{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
+					Return(&models.Resource{ID: 1, CloudAccount: models.CloudAccount{ID: 1}, Status: RUNNING}, nil)
 				mClient.EXPECT().GetCloudCredentials(ctx, int64(123)).Return(ca, nil)
 			},
 		},

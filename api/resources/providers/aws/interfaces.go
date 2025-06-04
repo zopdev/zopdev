@@ -13,7 +13,7 @@ type ResourceClient interface {
 }
 
 type InstanceLister interface {
-	GetAllInstances(ctx context.Context) ([]models.Instance, error)
+	GetAllInstances(ctx context.Context) ([]models.Resource, error)
 }
 
 type Idler interface {

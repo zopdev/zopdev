@@ -26,7 +26,7 @@ type Client struct {
 	RDS RDSAPI
 }
 
-func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
+func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Resource, error) {
 	input := &rds.DescribeDBInstancesInput{}
 
 	result, err := c.RDS.DescribeDBInstancesWithContext(ctx, input)
@@ -34,7 +34,7 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 		return nil, err
 	}
 
-	instances := make([]models.Instance, 0, len(result.DBInstances))
+	instances := make([]models.Resource, 0, len(result.DBInstances))
 
 	for _, db := range result.DBInstances {
 		engine := awsStringValue(db.Engine)
@@ -59,7 +59,7 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Instance, error) {
 			typ = "RDS-UNKNOWN"
 		}
 
-		instance := models.Instance{
+		instance := models.Resource{
 			Name:         awsStringValue(db.DBInstanceIdentifier),
 			Type:         typ,
 			UID:          awsStringValue(db.DBInstanceArn),

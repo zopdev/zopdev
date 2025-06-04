@@ -1,4 +1,4 @@
-package service
+package resource
 
 import (
 	"errors"
@@ -12,10 +12,10 @@ var errMock = errors.New("mock error")
 
 type mockSQLClient struct {
 	isError   bool
-	instances []models.Instance
+	instances []models.Resource
 }
 
-func (m *mockSQLClient) GetAllInstances(_ *gofr.Context, _ string) ([]models.Instance, error) {
+func (m *mockSQLClient) GetAllInstances(_ *gofr.Context, _ string) ([]models.Resource, error) {
 	if m.isError {
 		return nil, errMock
 	}

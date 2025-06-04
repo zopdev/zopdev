@@ -1,19 +1,19 @@
-package service
+package resource
 
 import (
 	"context"
 	"testing"
 
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/request"
+	"github.com/aws/aws-sdk-go/service/ec2"
+	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
 	"gofr.dev/pkg/gofr/container"
 	"golang.org/x/oauth2/google"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/request"
-	"github.com/aws/aws-sdk-go/service/ec2"
-	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/models"
 	"github.com/zopdev/zopdev/api/resources/providers/aws/database"
@@ -74,8 +74,9 @@ func TestService_SyncCron(t *testing.T) {
 		Context:   context.Background(),
 		Container: cnt,
 	}
-	mockResp := []models.Instance{
-		{ID: 1, Name: "sql-instance-1", UID: "zop/sql1", Status: RUNNING}, {ID: 2, Name: "sql-instance-2", UID: "zop/sql2", Status: RUNNING},
+	mockResp := []models.Resource{
+		{ID: 1, Name: "sql-instance-1", UID: "zop/sql1", Status: RUNNING},
+		{ID: 2, Name: "sql-instance-2", UID: "zop/sql2", Status: STOPPED},
 	}
 	mockLister := &mockSQLClient{
 		isError:   false,
@@ -104,7 +105,7 @@ func TestService_SyncCron(t *testing.T) {
 		Return(nil, nil).AnyTimes()
 	mStore.EXPECT().UpdateStatus(ctx, RUNNING, int64(1)).
 		Return(nil)
-	mStore.EXPECT().UpdateStatus(ctx, RUNNING, int64(2)).
+	mStore.EXPECT().UpdateStatus(ctx, STOPPED, int64(2)).
 		Return(nil)
 
 	// Add correct mocks for AWS EC2 and RDS clients

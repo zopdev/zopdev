@@ -1,4 +1,4 @@
-package service
+package resource
 
 import (
 	"strings"
@@ -10,11 +10,11 @@ import (
 	"github.com/zopdev/zopdev/api/resources/models"
 )
 
-func (s *Service) getAllInstances(ctx *gofr.Context, ca *client.CloudAccount) ([]models.Instance, error) {
-	var instances []models.Instance
+func (s *Service) getAllInstances(ctx *gofr.Context, ca *client.CloudAccount) ([]models.Resource, error) {
+	var instances []models.Resource
 
 	type result struct {
-		instances []models.Instance
+		instances []models.Resource
 		err       error
 	}
 
@@ -79,7 +79,7 @@ func (s *Service) getAllInstances(ctx *gofr.Context, ca *client.CloudAccount) ([
 	return instances, nil
 }
 
-func (s *Service) getAllSQLInstances(ctx *gofr.Context, req CloudDetails) ([]models.Instance, error) {
+func (s *Service) getAllSQLInstances(ctx *gofr.Context, req CloudDetails) ([]models.Resource, error) {
 	switch req.CloudType {
 	case GCP:
 		return s.getGCPSQLInstances(ctx, req.Creds)
@@ -92,7 +92,7 @@ func (s *Service) getAllSQLInstances(ctx *gofr.Context, req CloudDetails) ([]mod
 	}
 }
 
-func (s *Service) getGCPSQLInstances(ctx *gofr.Context, cred any) ([]models.Instance, error) {
+func (s *Service) getGCPSQLInstances(ctx *gofr.Context, cred any) ([]models.Resource, error) {
 	creds, err := s.gcp.NewGoogleCredentials(ctx, cred, "https://www.googleapis.com/auth/cloud-platform")
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func (s *Service) getGCPSQLInstances(ctx *gofr.Context, cred any) ([]models.Inst
 	return sqlClient.GetAllInstances(ctx, creds.ProjectID)
 }
 
-func (s *Service) getAWSRDSInstances(ctx *gofr.Context, cred any) ([]models.Instance, error) {
+func (s *Service) getAWSRDSInstances(ctx *gofr.Context, cred any) ([]models.Resource, error) {
 	awsRDSClient, err := s.aws.NewRDSClient(ctx, cred)
 	if err != nil {
 		return nil, err
