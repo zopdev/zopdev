@@ -78,7 +78,7 @@ func Test_GetAllInstances_Success(t *testing.T) {
 
 	for _, inst := range instances {
 		assert.Equal(t, "test-instance", inst.Name)
-		assert.Equal(t, "EC2-t2.micro", inst.Type)
+		assert.Equal(t, "EC2", inst.Type)
 		assert.Equal(t, "i-123", inst.UID)
 		assert.Equal(t, "running", inst.Status)
 
