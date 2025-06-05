@@ -45,7 +45,10 @@ func (s *Service) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]m
 				return er
 			}
 
-			var resources []models.Resource
+			var (
+				resources []models.Resource
+				status    = RUNNING
+			)
 
 			for i := range resIDs {
 				resource, er := s.resSvc.GetByID(ctx, resIDs[i])
@@ -53,10 +56,15 @@ func (s *Service) GetAllResourceGroups(ctx *gofr.Context, cloudAccID int64) ([]m
 					return er
 				}
 
+				if resource.Status == STOPPED {
+					status = STOPPED
+				}
+
 				resources = append(resources, *resource)
 			}
 
 			mu.Lock()
+			rg.Status = status
 			resourceGroupData = append(resourceGroupData, models.ResourceGroupData{
 				ResourceGroup: rg,
 				Resources:     resources,
