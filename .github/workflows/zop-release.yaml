@@ -1,0 +1,185 @@
+name: Publish api image
+
+on:
+  push:
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-and-code-quality-api:
+    name: 🧪 Test and Linters
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.24'
+
+      - name: Get dependencies
+        run: |
+          cd api
+          go mod download
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.1.6
+          args: --timeout 8m
+          working-directory: api
+
+      - name: Test
+        run: |
+          cd api
+          export APP_ENV=test
+          go test ./... -v -short -coverprofile packageWithpbgo.cov -coverpkg=./...
+          grep -vE '^gofr\.dev\/.*\.pb\.go' packageWithpbgo.cov > profile.cov
+          go tool cover -func profile.cov
+  prettier-and-lint-dashboard:
+    name: 🧪 Prettier and Lint
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+
+      - name: Install dependencies
+        run: |
+          cd dashboard
+          npm install
+
+      - name: run linter
+        run: |
+          cd dashboard
+          CI=false npm run lint
+
+      - name: run prettier
+        run: |
+          cd dashboard
+          CI=false npm run prettier:check
+
+  publish-dashboard-image:
+    if: ${{ startsWith(github.ref, 'refs/tags/v')}}
+    name: 🔨 Build and 🐳 Dockerize
+    needs: prettier-and-lint-dashboard
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Release Tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18.x"
+
+      - name: Install dependencies
+        run: |
+          cd dashboard
+          npm install
+
+      - name: Build
+        run: |
+          cd dashboard
+          npm run build
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: "v4vikash"
+          password: ${{ secrets.DOCKER_HUB_PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          context: ./dashboard
+          file: ./dashboard/Dockerfile
+          tags: zopdev/dashboard:${{ env.RELEASE_VERSION }}
+
+  publich-api-image:
+    if: ${{ startsWith(github.ref, 'refs/tags/v')}}
+    name: 🔨 Build and 🐳 Dockerize
+    needs: test-and-code-quality-api
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Release Tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: "v4vikash"
+          password: ${{ secrets.DOCKER_HUB_PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          context: ./api
+          file: ./api/Dockerfile
+          tags: zopdev/api:${{ env.RELEASE_VERSION }}
+  publich-zopdev-image:
+    if: ${{ startsWith(github.ref, 'refs/tags/v')}}
+    name: 🔨 Build and 🐳 Dockerize
+    needs: [prettier-and-lint-dashboard,test-and-code-quality-api]
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Release Tag
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@f4ef78c080cd8ba55a85445d5b36e214a81df20a
+        with:
+          username: "v4vikash"
+          password: ${{ secrets.DOCKER_HUB_PAT }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v4
+        with:
+          push: true
+          context: .
+          file: ./Dockerfile
+          tags: zopdev/zopdev:${{ env.RELEASE_VERSION }}
