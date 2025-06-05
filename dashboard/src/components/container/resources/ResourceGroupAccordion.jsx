@@ -119,11 +119,10 @@ const ResourceGroupAccordion = ({
                           setDeleteItem(group);
                         }}
                       >
-                        <TrashIcon className="text-gray-500 h-4 w-4 hover:text-red-600 rounded" />
+                        <TrashIcon className="text-gray-500 h-4 w-4 group-hover:text-red-600 rounded" />
                       </IconButton>
                     }
                   />
-                  {/*<ExampleUsage group={group} resourceDelete={resourceDelete} />*/}
                 </div>
               </div>
             </div>
