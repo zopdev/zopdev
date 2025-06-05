@@ -8,7 +8,7 @@ func addResourceGroup() migration.Migrate {
 			// write your migrations here
 			_, err := d.SQL.Exec(`CREATE TABLE IF NOT EXISTS resource_groups (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL,
     description TEXT,
     cloud_account_id INTEGER NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
