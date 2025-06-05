@@ -1,17 +1,21 @@
 package sql
 
 import (
+	"errors"
+	"net/http"
+
 	"gofr.dev/pkg/gofr"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/sqladmin/v1"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 const (
 	// RUNNING instance state for zopdev.
 	RUNNING = "RUNNING"
-	// SUSPENDED instance state for zopdev.
-	SUSPENDED = "SUSPENDED"
+	// STOPPED instance state for zopdev.
+	STOPPED = "STOPPED"
 
 	// The following constants are to identify and change the state of the instance.
 
@@ -25,21 +29,21 @@ type Client struct {
 	SQL *sqladmin.InstancesService
 }
 
-func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.Instance, error) {
+func (c *Client) GetAllInstances(_ *gofr.Context, projectID string) ([]models.Resource, error) {
 	list, err := c.SQL.List(projectID).Do()
 	if err != nil {
 		return nil, err
 	}
 
-	var instances = make([]models.Instance, 0)
+	var instances = make([]models.Resource, 0)
 
 	for _, item := range list.Items {
-		instances = append(instances, models.Instance{
+		instances = append(instances, models.Resource{
 			Name:         item.Name,
 			Type:         "SQL",
-			ProviderID:   item.Project,
 			Region:       item.Region,
 			CreationTime: item.CreateTime,
+			UID:          projectID + "/" + item.Name,
 			Status:       getState(item.Settings.ActivationPolicy),
 		})
 	}
@@ -52,9 +56,9 @@ func getState(state string) string {
 	case ALWAYS:
 		return RUNNING
 	case NEVER:
-		return SUSPENDED
+		return STOPPED
 	default:
-		return SUSPENDED
+		return STOPPED
 	}
 }
 
@@ -67,7 +71,7 @@ func (c *Client) StartInstance(_ *gofr.Context, projectID, instanceName string) 
 
 	_, err := c.SQL.Patch(projectID, instanceName, patchReq).Do()
 	if err != nil {
-		return err
+		return getError(err)
 	}
 
 	return nil
@@ -82,8 +86,24 @@ func (c *Client) StopInstance(_ *gofr.Context, projectID, instanceName string) e
 
 	_, err := c.SQL.Patch(projectID, instanceName, patchReq).Do()
 	if err != nil {
-		return err
+		return getError(err)
 	}
 
 	return nil
+}
+
+func getError(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	var gErr *googleapi.Error
+
+	if errors.As(err, &gErr) {
+		if gErr.Code == http.StatusConflict {
+			return &ErrConflict{Message: gErr.Message}
+		}
+	}
+
+	return &InternalServerError{}
 }

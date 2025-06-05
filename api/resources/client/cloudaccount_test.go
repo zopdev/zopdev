@@ -15,6 +15,8 @@ import (
 	"gofr.dev/pkg/gofr/container"
 )
 
+var errService = errors.New("service error")
+
 func Test_GetCloudCredentials_Success(t *testing.T) {
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
@@ -43,8 +45,6 @@ func Test_GetCloudCredentials_Success(t *testing.T) {
 		t.Error("Expected credentials to be not nil")
 	}
 }
-
-var errService = errors.New("service error")
 
 func Test_GetCloudCredentials_Error(t *testing.T) {
 	ctrl := gomock.NewController(t)
@@ -93,6 +93,91 @@ func Test_GetCloudCredentials_Error(t *testing.T) {
 				Return(resp, tc.serviceError)
 
 			credentials, err := c.GetCloudCredentials(ctx, tc.cloudAccID)
+			if err == nil {
+				t.Errorf("Expected error %v, got nil", tc.expectedError)
+			}
+
+			if tc.expectedError == nil {
+				assert.NotNil(t, credentials)
+			}
+
+			require.ErrorIs(t, err, tc.expectedError)
+
+			resp.Body.Close()
+		})
+	}
+}
+
+func TestClient_GetAllCloudAccounts_Success(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cont, mocks := container.NewMockContainer(t, container.WithMockHTTPService("cloud-account"))
+	ctx := &gofr.Context{
+		Container: cont,
+	}
+	c := New()
+	body := []byte(`{"data" : [{"id" : 123,"provider" : "gcp"},{"id" : 456,"provider" : "aws"}]}`)
+	expRes := []CloudAccount{
+		{ID: 123, Provider: "gcp"},
+		{ID: 456, Provider: "aws"},
+	}
+	resp := generateHTTPResponse(body, http.StatusOK)
+
+	defer resp.Body.Close()
+
+	mocks.HTTPService.EXPECT().Get(ctx, "cloud-accounts", nil).
+		Return(resp, nil)
+
+	res, err := c.GetAllCloudAccounts(ctx)
+
+	require.NoError(t, err)
+	assert.Equal(t, expRes, res)
+}
+
+func Test_GetAllCloudAccounts_Error(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	cont, mocks := container.NewMockContainer(t, container.WithMockHTTPService("cloud-account"))
+	ctx := &gofr.Context{
+		Container: cont,
+	}
+	c := New()
+
+	testCases := []struct {
+		name          string
+		expectedError error
+		serviceError  error
+		statusCode    int
+		body          []byte
+	}{
+		{
+			name:          "Cloud Account Id not present",
+			expectedError: errFailedToGetCloudAccounts,
+			statusCode:    http.StatusBadRequest,
+		},
+		{
+			name:          "error calling the API",
+			serviceError:  errService,
+			expectedError: errService,
+			statusCode:    0,
+		},
+		{
+			name:          "invalid response from API",
+			expectedError: errInvalidResponse,
+			statusCode:    http.StatusOK,
+			body:          []byte(`{"data" : {"id" : 123}`),
+		},
+	}
+
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			resp := generateHTTPResponse(tc.body, tc.statusCode)
+			mocks.HTTPService.EXPECT().Get(ctx, "cloud-accounts", nil).
+				Return(resp, tc.serviceError)
+
+			credentials, err := c.GetAllCloudAccounts(ctx)
 			if err == nil {
 				t.Errorf("Expected error %v, got nil", tc.expectedError)
 			}

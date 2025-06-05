@@ -1,9 +1,12 @@
 package main
 
 import (
+	"gofr.dev/pkg/gofr"
+
 	appHandler "github.com/zopdev/zopdev/api/applications/handler"
 	appService "github.com/zopdev/zopdev/api/applications/service"
 	appStore "github.com/zopdev/zopdev/api/applications/store"
+
 	auditHandler "github.com/zopdev/zopdev/api/audit/handler"
 	auditService "github.com/zopdev/zopdev/api/audit/service"
 	auditStore "github.com/zopdev/zopdev/api/audit/store"
@@ -11,26 +14,30 @@ import (
 	caHandler "github.com/zopdev/zopdev/api/cloudaccounts/handler"
 	caService "github.com/zopdev/zopdev/api/cloudaccounts/service"
 	caStore "github.com/zopdev/zopdev/api/cloudaccounts/store"
-	clStore "github.com/zopdev/zopdev/api/deploymentspace/cluster/store"
-	"github.com/zopdev/zopdev/api/provider/gcp"
 
-	envHandler "github.com/zopdev/zopdev/api/environments/handler"
-	envService "github.com/zopdev/zopdev/api/environments/service"
-	envStore "github.com/zopdev/zopdev/api/environments/store"
+	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
+	clStore "github.com/zopdev/zopdev/api/deploymentspace/cluster/store"
 
 	deployHandler "github.com/zopdev/zopdev/api/deploymentspace/handler"
 	deployService "github.com/zopdev/zopdev/api/deploymentspace/service"
 	deployStore "github.com/zopdev/zopdev/api/deploymentspace/store"
 
-	clService "github.com/zopdev/zopdev/api/deploymentspace/cluster/service"
+	envHandler "github.com/zopdev/zopdev/api/environments/handler"
+	envService "github.com/zopdev/zopdev/api/environments/service"
+	envStore "github.com/zopdev/zopdev/api/environments/store"
+	"github.com/zopdev/zopdev/api/migrations"
+	"github.com/zopdev/zopdev/api/provider/gcp"
 
 	resourceClient "github.com/zopdev/zopdev/api/resources/client"
-	resrouceHandler "github.com/zopdev/zopdev/api/resources/handler"
+	resourceHandler "github.com/zopdev/zopdev/api/resources/handler/resource"
+	"github.com/zopdev/zopdev/api/resources/providers/aws"
 	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
-	resourceService "github.com/zopdev/zopdev/api/resources/service"
+	resourceService "github.com/zopdev/zopdev/api/resources/service/resource"
+	resourceStore "github.com/zopdev/zopdev/api/resources/store/resource"
 
-	"github.com/zopdev/zopdev/api/migrations"
-	"gofr.dev/pkg/gofr"
+	resGroupHandler "github.com/zopdev/zopdev/api/resources/handler/resourcegroup"
+	resGroupService "github.com/zopdev/zopdev/api/resources/service/resourcegroup"
+	resGroupStore "github.com/zopdev/zopdev/api/resources/store/resourcegroup"
 )
 
 func main() {
@@ -108,9 +115,26 @@ func registerAuditAPIRoutes(app *gofr.App) {
 func registerCloudResourceRoutes(app *gofr.App) {
 	client := resourceClient.New()
 	gcpClient := gcpResource.New()
-	resSvc := resourceService.New(gcpClient, client)
-	resHld := resrouceHandler.New(resSvc)
+	awsClient := aws.New()
+	resStore := resourceStore.New()
+	resSvc := resourceService.New(gcpClient, awsClient, client, resStore)
+	resHld := resourceHandler.New(resSvc)
 
-	app.GET("/resources", resHld.GetResources)
-	app.POST("/resources/state", resHld.ChangeState)
+	// TODO: Figure out a way to sync resources on startup.
+
+	app.AddCronJob("0 * * * *", "resource-sync", resSvc.SyncCron)
+
+	app.GET("/cloud-account/{id}/resources", resHld.GetResources)
+	app.POST("/cloud-account/{id}/resources/state", resHld.ChangeState)
+	app.POST("/cloud-account/{id}/resources/sync", resHld.SyncResources)
+
+	rgStr := resGroupStore.New()
+	rgSvc := resGroupService.New(rgStr, resSvc)
+	rgHld := resGroupHandler.New(rgSvc)
+
+	app.GET("/cloud-account/{id}/resource-groups", rgHld.GetAllResourceGroups)
+	app.GET("/cloud-account/{id}/resource-groups/{rgID}", rgHld.GetResourceGroup)
+	app.POST("/cloud-account/{id}/resource-groups", rgHld.CreateResourceGroup)
+	app.PUT("/cloud-account/{id}/resource-groups/{rgID}", rgHld.UpdateResourceGroup)
+	app.DELETE("/cloud-account/{id}/resource-groups/{rgID}", rgHld.DeleteResourceGroup)
 }

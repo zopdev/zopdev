@@ -1,9 +1,9 @@
-import { Fragment, useState, cloneElement } from 'react';
+import { Fragment, useState, cloneElement, useEffect } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline/index.js';
 
 const FullScreenOverlay = ({
-  isOpen,
+  isOpen = false,
   onClose,
   customCTA,
   title,
@@ -15,6 +15,7 @@ const FullScreenOverlay = ({
   closeOnOutsideClick = true,
   overlayColor = 'light',
   maxHeight = '80vh',
+  renderContentProps,
 }) => {
   const defaultPosition = variant === 'popup' ? 'center' : 'right';
   const effectivePosition = position || defaultPosition;
@@ -36,6 +37,14 @@ const FullScreenOverlay = ({
     }
   };
 
+  useEffect(() => {
+    if (isOpen) {
+      openPopup();
+    } else {
+      closePopup();
+    }
+  }, [isOpen]);
+
   const sizeClasses = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -54,7 +63,7 @@ const FullScreenOverlay = ({
 
   const drawerPositionClasses = {
     left: 'left-0 top-0 bottom-0 h-full w-full',
-    right: 'right-0 top-0 bottom-0 h-full max-w-sm',
+    right: 'right-0 top-0 bottom-0 h-full w-full',
   };
 
   const popupPositionClasses = {
@@ -141,7 +150,7 @@ const FullScreenOverlay = ({
                     )}
                   </div>
                   <div className="flex-grow px-6 py-4 overflow-y-auto">
-                    {renderContent && renderContent({ onClose: closePopup })}
+                    {renderContent && renderContent({ onClose: closePopup, ...renderContentProps })}
                   </div>
                 </Dialog.Panel>
               </Transition.Child>
@@ -165,7 +174,7 @@ const FullScreenOverlay = ({
                     {hasCloseIcon && (
                       <button
                         onClick={closePopup}
-                        className="text-gray-400 hover:text-gray-600 focus:outline-none transition-colors duration-200"
+                        className="text-gray-400 cursor-pointer hover:text-gray-600 focus:outline-none transition-colors duration-200"
                       >
                         <XMarkIcon className="h-5 w-5" />
                         <span className="sr-only">Close</span>
@@ -173,7 +182,7 @@ const FullScreenOverlay = ({
                     )}
                   </div>
                   <div className="flex-grow px-6 py-4 overflow-y-auto">
-                    {renderContent && renderContent({ onClose: closePopup })}
+                    {renderContent && renderContent({ onClose: closePopup, ...renderContentProps })}
                   </div>
                 </Dialog.Panel>
               </Transition.Child>

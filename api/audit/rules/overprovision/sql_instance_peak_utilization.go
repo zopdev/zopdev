@@ -8,6 +8,7 @@ import (
 	"github.com/zopdev/zopdev/api/audit/client"
 	"github.com/zopdev/zopdev/api/audit/rules"
 	"github.com/zopdev/zopdev/api/audit/rules/overprovision/gcp"
+	"github.com/zopdev/zopdev/api/audit/rules/overprovision/oci"
 	"github.com/zopdev/zopdev/api/audit/store"
 )
 
@@ -20,6 +21,8 @@ func (*SQLInstancePeak) Execute(ctx *gofr.Context, ca *client.CloudAccount) ([]s
 	switch ca.Provider {
 	case rules.GCP:
 		return gcp.CheckCloudSQLProvisionedUsage(ctx, ca.Credentials)
+	case rules.OCI:
+		return oci.CheckDBSystemProvisionedUsage(ctx, ca.Credentials)
 	default:
 		return nil, errUnsupportedCloudProvider
 	}

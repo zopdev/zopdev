@@ -5,7 +5,7 @@ import (
 
 	"gofr.dev/pkg/gofr"
 
-	"github.com/zopdev/zopdev/api/resources/providers/models"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 type SQLClient interface {
@@ -18,7 +18,7 @@ type MetricsClient interface {
 }
 
 type InstanceLister interface {
-	GetAllInstances(ctx *gofr.Context, projectID string) ([]models.Instance, error)
+	GetAllInstances(ctx *gofr.Context, projectID string) ([]models.Resource, error)
 }
 
 type TimeSeriesLister interface {
