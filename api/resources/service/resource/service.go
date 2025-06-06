@@ -4,6 +4,7 @@ import (
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
 
+	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/models"
 )
 
@@ -40,13 +41,15 @@ func (s *Service) GetByID(ctx *gofr.Context, id int64) (*models.Resource, error)
 	return res, nil
 }
 
+// TODO : This function should be generic such that we dont need to call anything specific to a particular cloud provider type.
+// and the error returned in case when the resource is starting or stopping or other operation, error should be returned carefully.
+// or state should be managed.
 func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) error {
 	res, err := s.store.GetResourceByID(ctx, resDetails.ID)
 	if err != nil {
 		return err
 	}
 
-	// We need not change the state if the resource is already in the desired state.
 	if res.Status == getStatus(resDetails.State) {
 		return nil
 	}
@@ -57,22 +60,58 @@ func (s *Service) ChangeState(ctx *gofr.Context, resDetails ResourceDetails) err
 	}
 
 	switch resDetails.Type {
-	case SQL:
-		err = s.changeSQLState(ctx, ca, resDetails)
-		if err != nil {
-			ctx.Errorf("failed to change SQL state: %v", err)
-			return err
-		}
-
-		err = s.store.UpdateStatus(ctx, getStatus(resDetails.State), resDetails.ID)
-		if err != nil {
-			ctx.Errorf("failed to update resource status: %v", err)
-		}
-
-		return nil
+	case SQL, "RDS":
+		return s.handleSQLChangeState(ctx, ca, resDetails)
+	case AWSCOMPUTE:
+		return s.handleAWSComputeChangeState(ctx, ca, resDetails, res)
 	default:
 		return gofrHttp.ErrorInvalidParam{Params: []string{"req.Type"}}
 	}
+}
+
+func (s *Service) handleSQLChangeState(ctx *gofr.Context, ca *client.CloudAccount, resDetails ResourceDetails) error {
+	err := s.changeSQLState(ctx, ca, resDetails)
+	if err != nil {
+		ctx.Errorf("failed to change SQL state: %v", err)
+		return err
+	}
+
+	err = s.store.UpdateStatus(ctx, getStatus(resDetails.State), resDetails.ID)
+	if err != nil {
+		ctx.Errorf("failed to update resource status: %v", err)
+	}
+
+	return nil
+}
+
+func (s *Service) handleAWSComputeChangeState(ctx *gofr.Context, ca *client.CloudAccount, resDetails ResourceDetails,
+	res *models.Resource) error {
+	cl, err := s.aws.NewEC2Client(ctx, ca.Credentials)
+	if err != nil {
+		ctx.Errorf("failed to create AWS EC2 client: %v", err)
+		return err
+	}
+
+	if resDetails.State == START {
+		err = cl.StartInstance(ctx, res.UID)
+		if err != nil {
+			ctx.Errorf("failed to start EC2 instance: %v", err)
+			return err
+		}
+	} else {
+		err = cl.StopInstance(ctx, res.UID)
+		if err != nil {
+			ctx.Errorf("failed to start EC2 instance: %v", err)
+			return err
+		}
+	}
+
+	err = s.store.UpdateStatus(ctx, getStatus(resDetails.State), resDetails.ID)
+	if err != nil {
+		ctx.Errorf("failed to update resource status: %v", err)
+	}
+
+	return nil
 }
 
 func getStatus(action ResourceState) string {

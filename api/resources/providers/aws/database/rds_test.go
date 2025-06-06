@@ -9,6 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/service/rds"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 type mockRDS struct {
@@ -72,16 +73,25 @@ func Test_GetAllInstances(t *testing.T) {
 				DBInstanceStatus:     aws.String("available"),
 				Engine:               aws.String("mysql"),
 			},
+			{
+				DBInstanceIdentifier: aws.String("test-rds-2"),
+				DBInstanceArn:        aws.String("arn:aws:rds:us-east-1:123456789012:db:test-rds-2"),
+				AvailabilityZone:     aws.String("us-east-1a"),
+				InstanceCreateTime:   aws.Time(time.Now()),
+				DBInstanceStatus:     aws.String("stopped"),
+				Engine:               aws.String("mysql"),
+			},
 		},
 	}
 	client := &Client{RDS: mock}
 	instances, err := client.GetAllInstances(nil)
 	require.NoError(t, err)
-	require.Len(t, instances, 1)
+	require.Len(t, instances, 2)
 	assert.Equal(t, "test-rds-1", instances[0].Name)
-	assert.Equal(t, "RDS-MYSQL", instances[0].Type)
+	assert.Equal(t, "RDS", instances[0].Type)
 	assert.Equal(t, "us-east-1a", instances[0].Region)
-	assert.Equal(t, "available", instances[0].Status)
+	assert.Equal(t, RUNNING, instances[0].Status)
+	assert.Equal(t, STOPPED, instances[1].Status)
 }
 
 func Test_GetAllInstances_Error(t *testing.T) {
@@ -109,7 +119,15 @@ func Test_StartInstance(t *testing.T) {
 			mock := &mockRDS{shouldErr: c.shouldErr}
 			client := &Client{RDS: mock}
 
-			err := client.StartInstance(nil, c.engine, c.clusterID, "test-instance")
+			resource := models.Resource{
+				Name: "test-instance",
+				Settings: map[string]any{
+					"engine":     c.engine,
+					"cluster_id": c.clusterID,
+				},
+			}
+
+			err := client.StartInstance(nil, &resource)
 			if c.shouldErr {
 				require.Error(t, err)
 			} else {
@@ -136,7 +154,15 @@ func Test_StopInstance(t *testing.T) {
 			mock := &mockRDS{shouldErr: c.shouldErr}
 			client := &Client{RDS: mock}
 
-			err := client.StopInstance(nil, c.engine, c.clusterID, "test-instance")
+			resource := models.Resource{
+				Name: "test-instance",
+				Settings: map[string]any{
+					"engine":     c.engine,
+					"cluster_id": c.clusterID,
+				},
+			}
+
+			err := client.StopInstance(nil, &resource)
 			if c.shouldErr {
 				require.Error(t, err)
 			} else {
@@ -152,13 +178,13 @@ func Test_GetAllInstances_AllTypes(t *testing.T) {
 		clusterID string
 		expType   string
 	}{
-		{"aurora-mysql", "cluster-1", "RDS-AURORA"},
-		{"mysql", "", "RDS-MYSQL"},
-		{"postgres", "", "RDS-POSTGRESQL"},
-		{"mariadb", "", "RDS-MARIADB"},
-		{"oracle", "", "RDS-ORACLE"},
-		{"sqlserver", "", "RDS-SQLSERVER"},
-		{"customengine", "", "RDS-UNKNOWN"},
+		{"aurora-mysql", "cluster-1", "RDS"},
+		{"mysql", "", "RDS"},
+		{"postgres", "", "RDS"},
+		{"mariadb", "", "RDS"},
+		{"oracle", "", "RDS"},
+		{"sqlserver", "", "RDS"},
+		{"customengine", "", "RDS"},
 	}
 	for _, e := range engines {
 		db := &rds.DBInstance{
@@ -175,6 +201,6 @@ func Test_GetAllInstances_AllTypes(t *testing.T) {
 		instances, err := client.GetAllInstances(nil)
 		require.NoError(t, err)
 		require.Len(t, instances, 1)
-		assert.Equal(t, e.expType, instances[0].Type)
+		assert.Equal(t, "RDS", instances[0].Type)
 	}
 }
