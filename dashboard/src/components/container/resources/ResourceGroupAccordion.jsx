@@ -134,6 +134,7 @@ const ResourceGroupAccordion = ({
                 enableRowClick={false}
                 renderRow={CloudResourceRow}
                 emptyStateTitle="No Resources added"
+                maxHeight={'80dvh'}
               />
             )}
           </div>

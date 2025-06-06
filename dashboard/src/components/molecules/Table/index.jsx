@@ -7,14 +7,15 @@ const Table = ({
   data,
   handleRowClick = () => {},
   enableRowClick = false,
-  stickyHeader = false,
+  stickyHeader = true,
   emptyStateTitle,
   emptyStateDescription,
   renderRow,
+  maxHeight = '70dvh',
 }) => {
   return (
     <>
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto overflow-y-auto scroll-hidden" style={{ maxHeight }}>
         <table className="table-auto w-full border-collapse">
           <colgroup>
             {headers.map((header) => (

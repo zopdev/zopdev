@@ -6,10 +6,12 @@ import ResourceIcon from '@/assets/svg/sidebar/ResourceIcon';
 export default function SidebarLayout() {
   const { cloudId } = useParams();
   return (
-    <div>
-      <TopBar />
-      <div className=" xs:inline-block md:flex min-h-[90vh] w-[100vw] overflow-hidden ">
-        <div>
+    <div className="flex flex-col h-screen">
+      <div className="fixed top-0 w-full z-10">
+        <TopBar />
+      </div>
+      <div className="flex flex-1 ">
+        <div className="fixed left-0 h-full pt-16 hidden md:block">
           <Sidebar
             menu={[
               {
@@ -20,9 +22,11 @@ export default function SidebarLayout() {
             ]}
           />
         </div>
-        <main className="px-4 sm:px-6 lg:px-8 w-full overflow-auto text-left pt-8">
-          <Outlet />
-        </main>
+        <div className="w-full md:ml-60 pt-16">
+          <main className="px-4 sm:px-6 lg:px-8 w-full overflow-auto text-left pt-8 h-[calc(100vh-64px)]">
+            <Outlet />
+          </main>
+        </div>
       </div>
     </div>
   );

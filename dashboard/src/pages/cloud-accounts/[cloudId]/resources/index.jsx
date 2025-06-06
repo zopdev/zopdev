@@ -1,5 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import { ArrowPathIcon, PlusCircleIcon } from '@heroicons/react/20/solid';
 
 import BlankCloudAccountSvg from '@/assets/svg/BlankCloudAccount';
@@ -57,12 +57,53 @@ const SyncButton = ({ onClick, loading }) => (
 
 const CloudResourcesPage = () => {
   const { cloudId } = useParams();
-  const [activeTab, setActiveTab] = useState(TABS[0]);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const getCurrentTabFromUrl = () => {
+    const urlTab = searchParams.get('currentTab');
+    if (urlTab) {
+      const urlToTabMap = {
+        resources: 'Resources',
+        resourcegroup: 'Resource Group',
+      };
+      if (urlToTabMap[urlTab.toLowerCase()]) {
+        return urlToTabMap[urlTab.toLowerCase()];
+      }
+    }
+    return TABS[0];
+  };
+
+  const [activeTab, setActiveTab] = useState(getCurrentTabFromUrl());
 
   const { data: resourceData = [], isLoading, isError, error } = useGetCloudResources(cloudId);
   const { data: resourceGroupData = [] } = useGetResourceGroup(cloudId);
   const resourceSync = usePostResourceGroupSync();
   const resourceDelete = useDeleteResourceGroup();
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    setSearchParams((prev) => {
+      prev.set('currentTab', newTab.toLowerCase().replace(' ', ''));
+      return prev;
+    });
+  };
+
+  useEffect(() => {
+    const currentUrlTab = searchParams.get('currentTab');
+    if (!currentUrlTab) {
+      setSearchParams((prev) => {
+        prev.set('currentTab', TABS[0].toLowerCase().replace(' ', ''));
+        return prev;
+      });
+    }
+  }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const urlTab = getCurrentTabFromUrl();
+    if (urlTab !== activeTab) {
+      setActiveTab(urlTab);
+    }
+  }, [searchParams]);
 
   const handleResourceSync = () => {
     resourceSync.mutate({ cloudAccId: cloudId });
@@ -105,6 +146,7 @@ const CloudResourcesPage = () => {
           enableRowClick={false}
           renderRow={CloudResourceRow}
           emptyStateTitle="No Resources Found"
+          maxHeight={'80dvh'}
         />
       );
     }
@@ -161,7 +203,7 @@ const CloudResourcesPage = () => {
             <Tabs
               tabs={TABS.map((label) => ({ label }))}
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChange={handleTabChange}
               size="md"
             />
             <div className="flex items-center">{renderTabActions()}</div>
