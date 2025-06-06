@@ -1,10 +1,12 @@
 package service
 
 import (
+	"crypto/rand"
 	"database/sql"
 	"encoding/json"
 	"errors"
 	"fmt"
+
 	"strings"
 	"time"
 
@@ -12,34 +14,45 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
+
 	"gofr.dev/pkg/gofr"
 	"gofr.dev/pkg/gofr/http"
+
+	"github.com/google/uuid"
 
 	"github.com/zopdev/zopdev/api/cloudaccounts/store"
 	"github.com/zopdev/zopdev/api/provider"
 )
 
+var (
+	errMissingIntegrationOrAccountID = errors.New("missing required fields: integration_id or account_id")
+	errFailedToCreateAdminUserGroup  = errors.New("failed to create admin user/group")
+	errUnsupportedProvider           = errors.New("unsupported provider")
+)
+
 type Service struct {
-	store           store.CloudAccountStore
-	deploymentSpace provider.Provider
+	store                  store.CloudAccountStore
+	deploymentSpace        provider.Provider
+	trustedPrincipalArnAWS string
 }
 
 // New creates a new CloudAccountService with the provided CloudAccountStore.
-func New(clStore store.CloudAccountStore, deploySpace provider.Provider) CloudAccountService {
-	return &Service{store: clStore, deploymentSpace: deploySpace}
+func New(clStore store.CloudAccountStore, deploySpace provider.Provider, trustedPrincipalARN string) *Service {
+	return &Service{store: clStore, deploymentSpace: deploySpace, trustedPrincipalArnAWS: trustedPrincipalARN}
 }
 
 // AddCloudAccount adds a new cloud account to the store if it doesn't already exist.
 func (s *Service) AddCloudAccount(ctx *gofr.Context, cloudAccount *store.CloudAccount) (*store.CloudAccount, error) {
 	// TODO : validation is only checking if the values are present - we also need to check if the values are valid
-	// and able to connect to a cloud account, we would need to keep that code in a separate package where all gcp, aws code is present.
+	// and able to connect to a cloud account,
+	// we would need to keep that code in a separate package where all providerGCP, providerAWS code is present.
 	switch strings.ToUpper(cloudAccount.Provider) {
-	case gcp:
+	case providerGCP:
 		err := fetchGCPProviderDetails(ctx, cloudAccount)
 		if err != nil {
 			return nil, err
 		}
-	case aws:
+	case providerAWS:
 		err := validateAWSProviderDetails(ctx, cloudAccount)
 		if err != nil {
 			return nil, err
@@ -263,4 +276,77 @@ func (s *Service) FetchCredentials(ctx *gofr.Context, cloudAccountID int64) (int
 	cloudAcc.Credentials = creds
 
 	return cloudAcc, nil
+}
+
+func (s *Service) GetCloudAccountConnectionInfo(_ *gofr.Context, cloudAccountType string) (AWSIntegrationINFO, error) {
+	// Validate cloudAccountType
+	if !strings.EqualFold(cloudAccountType, providerAWS) {
+		return AWSIntegrationINFO{}, errUnsupportedProvider
+	}
+
+	integrationID := uuid.New().String()
+	externalID := fmt.Sprintf("ext-%s", integrationID)
+	roleName := fmt.Sprintf("CrossAccountAccessRole-%s", integrationID)
+
+	// Generate CloudFormation URL
+	cfnURL := generateCloudFormationURL(integrationID, externalID, roleName, defaultPermissionLevelAWS, s.trustedPrincipalArnAWS)
+
+	// Construct the integration object for the response
+	integration := AWSIntegrationINFO{
+		CloudformationURL: cfnURL,
+		IntegrationID:     integrationID,
+	}
+
+	return integration, nil
+}
+
+func (s *Service) CreateCloudAccountConnection(ctx *gofr.Context, req *RoleRequest) (*store.CloudAccount, error) {
+	if req.IntegrationID == "" || req.AccountID == "" {
+		return nil, errMissingIntegrationOrAccountID
+	}
+
+	// Generate user_name and group_name
+	randomSuffix := func(n int) string {
+		b := make([]byte, n)
+		if _, err := rand.Read(b); err != nil {
+			panic(fmt.Sprintf("failed to read random bytes: %v", err))
+		}
+
+		return fmt.Sprintf("%x", b)[:n]
+	}
+
+	const suffixLength = 6
+	suffix := randomSuffix(suffixLength)
+	userName := "Zop-Admin-" + suffix
+	groupName := "ZopAdminGroup-" + suffix
+
+	externalID := fmt.Sprintf("ext-%s", req.IntegrationID)
+	roleName := fmt.Sprintf("CrossAccountAccessRole-%s", req.IntegrationID)
+	roleARN := fmt.Sprintf("arn:aws:iam::%s:role/%s", req.AccountID, roleName)
+
+	result, err := assumeRole(roleARN, externalID, "session-"+req.IntegrationID)
+	if err != nil {
+		return nil, err
+	}
+
+	creds := result.Credentials
+
+	ak, sk, err := createAdminUserWithGroup(ctx, *creds.AccessKeyId, *creds.SecretAccessKey, *creds.SessionToken, userName, groupName)
+	if err != nil {
+		return nil, errFailedToCreateAdminUserGroup
+	}
+
+	cl, err := s.AddCloudAccount(ctx, &store.CloudAccount{
+		Name:     req.CloudAccountName,
+		Provider: providerAWS,
+		Credentials: awsCredentials{
+			AccessKey:    ak,
+			AccessSecret: sk,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return cl, nil
 }

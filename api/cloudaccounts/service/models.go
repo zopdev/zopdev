@@ -33,3 +33,14 @@ type DeploymentSpaceOptions struct {
 	Path string `json:"path"`
 	Type string `json:"type"`
 }
+
+type AWSIntegrationINFO struct {
+	CloudformationURL string `json:"cloudformation_url"`
+	IntegrationID     string `json:"integration_id"`
+}
+
+type RoleRequest struct {
+	CloudAccountName string `json:"cloud_account_name"`
+	IntegrationID    string `json:"integration_id"`
+	AccountID        string `json:"account_id"`
+}
