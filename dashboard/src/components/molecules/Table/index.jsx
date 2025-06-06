@@ -11,7 +11,7 @@ const Table = ({
   emptyStateTitle,
   emptyStateDescription,
   renderRow,
-  maxHeight,
+  maxHeight = '70dvh',
 }) => {
   return (
     <>

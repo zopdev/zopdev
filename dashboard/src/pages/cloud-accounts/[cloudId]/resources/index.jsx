@@ -146,7 +146,7 @@ const CloudResourcesPage = () => {
           enableRowClick={false}
           renderRow={CloudResourceRow}
           emptyStateTitle="No Resources Found"
-          maxHeight={'700px'}
+          maxHeight={'80dvh'}
         />
       );
     }
