@@ -5,6 +5,7 @@ import ErrorComponent from '@/components/atom/ErrorComponent';
 import CompleteLoader from '@/components/atom/Loaders/CompleteLoader';
 import PageHeading from '@/components/atom/PageHeading';
 import CloudAccountCard from '@/components/molecules/Cards/CloudAccountCard';
+import SchedulerMatrix from '@/components/molecules/SchedulerMatrix';
 import { useGetCloudAccounts } from '@/queries/cloud-account';
 import { PlusCircleIcon } from '@heroicons/react/20/solid';
 
@@ -27,14 +28,12 @@ const CloudAccountPage = () => {
           }
         />
       )}
-
       {cloudAccounts?.isLoading && <CompleteLoader />}
       <div className="flex gap-4 w-full justify-start mt-4 flex-wrap">
         {cloudAccounts?.data?.data?.map((item, idx) => {
           return <CloudAccountCard key={idx} item={item} />;
         })}
       </div>
-
       {cloudAccounts?.data?.data?.length === 0 && (
         <EmptyComponent
           imageComponent={<BlankCloudAccountSvg />}
@@ -43,10 +42,10 @@ const CloudAccountPage = () => {
           title={'Please start by setting up your first cloud account'}
         />
       )}
-
       {cloudAccounts?.isError && (
         <ErrorComponent errorText={cloudAccounts?.error?.message || 'Something went wrong'} />
       )}
+      <SchedulerMatrix />
     </div>
   );
 };

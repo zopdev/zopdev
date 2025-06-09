@@ -203,6 +203,25 @@ class ImmutableScheduleManager {
     );
   }
 
+  getScheduleStats() {
+    const totalSlots = this.schedule.flat().length;
+    const activeSlots = this.schedule
+      .flat()
+      .filter((slot) => slot === CONFIG.SLOT_STATES.ACTIVE).length;
+    const inactiveSlots = totalSlots - activeSlots;
+
+    const slotDurationMinutes = CONFIG.SLOT_DURATIONS[this.resolution];
+    const activeHours = (activeSlots * slotDurationMinutes) / 60;
+    const inactiveHours = (inactiveSlots * slotDurationMinutes) / 60;
+    const inactivePercentage = ((inactiveSlots / totalSlots) * 100).toFixed(1);
+
+    return {
+      activeHours: Math.round(activeHours * 10) / 10,
+      inactiveHours: Math.round(inactiveHours * 10) / 10,
+      inactivePercentage: parseFloat(inactivePercentage),
+    };
+  }
+
   export() {
     return {
       schedule: this.schedule.map((day) => [...day]),
@@ -217,7 +236,6 @@ class ImmutableScheduleManager {
   }
 }
 
-// Memoized slot cell component
 const SlotCell = React.memo(
   ({ dayIndex, hourIndex, scheduleManager, timeResolution, onSlotToggle }) => {
     const slotsPerHour = getSlotsPerHour(timeResolution);
@@ -293,6 +311,8 @@ export default function SchedulerMatrix() {
   const handleApply = useCallback(() => {
     const exportedData = scheduleManager.export();
     const activeSlots = scheduleManager.getActiveSlots();
+    const stats = scheduleManager.getScheduleStats();
+    console.log(stats);
 
     console.log('Schedule Export:', exportedData);
     console.log('Active Slots:', activeSlots);
@@ -308,6 +328,7 @@ export default function SchedulerMatrix() {
 
   // Memoized active slots count
   const activeSlotCount = useMemo(() => scheduleManager.getActiveSlots().length, [scheduleManager]);
+  const stats = useMemo(() => scheduleManager.getScheduleStats().length, [scheduleManager]);
 
   // Memoized resolution options
   const resolutionOptions = useMemo(() => Object.keys(CONFIG.SLOT_DURATIONS), []);
@@ -333,6 +354,23 @@ export default function SchedulerMatrix() {
           ))}
         </div>
         <div className="text-sm text-gray-600">{activeSlotCount} active slots</div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-between mb-4">
+        <div> Estimated Savings </div>
+        <div>Active Hours: Inactive Hours: {}</div>
+        <div className="flex items-center space-x-6 mb-2">
+          <div className="flex items-center text-gray-700">
+            <div className="w-4 h-4 bg-green-500 mr-2"></div>
+            <span>RUNNING</span>
+          </div>
+          <div className="flex items-center text-gray-700">
+            <div className="w-4 h-4 bg-red-500 mr-2"></div>
+            <span>STOPPED</span>
+          </div>
+        </div>
+
+        {/* <Button onClick={handleReset}>Reset to Initial Data</Button> */}
       </div>
 
       {/* Matrix Grid */}
