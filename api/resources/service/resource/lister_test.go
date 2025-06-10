@@ -2,17 +2,18 @@ package resource
 
 import (
 	"context"
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 	"gofr.dev/pkg/gofr"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/option"
 
 	"github.com/zopdev/zopdev/api/resources/models"
 )
+
+var errMock = errors.New("mock error")
 
 func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
 	ctx := &gofr.Context{}
@@ -20,7 +21,7 @@ func TestService_getAllSQLInstances_UnsupportedCloud(t *testing.T) {
 
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
-	mAWS := NewMockAWSClient(ctrl)
+	mAWS := NewMockCloudResourceProvider(ctrl)
 	s := New(nil, mAWS, nil, nil)
 	instances, err := s.getAllSQLInstances(ctx, req)
 
@@ -43,14 +44,9 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 		Context: context.Background(),
 	}
 
-	mockGCP := NewMockGCPClient(ctrl)
-	mockCreds := &google.Credentials{ProjectID: "test-project"}
+	mockGCP := NewMockCloudResourceProvider(ctrl)
 	mockResp := []models.Resource{
 		{Name: "sql-instance-1"}, {Name: "sql-instance-2"},
-	}
-	mockLister := &mockSQLClient{
-		isError:   false,
-		instances: mockResp,
 	}
 
 	testCases := []struct {
@@ -66,48 +62,20 @@ func TestService_getAllSQLInstances_GCP(t *testing.T) {
 			expResp: mockResp,
 			expErr:  nil,
 			mockCalls: func() {
-				mockGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
-					Return(mockCreds, nil)
-				mockGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
-					Return(mockLister, nil)
+				mockGCP.EXPECT().ListResources(ctx, req.Creds, gomock.Any()).Return(mockResp, nil)
 			},
 		},
 		{
-			name:   "Error creating credentials",
+			name:   "Error listing resources",
 			req:    req,
 			expErr: errMock,
 			mockCalls: func() {
-				mockGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
-					Return(nil, errMock)
-			},
-		},
-		{
-			name:   "Error creating SQL instance lister",
-			req:    req,
-			expErr: errMock,
-			mockCalls: func() {
-				mockGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
-					Return(mockCreds, nil)
-				mockGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
-					Return(nil, errMock)
-			},
-		},
-		{
-			name:   "Error getting SQL instances",
-			req:    req,
-			expErr: errMock,
-			mockCalls: func() {
-				mockLister.isError = true
-
-				mockGCP.EXPECT().NewGoogleCredentials(ctx, req.Creds, "https://www.googleapis.com/auth/cloud-platform").
-					Return(mockCreds, nil)
-				mockGCP.EXPECT().NewSQLClient(ctx, option.WithCredentials(mockCreds)).
-					Return(mockLister, nil)
+				mockGCP.EXPECT().ListResources(ctx, req.Creds, gomock.Any()).Return(nil, errMock)
 			},
 		},
 	}
 
-	mAWS := NewMockAWSClient(ctrl)
+	mAWS := NewMockCloudResourceProvider(ctrl)
 	s := New(mockGCP, mAWS, nil, nil)
 
 	for _, tc := range testCases {

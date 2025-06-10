@@ -30,10 +30,10 @@ import (
 
 	resourceClient "github.com/zopdev/zopdev/api/resources/client"
 	resourceHandler "github.com/zopdev/zopdev/api/resources/handler/resource"
-	"github.com/zopdev/zopdev/api/resources/providers/aws"
-	gcpResource "github.com/zopdev/zopdev/api/resources/providers/gcp"
 	resourceService "github.com/zopdev/zopdev/api/resources/service/resource"
 	resourceStore "github.com/zopdev/zopdev/api/resources/store/resource"
+
+	"github.com/zopdev/zopdev/api/resources/providers"
 
 	resGroupHandler "github.com/zopdev/zopdev/api/resources/handler/resourcegroup"
 	resGroupService "github.com/zopdev/zopdev/api/resources/service/resourcegroup"
@@ -114,8 +114,17 @@ func registerAuditAPIRoutes(app *gofr.App) {
 
 func registerCloudResourceRoutes(app *gofr.App) {
 	client := resourceClient.New()
-	gcpClient := gcpResource.New()
-	awsClient := aws.New()
+
+	gcpClient, err := providers.NewCloudResourceProvider("GCP")
+	if err != nil {
+		app.Logger().Fatal(err)
+	}
+
+	awsClient, err := providers.NewCloudResourceProvider("AWS")
+	if err != nil {
+		app.Logger().Fatal(err)
+	}
+
 	resStore := resourceStore.New()
 	resSvc := resourceService.New(gcpClient, awsClient, client, resStore)
 	resHld := resourceHandler.New(resSvc)

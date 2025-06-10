@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"gofr.dev/pkg/gofr"
-	"google.golang.org/api/option"
 
 	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/models"
@@ -92,25 +91,18 @@ func (s *Service) getAllSQLInstances(ctx *gofr.Context, req CloudDetails) ([]mod
 	}
 }
 
-func (s *Service) getGCPSQLInstances(ctx *gofr.Context, cred any) ([]models.Resource, error) {
-	creds, err := s.gcp.NewGoogleCredentials(ctx, cred, "https://www.googleapis.com/auth/cloud-platform")
-	if err != nil {
-		return nil, err
+func (s *Service) getGCPSQLInstances(ctx *gofr.Context, creds any) ([]models.Resource, error) {
+	filter := models.ResourceFilter{
+		ResourceTypes: []string{"SQL"},
 	}
 
-	sqlClient, err := s.gcp.NewSQLClient(ctx, option.WithCredentials(creds))
-	if err != nil {
-		return nil, err
-	}
-
-	return sqlClient.GetAllInstances(ctx, creds.ProjectID)
+	return s.gcp.ListResources(ctx, creds, filter)
 }
 
-func (s *Service) getAWSRDSInstances(ctx *gofr.Context, cred any) ([]models.Resource, error) {
-	awsRDSClient, err := s.aws.NewRDSClient(ctx, cred)
-	if err != nil {
-		return nil, err
+func (s *Service) getAWSRDSInstances(ctx *gofr.Context, creds any) ([]models.Resource, error) {
+	filter := models.ResourceFilter{
+		ResourceTypes: []string{"RDS"},
 	}
 
-	return awsRDSClient.GetAllInstances(ctx)
+	return s.aws.ListResources(ctx, creds, filter)
 }

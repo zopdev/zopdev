@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"context"
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -8,7 +9,6 @@ import (
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/zopdev/zopdev/api/resources/models"
-	"gofr.dev/pkg/gofr"
 )
 
 // EC2API defines the methods used from the AWS EC2 client for easier testing/mocking.
@@ -23,7 +23,7 @@ type Client struct {
 	EC2 EC2API
 }
 
-func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Resource, error) {
+func (c *Client) GetAllInstances(ctx context.Context) ([]models.Resource, error) {
 	regions := GetAWSRegions()
 
 	type result struct {
@@ -94,7 +94,7 @@ func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Resource, error) {
 	return allInstances, firstErr
 }
 
-func (c *Client) StartInstance(ctx *gofr.Context, instanceID string) error {
+func (c *Client) StartInstance(ctx context.Context, instanceID string) error {
 	input := &ec2.StartInstancesInput{
 		InstanceIds: []*string{&instanceID},
 	}
@@ -103,7 +103,7 @@ func (c *Client) StartInstance(ctx *gofr.Context, instanceID string) error {
 	return err
 }
 
-func (c *Client) StopInstance(ctx *gofr.Context, instanceID string) error {
+func (c *Client) StopInstance(ctx context.Context, instanceID string) error {
 	input := &ec2.StopInstancesInput{
 		InstanceIds: []*string{&instanceID},
 	}
