@@ -28,8 +28,9 @@ var (
 
 const (
 	resourceUIDSplitParts = 2
-	dbSQL                 = "SQL"
-	dbRDS                 = "RDS"
+	database
+	databaseSQL = "SQL"
+	allResource = "ALL"
 )
 
 type Client struct{}
@@ -79,7 +80,7 @@ func (c *Client) ListResources(ctx *gofr.Context, creds any, filter models.Resou
 	includeSQL := len(resourceTypes) == 0
 
 	for _, t := range resourceTypes {
-		if t == dbSQL || t == "ALL" {
+		if t == databaseSQL || t == allResource {
 			includeSQL = true
 		}
 	}
@@ -117,7 +118,7 @@ func (c *Client) ListResources(ctx *gofr.Context, creds any, filter models.Resou
 
 func (c *Client) StartResource(ctx *gofr.Context, creds any, resource *models.Resource) error {
 	switch resource.Type {
-	case dbSQL:
+	case databaseSQL:
 		credsObj, err := c.NewGoogleCredentials(ctx, creds, sqladmin.SqlserviceAdminScope)
 		if err != nil {
 			return ErrInvalidCredentials

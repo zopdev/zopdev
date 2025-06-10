@@ -27,7 +27,7 @@ var (
 
 const allResource = "ALL"
 const resourceEC2 = "EC2"
-const dbRDS = "RDS"
+const databaseRDS = "RDS"
 
 type Client struct {
 }
@@ -151,7 +151,7 @@ func (c *Client) ListResources(ctx *gofr.Context, creds any, filter models.Resou
 	var allResources []models.Resource
 
 	includeEC2 := shouldIncludeResourceType(filter.ResourceTypes, resourceEC2)
-	includeRDS := shouldIncludeResourceType(filter.ResourceTypes, dbRDS)
+	includeRDS := shouldIncludeResourceType(filter.ResourceTypes, databaseRDS)
 
 	if includeEC2 {
 		instances, err := c.getEC2Resources(ctx, creds)
@@ -187,7 +187,7 @@ func (c *Client) StartResource(ctx *gofr.Context, creds any, resource *models.Re
 		}
 
 		return ec2Client.StartInstance(ctx, resource.UID)
-	case dbRDS:
+	case databaseRDS:
 		rdsClient, err := c.NewRDSClient(ctx, creds)
 		if err != nil {
 			return err
