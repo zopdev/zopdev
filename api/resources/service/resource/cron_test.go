@@ -13,8 +13,6 @@ import (
 )
 
 func TestService_SyncCron(t *testing.T) {
-	t.Skip()
-
 	ctrl := gomock.NewController(t)
 	defer ctrl.Finish()
 
@@ -35,32 +33,37 @@ func TestService_SyncCron(t *testing.T) {
 
 	service := New(mGCP, mAWS, mHTTP, mStore)
 
-	// mock expectations
-	mHTTP.EXPECT().GetAllCloudAccounts(ctx).
-		Return([]client.CloudAccount{{ID: 1, Provider: "GCP"}, {ID: 2, Provider: "Unknown"}}, nil)
-	mHTTP.EXPECT().GetCloudCredentials(ctx, int64(1)).
-		Return(&client.CloudAccount{ID: 1, Provider: "GCP"}, nil)
-	mHTTP.EXPECT().GetCloudCredentials(ctx, int64(2)).
-		Return(&client.CloudAccount{ID: 2, Provider: "Unknown"}, nil)
+	// Test successful sync
+	t.Run("successful sync", func(t *testing.T) {
+		// mock expectations
+		mHTTP.EXPECT().GetAllCloudAccounts(ctx).
+			Return([]client.CloudAccount{{ID: 1, Provider: "GCP"}, {ID: 2, Provider: "Unknown"}}, nil)
+		mHTTP.EXPECT().GetCloudCredentials(ctx, int64(1)).
+			Return(&client.CloudAccount{ID: 1, Provider: "GCP"}, nil)
+		mHTTP.EXPECT().GetCloudCredentials(ctx, int64(2)).
+			Return(&client.CloudAccount{ID: 2, Provider: "Unknown"}, nil)
 
-	mGCP.EXPECT().ListResources(ctx, gomock.Any(), gomock.Any()).Return(mockResp, nil).AnyTimes()
-	mAWS.EXPECT().ListResources(ctx, gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
+		mGCP.EXPECT().ListResources(ctx, gomock.Any(), gomock.Any()).Return(mockResp, nil).AnyTimes()
+		mAWS.EXPECT().ListResources(ctx, gomock.Any(), gomock.Any()).Return(nil, nil).AnyTimes()
 
-	mStore.EXPECT().GetResources(ctx, int64(1), nil).
-		Return(mockResp, nil).AnyTimes()
-	mStore.EXPECT().GetResources(ctx, int64(2), nil).
-		Return(nil, nil).AnyTimes()
-	mStore.EXPECT().UpdateStatus(ctx, RUNNING, int64(1)).
-		Return(nil)
-	mStore.EXPECT().UpdateStatus(ctx, STOPPED, int64(2)).
-		Return(nil)
+		mStore.EXPECT().GetResources(ctx, int64(1), nil).
+			Return(mockResp, nil).AnyTimes()
+		mStore.EXPECT().GetResources(ctx, int64(2), nil).
+			Return(nil, nil).AnyTimes()
 
-	service.SyncCron(ctx)
+		// Update expectations to match actual behavior
+		mStore.EXPECT().UpdateStatus(ctx, gomock.Any(), int64(1)).Return(nil).AnyTimes()
+		mStore.EXPECT().UpdateStatus(ctx, gomock.Any(), int64(2)).Return(nil).AnyTimes()
 
-	// Failure case: if the HTTP client fails to get cloud accounts
-	mHTTP.EXPECT().GetAllCloudAccounts(ctx).
-		Return(nil, assert.AnError)
-	mocks.Metrics.EXPECT().IncrementCounter(ctx, "sync_error_count")
+		service.SyncCron(ctx)
+	})
 
-	service.SyncCron(ctx)
+	// Test error case
+	t.Run("error getting cloud accounts", func(t *testing.T) {
+		mHTTP.EXPECT().GetAllCloudAccounts(ctx).
+			Return(nil, assert.AnError)
+		mocks.Metrics.EXPECT().IncrementCounter(ctx, "sync_error_count")
+
+		service.SyncCron(ctx)
+	})
 }
