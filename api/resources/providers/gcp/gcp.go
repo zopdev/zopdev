@@ -95,13 +95,8 @@ func (c *Client) ListResources(ctx *gofr.Context, creds any, filter models.Resou
 		if err != nil {
 			return nil, ErrInitializingClient
 		}
-		// Extract projectID from creds
-		var credStruct struct{ ProjectID string }
 
-		b, _ := json.Marshal(creds)
-		_ = json.Unmarshal(b, &credStruct)
-
-		instances, err := sqlClient.GetAllInstances(ctx, credStruct.ProjectID)
+		instances, err := sqlClient.GetAllInstances(ctx, credsObj.ProjectID)
 		if err != nil {
 			return nil, err
 		}
