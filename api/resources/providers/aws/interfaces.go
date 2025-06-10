@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/zopdev/zopdev/api/resources/models"
 	"gofr.dev/pkg/gofr"
 )
@@ -13,7 +11,7 @@ type ResourceClient interface {
 }
 
 type InstanceLister interface {
-	GetAllInstances(ctx context.Context) ([]models.Resource, error)
+	GetAllInstances(ctx *gofr.Context) ([]models.Resource, error)
 }
 
 type Idler interface {

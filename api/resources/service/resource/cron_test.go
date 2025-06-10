@@ -34,7 +34,7 @@ func TestService_SyncCron(t *testing.T) {
 	service := New(mGCP, mAWS, mHTTP, mStore)
 
 	// Test successful sync
-	t.Run("successful sync", func(t *testing.T) {
+	t.Run("successful sync", func(_ *testing.T) {
 		// mock expectations
 		mHTTP.EXPECT().GetAllCloudAccounts(ctx).
 			Return([]client.CloudAccount{{ID: 1, Provider: "GCP"}, {ID: 2, Provider: "Unknown"}}, nil)
@@ -59,7 +59,7 @@ func TestService_SyncCron(t *testing.T) {
 	})
 
 	// Test error case
-	t.Run("error getting cloud accounts", func(t *testing.T) {
+	t.Run("error getting cloud accounts", func(_ *testing.T) {
 		mHTTP.EXPECT().GetAllCloudAccounts(ctx).
 			Return(nil, assert.AnError)
 		mocks.Metrics.EXPECT().IncrementCounter(ctx, "sync_error_count")

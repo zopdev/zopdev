@@ -1,9 +1,10 @@
 package database
 
 import (
-	"context"
 	"strings"
 	"time"
+
+	"gofr.dev/pkg/gofr"
 
 	"github.com/aws/aws-sdk-go/aws/request"
 
@@ -64,7 +65,7 @@ func extractEngineAndClusterID(resource *models.Resource) (engine, clusterID str
 	return eng, clID, nil
 }
 
-func (c *Client) GetAllInstances(ctx context.Context) ([]models.Resource, error) {
+func (c *Client) GetAllInstances(ctx *gofr.Context) ([]models.Resource, error) {
 	input := &rds.DescribeDBInstancesInput{}
 
 	result, err := c.RDS.DescribeDBInstancesWithContext(ctx, input)
@@ -103,7 +104,7 @@ func (c *Client) GetAllInstances(ctx context.Context) ([]models.Resource, error)
 }
 
 // StartInstance handles all RDS types: Aurora clusters and standard RDS. Aurora Serverless detection is not supported here.
-func (c *Client) StartInstance(ctx context.Context, resource *models.Resource) error {
+func (c *Client) StartInstance(ctx *gofr.Context, resource *models.Resource) error {
 	engine, clusterID, err := extractEngineAndClusterID(resource)
 	if err != nil {
 		return err
@@ -129,7 +130,7 @@ func (c *Client) StartInstance(ctx context.Context, resource *models.Resource) e
 }
 
 // StopInstance handles all RDS types: Aurora clusters and standard RDS. Aurora Serverless detection is not supported here.
-func (c *Client) StopInstance(ctx context.Context, resource *models.Resource) error {
+func (c *Client) StopInstance(ctx *gofr.Context, resource *models.Resource) error {
 	engine, clusterID, err := extractEngineAndClusterID(resource)
 	if err != nil {
 		return err
