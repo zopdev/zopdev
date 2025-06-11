@@ -16,5 +16,6 @@ func All() map[int64]migration.Migrate {
 		20250506162207: createTableAuditResults(),
 		20250526163931: addResourcesTable(),
 		20250531164921: addResourceGroup(),
+		20250610143551: addScheduleTable(),
 	}
 }

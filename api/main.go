@@ -38,6 +38,10 @@ import (
 	resGroupHandler "github.com/zopdev/zopdev/api/resources/handler/resourcegroup"
 	resGroupService "github.com/zopdev/zopdev/api/resources/service/resourcegroup"
 	resGroupStore "github.com/zopdev/zopdev/api/resources/store/resourcegroup"
+
+	scheduleHandler "github.com/zopdev/zopdev/api/scheduler/handler"
+	scheduleService "github.com/zopdev/zopdev/api/scheduler/service"
+	scheduleStore "github.com/zopdev/zopdev/api/scheduler/store"
 )
 
 func main() {
@@ -96,6 +100,7 @@ func main() {
 
 	registerAuditAPIRoutes(app)
 	registerCloudResourceRoutes(app)
+	registerScheduleAPIRoutes(app)
 
 	app.Run()
 }
@@ -137,4 +142,17 @@ func registerCloudResourceRoutes(app *gofr.App) {
 	app.POST("/cloud-account/{id}/resource-groups", rgHld.CreateResourceGroup)
 	app.PUT("/cloud-account/{id}/resource-groups/{rgID}", rgHld.UpdateResourceGroup)
 	app.DELETE("/cloud-account/{id}/resource-groups/{rgID}", rgHld.DeleteResourceGroup)
+}
+
+func registerScheduleAPIRoutes(app *gofr.App) {
+
+	schStr := scheduleStore.New()
+	schSvc := scheduleService.New(schStr)
+	schHld := scheduleHandler.New(schSvc)
+
+	app.GET("/schedule", schHld.GetAllSchedules)
+	app.GET("/schedule/{id}", schHld.GetSchedule)
+	app.POST("/schedule", schHld.CreateSchedule)
+	app.PUT("/schedule/{id}", schHld.UpdateSchedule)
+	app.DELETE("/schedule/{id}", schHld.DeleteSchedule)
 }
