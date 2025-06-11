@@ -1,8 +1,9 @@
 package store
 
 import (
-	"gofr.dev/pkg/gofr"
 	"time"
+
+	"gofr.dev/pkg/gofr"
 
 	"github.com/zopdev/zopdev/api/scheduler/models"
 )

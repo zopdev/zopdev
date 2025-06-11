@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
 
@@ -20,6 +21,11 @@ var (
 	errInternalServer = errors.New("something went wrong! Please try again later")
 )
 
+const (
+	scheduleLength = 96 // Length of each day's schedule string
+	daysInWeek     = 7  // Number of days in a week
+)
+
 type Service struct {
 	str Store
 }
@@ -31,7 +37,7 @@ func New(str Store) *Service {
 func (s *Service) GetAllSchedules(ctx *gofr.Context) ([]*models.Schedule, error) {
 	sch, err := s.str.GetAllSchedule(ctx)
 	if err != nil {
-		ctx.Logger.Errorf("error getting all schedules: %v", err)
+		ctx.Errorf("error getting all schedules: %v", err)
 		return nil, errInternalServer
 	}
 
@@ -41,7 +47,7 @@ func (s *Service) GetAllSchedules(ctx *gofr.Context) ([]*models.Schedule, error)
 func (s *Service) GetSchedule(ctx *gofr.Context, id int64) (*models.Schedule, error) {
 	sch, err := s.str.GetScheduleByID(ctx, id)
 	if err != nil {
-		ctx.Logger.Errorf("error geting schedule: %v with id %d", err, id)
+		ctx.Errorf("error getting schedule: %v with id %d", err, id)
 		return nil, errInternalServer
 	}
 
@@ -53,19 +59,29 @@ func (s *Service) GetSchedule(ctx *gofr.Context, id int64) (*models.Schedule, er
 }
 
 func (s *Service) CreateSchedule(ctx *gofr.Context, sch *models.Schedule) (*models.Schedule, error) {
-	sch, err := s.str.CreateSchedule(ctx, sch)
+	err := validateScheduleString(sch.ScheduleString)
 	if err != nil {
-		ctx.Logger.Errorf("error creating schedule: %v", err)
+		return nil, err
+	}
+
+	res, err := s.str.CreateSchedule(ctx, sch)
+	if err != nil {
+		ctx.Errorf("error creating schedule: %v", err)
 		return nil, errInternalServer
 	}
 
-	return sch, nil
+	return res, nil
 }
 
 func (s *Service) UpdateSchedule(ctx *gofr.Context, sch *models.Schedule) error {
-	err := s.str.UpdateSchedule(ctx, sch)
+	err := validateScheduleString(sch.ScheduleString)
 	if err != nil {
-		ctx.Logger.Errorf("error updating schedule: %v", err)
+		return err
+	}
+
+	err = s.str.UpdateSchedule(ctx, sch)
+	if err != nil {
+		ctx.Errorf("error updating schedule: %v", err)
 		return errInternalServer
 	}
 
@@ -79,8 +95,28 @@ func (s *Service) DeleteSchedule(ctx *gofr.Context, id int64) error {
 
 	err := s.str.DeleteSchedule(ctx, id)
 	if err != nil {
-		ctx.Logger.Errorf("error deleting schedule: %v", err)
+		ctx.Errorf("error deleting schedule: %v", err)
 		return errInternalServer
+	}
+
+	return nil
+}
+
+func validateScheduleString(sch models.Schedules) error {
+	if len(sch) == 0 {
+		return gofrHttp.ErrorMissingParam{Params: []string{"scheduleString"}}
+	}
+
+	if len(sch) != daysInWeek {
+		return gofrHttp.ErrorInvalidParam{Params: []string{"scheduleString"}}
+	}
+
+	// Additional validation logic for the schedule string can be added here.
+	// For example, checking if it follows a specific format or pattern.
+	for _, daySch := range sch {
+		if len(daySch) != scheduleLength {
+			return gofrHttp.ErrorInvalidParam{Params: []string{"scheduleString"}}
+		}
 	}
 
 	return nil

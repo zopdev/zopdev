@@ -145,7 +145,6 @@ func registerCloudResourceRoutes(app *gofr.App) {
 }
 
 func registerScheduleAPIRoutes(app *gofr.App) {
-
 	schStr := scheduleStore.New()
 	schSvc := scheduleService.New(schStr)
 	schHld := scheduleHandler.New(schSvc)

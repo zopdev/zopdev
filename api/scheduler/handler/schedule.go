@@ -1,10 +1,12 @@
 package handler
 
 import (
-	"github.com/zopdev/zopdev/api/scheduler/models"
+	"strconv"
+
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
-	"strconv"
+
+	"github.com/zopdev/zopdev/api/scheduler/models"
 )
 
 type Service interface {
