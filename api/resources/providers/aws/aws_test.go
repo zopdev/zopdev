@@ -2,10 +2,14 @@ package aws
 
 import (
 	"context"
-	"github.com/stretchr/testify/require"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/stretchr/testify/assert"
+	"gofr.dev/pkg/gofr"
+
+	"github.com/zopdev/zopdev/api/resources/models"
 )
 
 func TestNew(t *testing.T) {
@@ -91,4 +95,174 @@ func TestNewEC2Client_Success(t *testing.T) {
 	client, err := c.NewEC2Client(context.Background(), creds)
 	require.NoError(t, err)
 	require.NotNil(t, client)
+}
+
+func Test_shouldIncludeResourceType(t *testing.T) {
+	tests := []struct {
+		name          string
+		resourceTypes []string
+		targetType    string
+		want          bool
+	}{
+		{
+			name:          "empty resource types should include all",
+			resourceTypes: []string{},
+			targetType:    "EC2",
+			want:          true,
+		},
+		{
+			name:          "matching resource type should be included",
+			resourceTypes: []string{"EC2", "RDS"},
+			targetType:    "EC2",
+			want:          true,
+		},
+		{
+			name:          "ALL resource type should include everything",
+			resourceTypes: []string{"ALL"},
+			targetType:    "EC2",
+			want:          true,
+		},
+		{
+			name:          "non-matching resource type should be excluded",
+			resourceTypes: []string{"RDS"},
+			targetType:    "EC2",
+			want:          false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := shouldIncludeResourceType(tt.resourceTypes, tt.targetType)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func Test_ListResources(t *testing.T) {
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	tests := []struct {
+		name         string
+		creds        any
+		filter       models.ResourceFilter
+		wantErr      bool
+		errorMessage string
+	}{
+		{
+			name:  "invalid credentials",
+			creds: map[string]string{},
+			filter: models.ResourceFilter{
+				ResourceTypes: []string{"EC2"},
+			},
+			wantErr:      true,
+			errorMessage: "invalid cloud credentials",
+		},
+		{
+			name:  "valid credentials but no resources",
+			creds: map[string]string{"aws_access_key_id": "key", "aws_secret_access_key": "secret"},
+			filter: models.ResourceFilter{
+				ResourceTypes: []string{"UNKNOWN"},
+			},
+			wantErr:      true,
+			errorMessage: "not implemented",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := c.ListResources(ctx, tt.creds, tt.filter)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMessage)
+				assert.Nil(t, got)
+			}
+		})
+	}
+}
+
+func Test_StartResource(t *testing.T) {
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	tests := []struct {
+		name         string
+		creds        any
+		resource     *models.Resource
+		wantErr      bool
+		errorMessage string
+	}{
+		{
+			name:  "invalid credentials",
+			creds: map[string]string{},
+			resource: &models.Resource{
+				Type: "EC2",
+				UID:  "i-1234567890abcdef0",
+			},
+			wantErr:      true,
+			errorMessage: "invalid cloud credentials",
+		},
+		{
+			name:  "unsupported resource type",
+			creds: map[string]string{"aws_access_key_id": "key", "aws_secret_access_key": "secret"},
+			resource: &models.Resource{
+				Type: "UNKNOWN",
+			},
+			wantErr:      true,
+			errorMessage: "not implemented",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := c.StartResource(ctx, tt.creds, tt.resource)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMessage)
+			}
+		})
+	}
+}
+
+func Test_StopResource(t *testing.T) {
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	tests := []struct {
+		name         string
+		creds        any
+		resource     *models.Resource
+		wantErr      bool
+		errorMessage string
+	}{
+		{
+			name:  "invalid credentials",
+			creds: map[string]string{},
+			resource: &models.Resource{
+				Type: "EC2",
+				UID:  "i-1234567890abcdef0",
+			},
+			wantErr:      true,
+			errorMessage: "invalid cloud credentials",
+		},
+		{
+			name:  "unsupported resource type",
+			creds: map[string]string{"aws_access_key_id": "key", "aws_secret_access_key": "secret"},
+			resource: &models.Resource{
+				Type: "UNKNOWN",
+			},
+			wantErr:      true,
+			errorMessage: "not implemented",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err := c.StopResource(ctx, tt.creds, tt.resource)
+			if tt.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tt.errorMessage)
+			}
+		})
+	}
 }
