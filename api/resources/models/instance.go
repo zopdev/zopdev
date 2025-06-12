@@ -43,3 +43,9 @@ type CloudAccount struct {
 	ID   int64  `json:"id"`
 	Type string `json:"type"`
 }
+
+type ResourceFilter struct {
+	AccountID     int64
+	ResourceTypes []string
+	// Add more fields as needed (region, tags, etc.)
+}

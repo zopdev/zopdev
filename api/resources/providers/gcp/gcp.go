@@ -4,12 +4,18 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
+
+	gofrHttp "gofr.dev/pkg/gofr/http"
+
+	"gofr.dev/pkg/gofr"
 
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/option"
 	"google.golang.org/api/sqladmin/v1"
 
 	gmonitoring "cloud.google.com/go/monitoring/apiv3/v2"
+	"github.com/zopdev/zopdev/api/resources/models"
 	sql "github.com/zopdev/zopdev/api/resources/providers/gcp/database"
 	metric "github.com/zopdev/zopdev/api/resources/providers/gcp/monitoring"
 )
@@ -17,6 +23,14 @@ import (
 var (
 	ErrInvalidCredentials = errors.New("invalid cloud credentials")
 	ErrInitializingClient = errors.New("error initializing client")
+	ErrNotImplemented     = errors.New("not implemented")
+)
+
+const (
+	resourceUIDSplitParts = 2
+	database
+	databaseSQL = "SQL"
+	allResource = "ALL"
 )
 
 type Client struct{}
@@ -55,4 +69,92 @@ func (*Client) NewMetricsClient(ctx context.Context, opts ...option.ClientOption
 	}
 
 	return &metric.Client{MetricClient: mCl}, nil
+}
+
+// Implement methods matching the CloudResourceProvider interface.
+func (c *Client) ListResources(ctx *gofr.Context, creds any, filter models.ResourceFilter) ([]models.Resource, error) {
+	var allResources []models.Resource
+
+	resourceTypes := filter.ResourceTypes
+
+	includeSQL := len(resourceTypes) == 0
+
+	for _, t := range resourceTypes {
+		if t == databaseSQL || t == allResource {
+			includeSQL = true
+		}
+	}
+
+	if includeSQL {
+		credsObj, err := c.NewGoogleCredentials(ctx, creds, sqladmin.SqlserviceAdminScope)
+		if err != nil {
+			return nil, ErrInvalidCredentials
+		}
+
+		sqlClient, err := c.NewSQLClient(ctx, option.WithCredentials(credsObj))
+		if err != nil {
+			return nil, ErrInitializingClient
+		}
+
+		instances, err := sqlClient.GetAllInstances(ctx, credsObj.ProjectID)
+		if err != nil {
+			return nil, err
+		}
+
+		allResources = append(allResources, instances...)
+	}
+
+	if len(allResources) == 0 {
+		return nil, ErrNotImplemented
+	}
+
+	return allResources, nil
+}
+
+func (c *Client) StartResource(ctx *gofr.Context, creds any, resource *models.Resource) error {
+	switch resource.Type {
+	case databaseSQL:
+		credsObj, err := c.NewGoogleCredentials(ctx, creds, sqladmin.SqlserviceAdminScope)
+		if err != nil {
+			return ErrInvalidCredentials
+		}
+
+		sqlClient, err := c.NewSQLClient(ctx, option.WithCredentials(credsObj))
+		if err != nil {
+			return ErrInitializingClient
+		}
+		// resource.UID is expected to be "projectID/instanceName"
+		parts := strings.SplitN(resource.UID, "/", resourceUIDSplitParts)
+		if len(parts) != resourceUIDSplitParts {
+			return gofrHttp.ErrorInvalidParam{Params: []string{"resourceUID", resource.UID}}
+		}
+
+		return sqlClient.StartInstance(ctx, parts[0], parts[1])
+	default:
+		return ErrNotImplemented
+	}
+}
+
+func (c *Client) StopResource(ctx *gofr.Context, creds any, resource *models.Resource) error {
+	switch resource.Type {
+	case "SQL":
+		credsObj, err := c.NewGoogleCredentials(ctx, creds, sqladmin.SqlserviceAdminScope)
+		if err != nil {
+			return ErrInvalidCredentials
+		}
+
+		sqlClient, err := c.NewSQLClient(ctx, option.WithCredentials(credsObj))
+		if err != nil {
+			return ErrInitializingClient
+		}
+		// resource.UID is expected to be "projectID/instanceName"
+		parts := strings.SplitN(resource.UID, "/", resourceUIDSplitParts)
+		if len(parts) != resourceUIDSplitParts {
+			return gofrHttp.ErrorInvalidParam{Params: []string{"UID", "SQL resource"}}
+		}
+
+		return sqlClient.StopInstance(ctx, parts[0], parts[1])
+	default:
+		return ErrNotImplemented
+	}
 }

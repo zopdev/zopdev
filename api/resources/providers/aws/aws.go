@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 
+	"gofr.dev/pkg/gofr"
 	"gofr.dev/pkg/gofr/http"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -12,6 +13,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/aws/aws-sdk-go/service/rds"
+	"github.com/zopdev/zopdev/api/resources/models"
 	"github.com/zopdev/zopdev/api/resources/providers/aws/database"
 	"github.com/zopdev/zopdev/api/resources/providers/aws/vm"
 )
@@ -19,7 +21,12 @@ import (
 var (
 	ErrInvalidCredentials = errors.New("invalid cloud credentials")
 	ErrInitializingClient = errors.New("error initializing AWS client")
+	ErrNotImplemented     = errors.New("not implemented")
 )
+
+const allResource = "ALL"
+const resourceEC2 = "EC2"
+const databaseRDS = "RDS"
 
 type Client struct {
 }
@@ -101,4 +108,113 @@ func (*Client) newSession(accessKey, secretKey string) (*session.Session, error)
 	}
 
 	return sess, nil
+}
+
+// shouldIncludeResourceType determines if a resource type should be included based on the filter.
+func shouldIncludeResourceType(resourceTypes []string, targetType string) bool {
+	if len(resourceTypes) == 0 {
+		return true
+	}
+
+	for _, t := range resourceTypes {
+		if t == targetType || t == allResource {
+			return true
+		}
+	}
+
+	return false
+}
+
+// getEC2Resources retrieves EC2 resources using the provided credentials.
+func (c *Client) getEC2Resources(ctx *gofr.Context, creds any) ([]models.Resource, error) {
+	ec2Client, err := c.NewEC2Client(ctx, creds)
+	if err != nil {
+		return nil, err
+	}
+
+	return ec2Client.GetAllInstances(ctx)
+}
+
+// getRDSResources retrieves RDS resources using the provided credentials.
+func (c *Client) getRDSResources(ctx *gofr.Context, creds any) ([]models.Resource, error) {
+	rdsClient, err := c.NewRDSClient(ctx, creds)
+	if err != nil {
+		return nil, err
+	}
+
+	return rdsClient.GetAllInstances(ctx)
+}
+
+// ListResources implements the CloudResourceProvider interface to list AWS resources.
+func (c *Client) ListResources(ctx *gofr.Context, creds any, filter models.ResourceFilter) ([]models.Resource, error) {
+	var allResources []models.Resource
+
+	includeEC2 := shouldIncludeResourceType(filter.ResourceTypes, resourceEC2)
+	includeRDS := shouldIncludeResourceType(filter.ResourceTypes, databaseRDS)
+
+	if includeEC2 {
+		instances, err := c.getEC2Resources(ctx, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		allResources = append(allResources, instances...)
+	}
+
+	if includeRDS {
+		instances, err := c.getRDSResources(ctx, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		allResources = append(allResources, instances...)
+	}
+
+	if len(allResources) == 0 {
+		return nil, ErrNotImplemented // or a more descriptive error
+	}
+
+	return allResources, nil
+}
+
+func (c *Client) StartResource(ctx *gofr.Context, creds any, resource *models.Resource) error {
+	switch resource.Type {
+	case resourceEC2:
+		ec2Client, err := c.NewEC2Client(ctx, creds)
+		if err != nil {
+			return err
+		}
+
+		return ec2Client.StartInstance(ctx, resource.UID)
+	case databaseRDS:
+		rdsClient, err := c.NewRDSClient(ctx, creds)
+		if err != nil {
+			return err
+		}
+
+		return rdsClient.StartInstance(ctx, resource)
+	default:
+		return ErrNotImplemented
+	}
+}
+
+func (c *Client) StopResource(ctx *gofr.Context, creds any, resource *models.Resource) error {
+	switch resource.Type {
+	case "EC2":
+		ec2Client, err := c.NewEC2Client(ctx, creds)
+		if err != nil {
+			return err
+		}
+
+		return ec2Client.StopInstance(ctx, resource.UID)
+	case "RDS":
+		rdsClient, err := c.NewRDSClient(ctx, creds)
+		if err != nil {
+			return err
+		}
+
+		return rdsClient.StopInstance(ctx, resource)
+	default:
+		return ErrNotImplemented
+	}
 }

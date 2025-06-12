@@ -9,13 +9,13 @@ import (
 )
 
 type Service struct {
-	gcp   GCPClient
-	aws   AWSClient
+	gcp   CloudResourceProvider
+	aws   CloudResourceProvider
 	http  HTTPClient
 	store Store
 }
 
-func New(gcp GCPClient, aws AWSClient, http HTTPClient, store Store) *Service {
+func New(gcp, aws CloudResourceProvider, http HTTPClient, store Store) *Service {
 	return &Service{gcp: gcp, aws: aws, http: http, store: store}
 }
 
@@ -86,27 +86,21 @@ func (s *Service) handleSQLChangeState(ctx *gofr.Context, ca *client.CloudAccoun
 
 func (s *Service) handleAWSComputeChangeState(ctx *gofr.Context, ca *client.CloudAccount, resDetails ResourceDetails,
 	res *models.Resource) error {
-	cl, err := s.aws.NewEC2Client(ctx, ca.Credentials)
-	if err != nil {
-		ctx.Errorf("failed to create AWS EC2 client: %v", err)
-		return err
-	}
-
 	if resDetails.State == START {
-		err = cl.StartInstance(ctx, res.UID)
+		err := s.aws.StartResource(ctx, ca.Credentials, res)
 		if err != nil {
 			ctx.Errorf("failed to start EC2 instance: %v", err)
 			return err
 		}
 	} else {
-		err = cl.StopInstance(ctx, res.UID)
+		err := s.aws.StopResource(ctx, ca.Credentials, res)
 		if err != nil {
-			ctx.Errorf("failed to start EC2 instance: %v", err)
+			ctx.Errorf("failed to stop EC2 instance: %v", err)
 			return err
 		}
 	}
 
-	err = s.store.UpdateStatus(ctx, getStatus(resDetails.State), resDetails.ID)
+	err := s.store.UpdateStatus(ctx, getStatus(resDetails.State), resDetails.ID)
 	if err != nil {
 		ctx.Errorf("failed to update resource status: %v", err)
 	}
@@ -189,14 +183,17 @@ func (s *Service) removeStale(ctx *gofr.Context, visited []bool, res []models.Re
 func (s *Service) getALLComputeInstances(ctx *gofr.Context, details CloudDetails) ([]models.Resource, error) {
 	switch details.CloudType {
 	case AWS:
-		ec2Client, err := s.aws.NewEC2Client(ctx, details.Creds)
-		if err != nil {
-			return nil, err
+		filter := models.ResourceFilter{
+			ResourceTypes: []string{"EC2"},
 		}
 
-		return ec2Client.GetAllInstances(ctx)
+		return s.aws.ListResources(ctx, details.Creds, filter)
 	case GCP:
-		return nil, nil
+		filter := models.ResourceFilter{
+			ResourceTypes: []string{"COMPUTE"},
+		}
+
+		return s.gcp.ListResources(ctx, details.Creds, filter)
 	default:
 		// We are not returning any error because the sync process is completely internal, works on the cloud Account ID,
 		// if we are getting an unknown cloud type, then this feature is not implemented and we simply return nil.

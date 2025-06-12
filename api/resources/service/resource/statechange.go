@@ -7,7 +7,6 @@ import (
 
 	"gofr.dev/pkg/gofr"
 	gofrHttp "gofr.dev/pkg/gofr/http"
-	"google.golang.org/api/option"
 
 	"github.com/zopdev/zopdev/api/resources/client"
 )
@@ -42,38 +41,30 @@ func (s *Service) changeSQLState(ctx *gofr.Context, ca *client.CloudAccount, res
 	}
 }
 
-func (s *Service) changeGCPSQL(ctx *gofr.Context, cred any, resDetails ResourceDetails) error {
-	creds, err := s.gcp.NewGoogleCredentials(ctx, cred, "https://www.googleapis.com/auth/cloud-platform")
-	if err != nil {
-		return err
-	}
-
-	sqlClient, err := s.gcp.NewSQLClient(ctx, option.WithCredentials(creds))
-	if err != nil {
-		return err
+func (s *Service) changeGCPSQL(ctx *gofr.Context, creds any, resDetails ResourceDetails) error {
+	resource := models.Resource{
+		ID:   resDetails.ID,
+		Name: resDetails.Name,
+		Type: string(resDetails.Type),
+		// Add other fields as needed
 	}
 
 	switch resDetails.State {
 	case START:
-		return sqlClient.StartInstance(ctx, creds.ProjectID, resDetails.Name)
+		return s.gcp.StartResource(ctx, creds, &resource)
 	case SUSPEND:
-		return sqlClient.StopInstance(ctx, creds.ProjectID, resDetails.Name)
+		return s.gcp.StopResource(ctx, creds, &resource)
 	default:
 		return gofrHttp.ErrorInvalidParam{Params: []string{"req.State"}}
 	}
 }
 
-func (s *Service) changeAWSRDS(ctx *gofr.Context, cred any, state ResourceState, resDetails *models.Resource) error {
-	cl, err := s.aws.NewRDSClient(ctx, cred)
-	if err != nil {
-		return err
-	}
-
+func (s *Service) changeAWSRDS(ctx *gofr.Context, creds any, state ResourceState, resDetails *models.Resource) error {
 	switch state {
 	case START:
-		return cl.StartInstance(ctx, resDetails)
+		return s.aws.StartResource(ctx, creds, resDetails)
 	case SUSPEND:
-		return cl.StopInstance(ctx, resDetails)
+		return s.aws.StopResource(ctx, creds, resDetails)
 	default:
 		return gofrHttp.ErrorInvalidParam{Params: []string{"req.state"}}
 	}

@@ -3,12 +3,13 @@ package vm
 import (
 	"time"
 
+	"gofr.dev/pkg/gofr"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/request"
 
 	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/zopdev/zopdev/api/resources/models"
-	"gofr.dev/pkg/gofr"
 )
 
 // EC2API defines the methods used from the AWS EC2 client for easier testing/mocking.

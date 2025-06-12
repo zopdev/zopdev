@@ -1,27 +1,18 @@
 package resource
 
 import (
-	"context"
-
 	"gofr.dev/pkg/gofr"
-	"golang.org/x/oauth2/google"
-	"google.golang.org/api/option"
 
 	"github.com/zopdev/zopdev/api/resources/client"
 	"github.com/zopdev/zopdev/api/resources/models"
-	"github.com/zopdev/zopdev/api/resources/providers/aws/database"
-	"github.com/zopdev/zopdev/api/resources/providers/aws/vm"
-	"github.com/zopdev/zopdev/api/resources/providers/gcp"
 )
 
-type GCPClient interface {
-	NewGoogleCredentials(ctx context.Context, cred any, scopes ...string) (*google.Credentials, error)
-	NewSQLClient(ctx context.Context, opts ...option.ClientOption) (gcp.SQLClient, error)
-}
-
-type AWSClient interface {
-	NewRDSClient(_ context.Context, creds any) (*database.Client, error)
-	NewEC2Client(_ context.Context, creds any) (*vm.Client, error)
+// CloudResourceProvider is the contract for cloud resource operations used by the service layer.
+// Providers should implement this interface but should NOT import this package.
+type CloudResourceProvider interface {
+	ListResources(ctx *gofr.Context, creds any, filter models.ResourceFilter) ([]models.Resource, error)
+	StartResource(ctx *gofr.Context, creds any, resource *models.Resource) error
+	StopResource(ctx *gofr.Context, creds any, resource *models.Resource) error
 }
 
 type HTTPClient interface {
