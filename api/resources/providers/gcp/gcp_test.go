@@ -74,270 +74,173 @@ func TestClient_NewMetricsClient(t *testing.T) {
 	assert.Equal(t, ErrInitializingClient, err)
 }
 
-func Test_ListResources(t *testing.T) {
-	// Create a mock server
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"items": []}`))
-	}))
-	defer srv.Close()
-
-	c := &Client{}
-	ctx := &gofr.Context{}
-
-	tests := []struct {
-		name         string
-		creds        any
-		filter       models.ResourceFilter
-		wantErr      bool
-		errorMessage string
-	}{
-		{
-			name:  "invalid credentials",
-			creds: map[string]string{},
-			filter: models.ResourceFilter{
-				ResourceTypes: []string{"SQL"},
-			},
-			wantErr:      true,
-			errorMessage: "invalid cloud credentials",
-		},
-		{
-			name: "valid credentials but no resources",
-			creds: map[string]string{
-				"type":                        "service_account",
-				"project_id":                  "test-project",
-				"private_key_id":              "test-key-id",
-				"private_key":                 "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n-----END PRIVATE KEY-----\n",
-				"client_email":                "test@test-project.iam.gserviceaccount.com",
-				"client_id":                   "test-client-id",
-				"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
-				"token_uri":                   "https://oauth2.googleapis.com/token",
-				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-				"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
-			},
-			filter: models.ResourceFilter{
-				ResourceTypes: []string{"UNKNOWN"},
-			},
-			wantErr:      true,
-			errorMessage: "not implemented",
-		},
-		{
-			name: "empty resource types should include SQL",
-			creds: map[string]string{
-				"type":                        "service_account",
-				"project_id":                  "test-project",
-				"private_key_id":              "test-key-id",
-				"private_key":                 "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n-----END PRIVATE KEY-----\n",
-				"client_email":                "test@test-project.iam.gserviceaccount.com",
-				"client_id":                   "test-client-id",
-				"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
-				"token_uri":                   "https://oauth2.googleapis.com/token",
-				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-				"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
-			},
-			filter: models.ResourceFilter{
-				ResourceTypes: []string{},
-			},
-			wantErr:      true,
-			errorMessage: "private key should be a PEM",
-		},
-		{
-			name: "ALL resource type should include SQL",
-			creds: map[string]string{
-				"type":                        "service_account",
-				"project_id":                  "test-project",
-				"private_key_id":              "test-key-id",
-				"private_key":                 "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n-----END PRIVATE KEY-----\n",
-				"client_email":                "test@test-project.iam.gserviceaccount.com",
-				"client_id":                   "test-client-id",
-				"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
-				"token_uri":                   "https://oauth2.googleapis.com/token",
-				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-				"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
-			},
-			filter: models.ResourceFilter{
-				ResourceTypes: []string{"ALL"},
-			},
-			wantErr:      true,
-			errorMessage: "private key should be a PEM",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			got, err := c.ListResources(ctx, tt.creds, tt.filter)
-			if tt.wantErr {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorMessage)
-				assert.Nil(t, got)
-			}
-		})
+// testServiceAccountCreds returns a minimal set of service account credentials for testing.
+func testServiceAccountCreds() map[string]string {
+	return map[string]string{
+		"type":           "service_account",
+		"project_id":     "test-project",
+		"private_key_id": "test-key-id",
+		"private_key": "-----BEGIN PRIVATE KEY-----\n" +
+			"MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n" +
+			"-----END PRIVATE KEY-----\n",
+		"client_email":                "test@test-project.iam.gserviceaccount.com",
+		"client_id":                   "test-client-id",
+		"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
+		"token_uri":                   "https://oauth2.googleapis.com/token",
+		"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+		"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
 	}
 }
 
-func Test_StartResource(t *testing.T) {
-	// Create a mock server
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+// setupMockServer creates a mock HTTP server for testing.
+func setupMockServer(t *testing.T, response string) *httptest.Server {
+	t.Helper()
+
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "DONE"}`))
+
+		if _, err := w.Write([]byte(response)); err != nil {
+			t.Errorf("Failed to write response: %v", err)
+		}
 	}))
-	defer srv.Close()
-
-	c := &Client{}
-	ctx := &gofr.Context{}
-
-	tests := []struct {
-		name         string
-		creds        any
-		resource     *models.Resource
-		wantErr      bool
-		errorMessage string
-	}{
-		{
-			name:  "invalid credentials",
-			creds: map[string]string{},
-			resource: &models.Resource{
-				Type: "SQL",
-				UID:  "project-id/instance-name",
-			},
-			wantErr:      true,
-			errorMessage: "invalid cloud credentials",
-		},
-		{
-			name: "unsupported resource type",
-			creds: map[string]string{
-				"type":                        "service_account",
-				"project_id":                  "test-project",
-				"private_key_id":              "test-key-id",
-				"private_key":                 "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n-----END PRIVATE KEY-----\n",
-				"client_email":                "test@test-project.iam.gserviceaccount.com",
-				"client_id":                   "test-client-id",
-				"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
-				"token_uri":                   "https://oauth2.googleapis.com/token",
-				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-				"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
-			},
-			resource: &models.Resource{
-				Type: "UNKNOWN",
-			},
-			wantErr:      true,
-			errorMessage: "not implemented",
-		},
-		{
-			name: "invalid resource UID format",
-			creds: map[string]string{
-				"type":                        "service_account",
-				"project_id":                  "test-project",
-				"private_key_id":              "test-key-id",
-				"private_key":                 "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n-----END PRIVATE KEY-----\n",
-				"client_email":                "test@test-project.iam.gserviceaccount.com",
-				"client_id":                   "test-client-id",
-				"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
-				"token_uri":                   "https://oauth2.googleapis.com/token",
-				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-				"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
-			},
-			resource: &models.Resource{
-				Type: "SQL",
-				UID:  "invalid-uid",
-			},
-			wantErr:      true,
-			errorMessage: "invalid parameter",
-		},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := c.StartResource(ctx, tt.creds, tt.resource)
-			if tt.wantErr {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorMessage)
-			}
-		})
-	}
 }
 
-func Test_StopResource(t *testing.T) {
-	// Create a mock server
-	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(`{"status": "DONE"}`))
-	}))
+func Test_ListResources_InvalidCredentials(t *testing.T) {
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	got, err := c.ListResources(ctx, map[string]string{}, models.ResourceFilter{
+		ResourceTypes: []string{"SQL"},
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid cloud credentials")
+	assert.Nil(t, got)
+}
+
+func Test_ListResources_UnknownResourceType(t *testing.T) {
+	srv := setupMockServer(t, `{"items": []}`)
 	defer srv.Close()
 
 	c := &Client{}
 	ctx := &gofr.Context{}
 
-	tests := []struct {
-		name         string
-		creds        any
-		resource     *models.Resource
-		wantErr      bool
-		errorMessage string
-	}{
-		{
-			name:  "invalid credentials",
-			creds: map[string]string{},
-			resource: &models.Resource{
-				Type: "SQL",
-				UID:  "project-id/instance-name",
-			},
-			wantErr:      true,
-			errorMessage: "invalid cloud credentials",
-		},
-		{
-			name: "unsupported resource type",
-			creds: map[string]string{
-				"type":                        "service_account",
-				"project_id":                  "test-project",
-				"private_key_id":              "test-key-id",
-				"private_key":                 "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n-----END PRIVATE KEY-----\n",
-				"client_email":                "test@test-project.iam.gserviceaccount.com",
-				"client_id":                   "test-client-id",
-				"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
-				"token_uri":                   "https://oauth2.googleapis.com/token",
-				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-				"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
-			},
-			resource: &models.Resource{
-				Type: "UNKNOWN",
-			},
-			wantErr:      true,
-			errorMessage: "not implemented",
-		},
-		{
-			name: "invalid resource UID format",
-			creds: map[string]string{
-				"type":                        "service_account",
-				"project_id":                  "test-project",
-				"private_key_id":              "test-key-id",
-				"private_key":                 "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQC9QFi67K6u2X4K\n-----END PRIVATE KEY-----\n",
-				"client_email":                "test@test-project.iam.gserviceaccount.com",
-				"client_id":                   "test-client-id",
-				"auth_uri":                    "https://accounts.google.com/o/oauth2/auth",
-				"token_uri":                   "https://oauth2.googleapis.com/token",
-				"auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-				"client_x509_cert_url":        "https://www.googleapis.com/robot/v1/metadata/x509/test%40test-project.iam.gserviceaccount.com",
-			},
-			resource: &models.Resource{
-				Type: "SQL",
-				UID:  "invalid-uid",
-			},
-			wantErr:      true,
-			errorMessage: "invalid parameter",
-		},
-	}
+	got, err := c.ListResources(ctx, testServiceAccountCreds(), models.ResourceFilter{
+		ResourceTypes: []string{"UNKNOWN"},
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not implemented")
+	assert.Nil(t, got)
+}
 
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := c.StopResource(ctx, tt.creds, tt.resource)
-			if tt.wantErr {
-				require.Error(t, err)
-				assert.Contains(t, err.Error(), tt.errorMessage)
-			}
-		})
-	}
+func Test_ListResources_EmptyResourceTypes(t *testing.T) {
+	srv := setupMockServer(t, `{"items": []}`)
+	defer srv.Close()
+
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	got, err := c.ListResources(ctx, testServiceAccountCreds(), models.ResourceFilter{
+		ResourceTypes: []string{},
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "private key should be a PEM")
+	assert.Nil(t, got)
+}
+
+func Test_ListResources_AllResourceType(t *testing.T) {
+	srv := setupMockServer(t, `{"items": []}`)
+	defer srv.Close()
+
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	got, err := c.ListResources(ctx, testServiceAccountCreds(), models.ResourceFilter{
+		ResourceTypes: []string{"ALL"},
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "private key should be a PEM")
+	assert.Nil(t, got)
+}
+
+func Test_StartResource_InvalidCredentials(t *testing.T) {
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	err := c.StartResource(ctx, map[string]string{}, &models.Resource{
+		Type: "SQL",
+		UID:  "project-id/instance-name",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid cloud credentials")
+}
+
+func Test_StartResource_UnknownResourceType(t *testing.T) {
+	srv := setupMockServer(t, `{"status": "DONE"}`)
+	defer srv.Close()
+
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	err := c.StartResource(ctx, testServiceAccountCreds(), &models.Resource{
+		Type: "UNKNOWN",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not implemented")
+}
+
+func Test_StartResource_InvalidUID(t *testing.T) {
+	srv := setupMockServer(t, `{"status": "DONE"}`)
+	defer srv.Close()
+
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	err := c.StartResource(ctx, testServiceAccountCreds(), &models.Resource{
+		Type: "SQL",
+		UID:  "invalid-uid",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid parameter")
+}
+
+func Test_StopResource_InvalidCredentials(t *testing.T) {
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	err := c.StopResource(ctx, map[string]string{}, &models.Resource{
+		Type: "SQL",
+		UID:  "project-id/instance-name",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid cloud credentials")
+}
+
+func Test_StopResource_UnknownResourceType(t *testing.T) {
+	srv := setupMockServer(t, `{"status": "DONE"}`)
+	defer srv.Close()
+
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	err := c.StopResource(ctx, testServiceAccountCreds(), &models.Resource{
+		Type: "UNKNOWN",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "not implemented")
+}
+
+func Test_StopResource_InvalidUID(t *testing.T) {
+	srv := setupMockServer(t, `{"status": "DONE"}`)
+	defer srv.Close()
+
+	c := &Client{}
+	ctx := &gofr.Context{}
+
+	err := c.StopResource(ctx, testServiceAccountCreds(), &models.Resource{
+		Type: "SQL",
+		UID:  "invalid-uid",
+	})
+	require.Error(t, err)
+	assert.Contains(t, err.Error(), "invalid parameter")
 }
