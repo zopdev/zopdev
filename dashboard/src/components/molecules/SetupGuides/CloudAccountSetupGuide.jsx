@@ -13,6 +13,7 @@ export default function CloudAccountCreationGuide() {
       <Link
         to="https://cloud.google.com/sdk/docs/install"
         target="_blank"
+        rel="noopener"
         className={`text-primary-600 underline`}
       >
         https://cloud.google.com/sdk/docs/install
@@ -24,6 +25,7 @@ export default function CloudAccountCreationGuide() {
           <Link
             to="https://console.cloud.google.com/apis/api/cloudresourcemanager.googleapis.com"
             target="_blank"
+            rel="noopener"
             className={`text-primary-600 underline`}
           >
             Resource&nbsp;Manager&nbsp;API&nbsp;
@@ -33,6 +35,7 @@ export default function CloudAccountCreationGuide() {
           <Link
             to="https://console.cloud.google.com/marketplace/product/google/cloudbilling.googleapis.com"
             target="_blank"
+            rel="noopener"
             className={`text-primary-600 underline`}
           >
             Billing&nbsp;API&nbsp;
@@ -42,6 +45,7 @@ export default function CloudAccountCreationGuide() {
           <Link
             to="https://console.cloud.google.com/marketplace/product/google/compute.googleapis.com"
             target="_blank"
+            rel="noopener"
             className={`text-primary-600 underline`}
           >
             Compute&nbsp;Engine&nbsp;API&nbsp;
@@ -51,6 +55,7 @@ export default function CloudAccountCreationGuide() {
           <Link
             to="https://console.cloud.google.com/apis/library/serviceusage.googleapis.com"
             target="_blank"
+            rel="noopener"
             className={`text-primary-600 underline`}
           >
             Service&nbsp;Usage&nbsp;API&nbsp;
